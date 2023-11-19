@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "p7Rjzr1N6AtlatnlT6gqvLg0pdBmachvU1Z/c5vSos1SvK4wjNvweuvuG2Xp2KYJLGVvx8Dd+6OWpwA1wgBMNA==",
+  "success": true,
+  "projectFilePath": "/Users/johan/repo/chess-rts/chess-rts.csproj",
+  "expectedPackageFiles": [
+    "/Users/johan/.nuget/packages/raylib-cs/5.0.0/raylib-cs.5.0.0.nupkg.sha512",
+    "/Users/johan/.nuget/packages/system.numerics.vectors/4.5.0/system.numerics.vectors.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}

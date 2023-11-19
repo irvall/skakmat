@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/johan/repo/chess-rts/chess-rts.csproj": {}
+  },
+  "projects": {
+    "/Users/johan/repo/chess-rts/chess-rts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/johan/repo/chess-rts/chess-rts.csproj",
+        "projectName": "chess-rts",
+        "projectPath": "/Users/johan/repo/chess-rts/chess-rts.csproj",
+        "packagesPath": "/Users/johan/.nuget/packages/",
+        "outputPath": "/Users/johan/repo/chess-rts/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/Users/johan/Library/Application Support/Godot/mono/GodotNuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/Users/johan/.nuget/NuGet/NuGet.Config",
+          "/Users/johan/.nuget/NuGet/config/Godot.Offline.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net7.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "dependencies": {
+            "Raylib-cs": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.401/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
