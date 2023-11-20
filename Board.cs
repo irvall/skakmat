@@ -12,7 +12,6 @@ internal class Board
 
     private readonly Dictionary<ulong, (int row, int col)> possibleMoves = new();
     private readonly int squareHeight;
-
     private readonly int squareWidth;
     private readonly int windowHeight;
 
@@ -25,7 +24,7 @@ internal class Board
     internal ulong BlackRooks;
 
     private BoardState[] history = new BoardState[100];
-    private int historyIndex;
+    private uint historyIndex;
 
     internal BoardState? InitialState = null;
 
@@ -421,7 +420,13 @@ internal class Board
             var lastMoveX = lastMovePosition % SquareNo;
             var lastMoveY = lastMovePosition / SquareNo;
 
-            if (lastMoveY == (isWhite ? 3 : 4) && (lastMoveX == x - 1 || lastMoveX == x + 1))
+            // If the last move was a double push, we expect the diagonal to be empty
+            var diagonalLeft = (isWhite ? pawn >> 9 : pawn << 9) & lastState.AllPieces;
+            var diagonalRight = (isWhite ? pawn >> 7 : pawn << 7) & lastState.AllPieces;
+            var lastMoveWasLeft = lastMoveX == x + (isWhite ? -1 : 1);
+            var lastMoveWasRight = lastMoveX == x + (isWhite ? 1 : -1);
+            
+            if (lastMoveY == (isWhite ? 3 : 4) && (lastMoveWasLeft && diagonalLeft == 0 || lastMoveWasRight && diagonalRight == 0))
             {
                 Console.WriteLine("En passant is possible");
                 var enPassantPosition = isWhite ? lastMovePosition - 8 : lastMovePosition + 8;

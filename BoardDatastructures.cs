@@ -24,18 +24,23 @@ internal class BoardDatastructures
 
     public struct BoardState
     {
-        public ulong WhiteKings;
-        public ulong WhiteQueens;
-        public ulong WhiteRooks;
-        public ulong WhiteBishops;
-        public ulong WhiteKnights;
-        public ulong WhitePawns;
-        public ulong BlackKings;
-        public ulong BlackQueens;
-        public ulong BlackRooks;
-        public ulong BlackBishops;
-        public ulong BlackKnights;
-        public ulong BlackPawns;
+        public readonly ulong WhiteKings;
+        public readonly ulong WhiteQueens;
+        public readonly ulong WhiteRooks;
+        public readonly ulong WhiteBishops;
+        public readonly ulong WhiteKnights;
+        public readonly ulong WhitePawns;
+        public readonly ulong BlackKings;
+        public readonly ulong BlackQueens;
+        public readonly ulong BlackRooks;
+        public readonly ulong BlackBishops;
+        public readonly ulong BlackKnights;
+        public readonly ulong BlackPawns;
+
+        public ulong WhitePieces => WhiteKings | WhiteQueens | WhiteRooks | WhiteBishops | WhiteKnights | WhitePawns;
+        public ulong BlackPieces => BlackKings | BlackQueens | BlackRooks | BlackBishops | BlackKnights | BlackPawns;
+        public ulong AllPieces => WhitePieces | BlackPieces;
+        
 
         public BoardState(ulong WhiteKings, ulong WhiteQueens, ulong WhiteRooks, ulong WhiteBishops, ulong WhiteKnights,
             ulong WhitePawns, ulong BlackKings, ulong BlackQueens, ulong BlackRooks, ulong BlackBishops,
