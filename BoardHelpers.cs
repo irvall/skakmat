@@ -56,10 +56,8 @@ internal static class BoardHelpers
                     else Board.SetBit(ref board.BlackKings, x, y);
                     break;
                 }
-
             }
         }
-
 
 
         return board;
@@ -81,6 +79,7 @@ internal static class BoardHelpers
                     col += int.Parse(c.ToString());
                     continue;
                 }
+
                 switch (c)
                 {
                     case 'K':
@@ -120,12 +119,17 @@ internal static class BoardHelpers
                         board.BlackPawns |= 1UL << (row * Board.SquareNo + col);
                         break;
                 }
+
                 col++;
             }
+
             row++;
             col = 0;
         }
-        board.InitialState = new BoardState(board.WhiteKings, board.WhiteQueens, board.WhiteRooks, board.WhiteBishops, board.WhiteKnights, board.WhitePawns, board.BlackKings, board.BlackQueens, board.BlackRooks, board.BlackBishops, board.BlackKnights, board.BlackPawns);
+
+        board.InitialState = new BoardState(board.WhiteKings, board.WhiteQueens, board.WhiteRooks, board.WhiteBishops,
+            board.WhiteKnights, board.WhitePawns, board.BlackKings, board.BlackQueens, board.BlackRooks,
+            board.BlackBishops, board.BlackKnights, board.BlackPawns);
         return board;
     }
 }

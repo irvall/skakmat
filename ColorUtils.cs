@@ -1,4 +1,5 @@
-using Color = Raylib_cs.Color;
+using Raylib_cs;
+
 public static class ColorUtils
 {
     public static Color BrightenUp(this Color originalColor, float factor)
@@ -14,5 +15,4 @@ public static class ColorUtils
         // Return the new Color
         return new Color(newR, newG, newB, originalColor.A);
     }
-
 }

@@ -1,55 +1,68 @@
 using System.Numerics;
 using Raylib_cs;
 using static BoardDatastructures;
-using Color = Raylib_cs.Color;
 
 namespace chess_rts;
 
 internal class Board
 {
-    private MouseController MouseController { get; } = new();
-    private readonly Color boardBaseColor = Color.BROWN;
-
     internal const int SquareNo = 8;
+    private readonly Color boardBaseColor = Color.BROWN;
+    private readonly Dictionary<ulong, (int row, int col)> possibleCaptures = new();
 
-    private readonly int windowWidth;
-    private readonly int windowHeight;
-
-    private readonly int squareWidth;
+    private readonly Dictionary<ulong, (int row, int col)> possibleMoves = new();
     private readonly int squareHeight;
 
-    private Texture2D pieceTexture;
-    private int spriteWidth;
-    private int spriteHeight;
-    internal ulong WhiteKings;
-    internal ulong WhiteQueens;
-    internal ulong WhiteRooks;
-    internal ulong WhiteBishops;
-    internal ulong WhiteKnights;
-    internal ulong WhitePawns;
-    internal ulong BlackKings;
-    internal ulong BlackQueens;
-    internal ulong BlackRooks;
+    private readonly int squareWidth;
+    private readonly int windowHeight;
+
+    private readonly int windowWidth;
     internal ulong BlackBishops;
+    internal ulong BlackKings;
     internal ulong BlackKnights;
     internal ulong BlackPawns;
+    internal ulong BlackQueens;
+    internal ulong BlackRooks;
+
+    private BoardState[] history = new BoardState[100];
+    private int historyIndex;
 
     internal BoardState? InitialState = null;
+
+    private ulong pieceSelected;
+    private PieceType? pieceSelectedType;
+
+    private Texture2D pieceTexture;
+    private int spriteHeight;
+    private int spriteWidth;
+    internal ulong WhiteBishops;
+    internal ulong WhiteKings;
+    internal ulong WhiteKnights;
+    internal ulong WhitePawns;
+    internal ulong WhiteQueens;
+    internal ulong WhiteRooks;
+
+
+    public Board(int windowWidth, int windowHeight)
+    {
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
+        squareWidth = windowWidth / SquareNo;
+        squareHeight = windowHeight / SquareNo;
+        BlackKings = 0;
+    }
+
+    private MouseController MouseController { get; } = new();
 
     private ulong WhitePieces => WhiteKings | WhiteQueens | WhiteRooks | WhiteBishops | WhiteKnights | WhitePawns;
     private ulong BlackPieces => BlackKings | BlackQueens | BlackRooks | BlackBishops | BlackKnights | BlackPawns;
     private ulong AllPieces => WhitePieces | BlackPieces;
     private ulong EmptySquares => ~AllPieces;
 
-    private ulong pieceSelected;
-    private PieceType? pieceSelectedType;
-
-    private readonly Dictionary<ulong, (int row, int col)> possibleMoves = new();
-    private readonly Dictionary<ulong, (int row, int col)> possibleCaptures = new();
-    private static ulong GetBit(ulong bitBoard, int square) => bitBoard & (1UL << square);
-
-    private BoardState[] history = new BoardState[100];
-    private int historyIndex;
+    private static ulong GetBit(ulong bitBoard, int square)
+    {
+        return bitBoard & (1UL << square);
+    }
 
 
     private void SaveBoardState()
@@ -60,7 +73,9 @@ internal class Board
             Array.Copy(history, newHistory, history.Length);
             history = newHistory;
         }
-        history[historyIndex] = new BoardState(WhiteKings, WhiteQueens, WhiteRooks, WhiteBishops, WhiteKnights, WhitePawns, BlackKings, BlackQueens, BlackRooks, BlackBishops, BlackKnights, BlackPawns);
+
+        history[historyIndex] = new BoardState(WhiteKings, WhiteQueens, WhiteRooks, WhiteBishops, WhiteKnights,
+            WhitePawns, BlackKings, BlackQueens, BlackRooks, BlackBishops, BlackKnights, BlackPawns);
         historyIndex++;
     }
 
@@ -80,29 +95,15 @@ internal class Board
                 var idx = y * SquareNo + x;
                 var theBit = GetBit(bitBoard, idx);
                 if (theBit != 0)
-                {
                     Console.Write(LogUtility.BoldText("1 "));
-                }
                 else
-                {
                     LogUtility.WriteColor("0 ", ConsoleColor.DarkGray, false);
-                }
             }
+
             Console.WriteLine();
         }
+
         Console.WriteLine();
-    }
-
-
-
-
-    public Board(int windowWidth, int windowHeight)
-    {
-        this.windowWidth = windowWidth;
-        this.windowHeight = windowHeight;
-        squareWidth = windowWidth / SquareNo;
-        squareHeight = windowHeight / SquareNo;
-        BlackKings = 0;
     }
 
     public void Run()
@@ -143,10 +144,7 @@ internal class Board
 
     private void DrawOverlay()
     {
-        if (Raylib.IsKeyDown(KeyboardKey.KEY_R) && InitialState is not null)
-        {
-            SetPosition(InitialState.Value);
-        }
+        if (Raylib.IsKeyDown(KeyboardKey.KEY_R) && InitialState is not null) SetPosition(InitialState.Value);
         if (KeyController.LeftArrowPressed && historyIndex > 0 && history[historyIndex - 1].WhiteKings != 0)
         {
             historyIndex--;
@@ -164,6 +162,7 @@ internal class Board
             BlackKnights = state.BlackKnights;
             BlackPawns = state.BlackPawns;
         }
+
         if (KeyController.RightArrowPressed && historyIndex < history.Length - 1)
         {
             if (history[historyIndex + 1].WhiteKings != 0)
@@ -184,11 +183,8 @@ internal class Board
                 BlackKnights = state.BlackKnights;
                 BlackPawns = state.BlackPawns;
             }
-            else
-            {
-
-            }
         }
+
         {
             // TODO: Implement redo
         }
@@ -210,6 +206,7 @@ internal class Board
                 }
             }
         }
+
         possibleMoves.Values.ToList().ForEach(move =>
         {
             var square = new Rectangle(move.col * squareWidth, move.row * squareHeight, squareWidth, squareHeight);
@@ -220,8 +217,6 @@ internal class Board
             var square = new Rectangle(move.col * squareWidth, move.row * squareHeight, squareWidth, squareHeight);
             Raylib.DrawRectangleRec(square, new Color(255, 0, 50, 100));
         });
-
-
     }
 
     private bool TryMoveOrCapture(int idx)
@@ -274,6 +269,7 @@ internal class Board
                     default:
                         throw new ArgumentOutOfRangeException($"Piece not found: {piece}");
                 }
+
                 isMoveOrCapture = true;
             }
             else if (possibleCaptures.ContainsKey(clickedSquare))
@@ -322,9 +318,11 @@ internal class Board
                     default:
                         throw new ArgumentOutOfRangeException($"Piece not found: {piece}");
                 }
+
                 isMoveOrCapture = true;
             }
         }
+
         DetectPromotion();
 
 
@@ -343,6 +341,7 @@ internal class Board
             WhitePawns &= ~whitePromotion;
             WhiteQueens |= whitePromotion;
         }
+
         var blackPromotion = BlackPawns & Masks.Rank1;
         if (blackPromotion != 0)
         {
@@ -400,18 +399,12 @@ internal class Board
 
         var standardMove = (isWhite ? pawn >> 8 : pawn << 8) & EmptySquares;
 
-        if (standardMove != 0)
-        {
-            AddToMoveCollection(standardMove, possibleMoves);
-        }
+        if (standardMove != 0) AddToMoveCollection(standardMove, possibleMoves);
 
         if (isStartingPosition && standardMove != 0)
         {
             var doublePush = (isWhite ? pawn >> 16 : pawn << 16) & EmptySquares;
-            if (doublePush != 0)
-            {
-                AddToMoveCollection(doublePush, possibleMoves);
-            }
+            if (doublePush != 0) AddToMoveCollection(doublePush, possibleMoves);
         }
 
         PrintBitBoard(pawn, "Current pawn");
@@ -433,10 +426,7 @@ internal class Board
                 Console.WriteLine("En passant is possible");
                 var enPassantPosition = isWhite ? lastMovePosition - 8 : lastMovePosition + 8;
                 var enPassant = 1UL << enPassantPosition;
-                if (enPassant != 0)
-                {
-                    AddToMoveCollection(enPassant, possibleCaptures);
-                }
+                if (enPassant != 0) AddToMoveCollection(enPassant, possibleCaptures);
             }
         }
 
@@ -447,12 +437,12 @@ internal class Board
             if (captureRight != 0)
                 AddToMoveCollection(captureRight, possibleCaptures);
         }
+
         if (!isLeftEdge)
         {
             var captureLeft = (isWhite ? pawn >> 9 : pawn << 9) & opponentPieces;
             if (captureLeft != 0)
                 AddToMoveCollection(captureLeft, possibleCaptures);
-
         }
     }
 
@@ -470,13 +460,11 @@ internal class Board
         var idx = 0;
         while (bitBoard != 0)
         {
-            if ((bitBoard & 1) != 0)
-            {
-                score += PieceValue(idx);
-            }
+            if ((bitBoard & 1) != 0) score += PieceValue(idx);
             bitBoard >>= 1;
             idx++;
         }
+
         return score;
     }
 
@@ -541,7 +529,6 @@ internal class Board
 
     private void DrawBoard()
     {
-
         for (var y = 0; y < SquareNo; y++)
         for (var x = 0; x < SquareNo; x++)
         {
@@ -561,8 +548,6 @@ internal class Board
             if (GetBit(BlackKnights, idx) != 0) DrawPiece(PieceType.BlackKnight, x, y);
             if (GetBit(BlackPawns, idx) != 0) DrawPiece(PieceType.BlackPawn, x, y);
         }
-
-
     }
 
     private void DrawPiece(PieceType pieceType, int x, int y)
@@ -573,5 +558,4 @@ internal class Board
         var dest = new Rectangle(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
         Raylib.DrawTexturePro(pieceTexture, source, dest, Vector2.Zero, 0f, Color.WHITE);
     }
-
 }

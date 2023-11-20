@@ -1,4 +1,4 @@
-class BoardDatastructures
+internal class BoardDatastructures
 {
     internal static class Masks
     {
@@ -36,7 +36,10 @@ class BoardDatastructures
         public ulong BlackBishops;
         public ulong BlackKnights;
         public ulong BlackPawns;
-        public BoardState(ulong WhiteKings, ulong WhiteQueens, ulong WhiteRooks, ulong WhiteBishops, ulong WhiteKnights, ulong WhitePawns, ulong BlackKings, ulong BlackQueens, ulong BlackRooks, ulong BlackBishops, ulong BlackKnights, ulong BlackPawns)
+
+        public BoardState(ulong WhiteKings, ulong WhiteQueens, ulong WhiteRooks, ulong WhiteBishops, ulong WhiteKnights,
+            ulong WhitePawns, ulong BlackKings, ulong BlackQueens, ulong BlackRooks, ulong BlackBishops,
+            ulong BlackKnights, ulong BlackPawns)
         {
             this.WhiteKings = WhiteKings;
             this.WhiteQueens = WhiteQueens;
@@ -51,14 +54,13 @@ class BoardDatastructures
             this.BlackKnights = BlackKnights;
             this.BlackPawns = BlackPawns;
         }
-
     }
 
     internal enum PieceColor
     {
         White,
         Black
-    };
+    }
 
     internal enum PieceType
     {
@@ -74,5 +76,5 @@ class BoardDatastructures
         BlackKnight,
         BlackRook,
         BlackPawn
-    };
+    }
 }
