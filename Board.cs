@@ -226,11 +226,9 @@ internal class Board
             var clickedSquare = 1UL << idx;
             if (possibleMoves.ContainsKey(clickedSquare))
             {
-                // TODO: Find way to detect if the move was a double push, and set en passant accordingly
                 SaveBoardState();
                 var (row, col) = possibleMoves[clickedSquare];
                 var piece = pieceSelectedType.Value;
-                Console.WriteLine(piece + " at " + idx + " is moved to " + row + ", " + col);
                 switch (piece)
                 {
                     case PieceType.WhitePawn:
@@ -273,25 +271,41 @@ internal class Board
             }
             else if (possibleCaptures.ContainsKey(clickedSquare))
             {
-                // TODO: In case of en passant capture, remove the captured pawn
                 SaveBoardState();
                 var (row, col) = possibleCaptures[clickedSquare];
                 var piece = pieceSelectedType.Value;
-                Console.WriteLine(piece + " at " + idx + " is captured at " + row + ", " + col);
+                var isEnPassantCapture = (clickedSquare & EmptySquares) != 0;
                 switch (piece)
                 {
                     case PieceType.WhitePawn:
                     {
-                        BlackPawns &= ~clickedSquare;
+                        if (isEnPassantCapture)
+                        {
+                            var pawnToCapture = (clickedSquare << 8) & BlackPawns;
+                            BlackPawns &= ~pawnToCapture;
+                        }
+                        else
+                        {
+                            BlackPawns &= ~clickedSquare;
+                        }
                         WhitePawns &= ~pieceSelected;
                         WhitePawns |= clickedSquare;
                         break;
                     }
                     case PieceType.BlackPawn:
                     {
-                        WhitePawns &= ~clickedSquare;
+                        if (isEnPassantCapture)
+                        {
+                            var pawnToCapture = (clickedSquare >> 8) & WhitePawns;
+                            WhitePawns &= ~pawnToCapture;
+                        }
+                        else
+                        {
+                            WhitePawns &= ~clickedSquare;
+                        }
+
                         BlackPawns &= ~pieceSelected;
-                        BlackPawns |= clickedSquare;
+                        BlackPawns |= clickedSquare;                           
                         break;
                     }
                     case PieceType.WhiteKing:
@@ -364,6 +378,7 @@ internal class Board
                 break;
             }
             case PieceType.WhiteKing:
+                // TODO: Find king moves
                 break;
             case PieceType.WhiteQueen:
                 break;
