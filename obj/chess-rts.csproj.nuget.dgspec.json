@@ -1,29 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/Users/johan/repo/chess-rts/chess-rts.csproj": {}
+    "C:\\Users\\JohanIrvallRasmussen\\repo\\skakmat\\chess-rts.csproj": {}
   },
   "projects": {
-    "/Users/johan/repo/chess-rts/chess-rts.csproj": {
+    "C:\\Users\\JohanIrvallRasmussen\\repo\\skakmat\\chess-rts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/johan/repo/chess-rts/chess-rts.csproj",
+        "projectUniqueName": "C:\\Users\\JohanIrvallRasmussen\\repo\\skakmat\\chess-rts.csproj",
         "projectName": "chess-rts",
-        "projectPath": "/Users/johan/repo/chess-rts/chess-rts.csproj",
-        "packagesPath": "/Users/johan/.nuget/packages/",
-        "outputPath": "/Users/johan/repo/chess-rts/obj/",
+        "projectPath": "C:\\Users\\JohanIrvallRasmussen\\repo\\skakmat\\chess-rts.csproj",
+        "packagesPath": "C:\\Users\\JohanIrvallRasmussen\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\JohanIrvallRasmussen\\repo\\skakmat\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "/Users/johan/Library/Application Support/Godot/mono/GodotNuGetFallbackFolder"
+          "C:\\Users\\JohanIrvallRasmussen\\AppData\\Roaming\\Godot\\mono\\GodotNuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "/Users/johan/.nuget/NuGet/NuGet.Config",
-          "/Users/johan/.nuget/NuGet/config/Godot.Offline.Config"
+          "C:\\Users\\JohanIrvallRasmussen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\JohanIrvallRasmussen\\AppData\\Roaming\\NuGet\\config\\Godot.Offline.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -63,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.401/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace chess_rts;
 
-public class Log
+public abstract class LogUtility
 {
     private static void CustomLog(int logType, string text, IntPtr args) { }
 

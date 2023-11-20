@@ -7,9 +7,9 @@ public static class ColorUtils
         factor = Math.Clamp(factor, 0f, 1f);
 
         // Calculate the new color components
-        byte newR = (byte)Math.Clamp(originalColor.R + (255 - originalColor.R) * factor, 0, 255);
-        byte newG = (byte)Math.Clamp(originalColor.G + (255 - originalColor.G) * factor, 0, 255);
-        byte newB = (byte)Math.Clamp(originalColor.B + (255 - originalColor.B) * factor, 0, 255);
+        var newR = (byte)Math.Clamp(originalColor.R + (255 - originalColor.R) * factor, 0, 255);
+        var newG = (byte)Math.Clamp(originalColor.G + (255 - originalColor.G) * factor, 0, 255);
+        var newB = (byte)Math.Clamp(originalColor.B + (255 - originalColor.B) * factor, 0, 255);
 
         // Return the new Color
         return new Color(newR, newG, newB, originalColor.A);
