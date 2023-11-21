@@ -94,9 +94,9 @@ internal class Board
                 var idx = y * SquareNo + x;
                 var theBit = GetBit(bitBoard, idx);
                 if (theBit != 0)
-                    Console.Write(LogUtility.BoldText("1 "));
+                    Console.Write(LogUtility.BoldText($"{idx}".PadLeft(4)));
                 else
-                    LogUtility.WriteColor("0 ", ConsoleColor.DarkGray, false);
+                    LogUtility.WriteColor($"{idx}".PadLeft(4), ConsoleColor.DarkGray, false);
             }
 
             Console.WriteLine();
@@ -191,18 +191,18 @@ internal class Board
         {
             var x = (int)MouseController.MousePosition.X / squareWidth;
             var y = (int)MouseController.MousePosition.Y / squareHeight;
-            Console.WriteLine($"\n\n#########\n\nLeft mouse clicked at x={x}, y={y}");
             var idx = y * SquareNo + x;
             if (!TryMoveOrCapture(idx))
             {
+                Console.Clear();
                 var pieceType = PieceTypeAt(idx);
                 if (pieceType != null)
                 {
                     pieceSelected = 1UL << idx;
                     pieceSelectedType = pieceType;
-                    Console.WriteLine(pieceType + " at " + idx + " is selected");
                     FindMoves(pieceType.Value, idx, x, y);
                 }
+                else PrintBitBoard(AllPieces, "No piece at " + idx);
             }
         }
 
@@ -232,17 +232,17 @@ internal class Board
                 switch (piece)
                 {
                     case PieceType.WhitePawn:
-                    {
-                        WhitePawns &= ~pieceSelected;
-                        WhitePawns |= clickedSquare;
-                        break;
-                    }
+                        {
+                            WhitePawns &= ~pieceSelected;
+                            WhitePawns |= clickedSquare;
+                            break;
+                        }
                     case PieceType.BlackPawn:
-                    {
-                        BlackPawns &= ~pieceSelected;
-                        BlackPawns |= clickedSquare;
-                        break;
-                    }
+                        {
+                            BlackPawns &= ~pieceSelected;
+                            BlackPawns |= clickedSquare;
+                            break;
+                        }
                     case PieceType.WhiteKing:
                         break;
                     case PieceType.WhiteQueen:
@@ -278,36 +278,36 @@ internal class Board
                 switch (piece)
                 {
                     case PieceType.WhitePawn:
-                    {
-                        if (isEnPassantCapture)
                         {
-                            var pawnToCapture = (clickedSquare << 8) & BlackPawns;
-                            BlackPawns &= ~pawnToCapture;
+                            if (isEnPassantCapture)
+                            {
+                                var pawnToCapture = (clickedSquare << 8) & BlackPawns;
+                                BlackPawns &= ~pawnToCapture;
+                            }
+                            else
+                            {
+                                BlackPawns &= ~clickedSquare;
+                            }
+                            WhitePawns &= ~pieceSelected;
+                            WhitePawns |= clickedSquare;
+                            break;
                         }
-                        else
-                        {
-                            BlackPawns &= ~clickedSquare;
-                        }
-                        WhitePawns &= ~pieceSelected;
-                        WhitePawns |= clickedSquare;
-                        break;
-                    }
                     case PieceType.BlackPawn:
-                    {
-                        if (isEnPassantCapture)
                         {
-                            var pawnToCapture = (clickedSquare >> 8) & WhitePawns;
-                            WhitePawns &= ~pawnToCapture;
-                        }
-                        else
-                        {
-                            WhitePawns &= ~clickedSquare;
-                        }
+                            if (isEnPassantCapture)
+                            {
+                                var pawnToCapture = (clickedSquare >> 8) & WhitePawns;
+                                WhitePawns &= ~pawnToCapture;
+                            }
+                            else
+                            {
+                                WhitePawns &= ~clickedSquare;
+                            }
 
-                        BlackPawns &= ~pieceSelected;
-                        BlackPawns |= clickedSquare;                           
-                        break;
-                    }
+                            BlackPawns &= ~pieceSelected;
+                            BlackPawns |= clickedSquare;
+                            break;
+                        }
                     case PieceType.WhiteKing:
                         break;
                     case PieceType.WhiteQueen:
@@ -365,18 +365,20 @@ internal class Board
 
     private void FindMoves(PieceType type, int idx, int x, int y)
     {
+        var bitBoard = 1UL << idx;
+        PrintBitBoard(bitBoard, type.ToString());
         switch (type)
         {
             case PieceType.WhitePawn:
-            {
-                FindPawnMoves(idx, x, y, PieceColor.White);
-                break;
-            }
+                {
+                    FindPawnMoves(idx, x, y, PieceColor.White);
+                    break;
+                }
             case PieceType.BlackPawn:
-            {
-                FindPawnMoves(idx, x, y, PieceColor.Black);
-                break;
-            }
+                {
+                    FindPawnMoves(idx, x, y, PieceColor.Black);
+                    break;
+                }
             case PieceType.WhiteKing:
                 // TODO: Find king moves
                 break;
@@ -421,16 +423,11 @@ internal class Board
             if (doublePush != 0) AddToMoveCollection(doublePush, possibleMoves);
         }
 
-        PrintBitBoard(pawn, "Current pawn");
         if (historyIndex > 0 && y == (isWhite ? 3 : 4))
         {
             // Check if en passant is possible
             var lastState = history[historyIndex - 1];
             var lastMove = isWhite ? BlackPawns & ~lastState.BlackPawns : WhitePawns & ~lastState.WhitePawns;
-            PrintBitBoard(lastMove, "Last move");
-            PrintBitBoard(lastState.WhitePawns, "White pawns in former state");
-            PrintBitBoard(lastState.BlackPawns, "Black pawns in former state");
-
             var lastMovePosition = BitOperations.TrailingZeroCount(lastMove);
             var lastMoveX = lastMovePosition % SquareNo;
             var lastMoveY = lastMovePosition / SquareNo;
@@ -440,10 +437,9 @@ internal class Board
             var diagonalRight = (isWhite ? pawn >> 7 : pawn << 7) & lastState.AllPieces;
             var lastMoveWasLeft = lastMoveX == x + (isWhite ? -1 : 1);
             var lastMoveWasRight = lastMoveX == x + (isWhite ? 1 : -1);
-            
+
             if (lastMoveY == (isWhite ? 3 : 4) && (lastMoveWasLeft && diagonalLeft == 0 || lastMoveWasRight && diagonalRight == 0))
             {
-                Console.WriteLine("En passant is possible");
                 var enPassantPosition = isWhite ? lastMovePosition - 8 : lastMovePosition + 8;
                 var enPassant = 1UL << enPassantPosition;
                 if (enPassant != 0) AddToMoveCollection(enPassant, possibleCaptures);
@@ -550,24 +546,24 @@ internal class Board
     private void DrawBoard()
     {
         for (var y = 0; y < SquareNo; y++)
-        for (var x = 0; x < SquareNo; x++)
-        {
-            var idx = y * SquareNo + x;
-            var square = new Rectangle(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
-            Raylib.DrawRectangleRec(square, (x + y) % 2 == 0 ? boardBaseColor.BrightenUp(0.8f) : boardBaseColor);
-            if (GetBit(WhiteKings, idx) != 0) DrawPiece(PieceType.WhiteKing, x, y);
-            if (GetBit(WhiteQueens, idx) != 0) DrawPiece(PieceType.WhiteQueen, x, y);
-            if (GetBit(WhiteRooks, idx) != 0) DrawPiece(PieceType.WhiteRook, x, y);
-            if (GetBit(WhiteBishops, idx) != 0) DrawPiece(PieceType.WhiteBishop, x, y);
-            if (GetBit(WhiteKnights, idx) != 0) DrawPiece(PieceType.WhiteKnight, x, y);
-            if (GetBit(WhitePawns, idx) != 0) DrawPiece(PieceType.WhitePawn, x, y);
-            if (GetBit(BlackKings, idx) != 0) DrawPiece(PieceType.BlackKing, x, y);
-            if (GetBit(BlackQueens, idx) != 0) DrawPiece(PieceType.BlackQueen, x, y);
-            if (GetBit(BlackRooks, idx) != 0) DrawPiece(PieceType.BlackRook, x, y);
-            if (GetBit(BlackBishops, idx) != 0) DrawPiece(PieceType.BlackBishop, x, y);
-            if (GetBit(BlackKnights, idx) != 0) DrawPiece(PieceType.BlackKnight, x, y);
-            if (GetBit(BlackPawns, idx) != 0) DrawPiece(PieceType.BlackPawn, x, y);
-        }
+            for (var x = 0; x < SquareNo; x++)
+            {
+                var idx = y * SquareNo + x;
+                var square = new Rectangle(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
+                Raylib.DrawRectangleRec(square, (x + y) % 2 == 0 ? boardBaseColor.BrightenUp(0.8f) : boardBaseColor);
+                if (GetBit(WhiteKings, idx) != 0) DrawPiece(PieceType.WhiteKing, x, y);
+                if (GetBit(WhiteQueens, idx) != 0) DrawPiece(PieceType.WhiteQueen, x, y);
+                if (GetBit(WhiteRooks, idx) != 0) DrawPiece(PieceType.WhiteRook, x, y);
+                if (GetBit(WhiteBishops, idx) != 0) DrawPiece(PieceType.WhiteBishop, x, y);
+                if (GetBit(WhiteKnights, idx) != 0) DrawPiece(PieceType.WhiteKnight, x, y);
+                if (GetBit(WhitePawns, idx) != 0) DrawPiece(PieceType.WhitePawn, x, y);
+                if (GetBit(BlackKings, idx) != 0) DrawPiece(PieceType.BlackKing, x, y);
+                if (GetBit(BlackQueens, idx) != 0) DrawPiece(PieceType.BlackQueen, x, y);
+                if (GetBit(BlackRooks, idx) != 0) DrawPiece(PieceType.BlackRook, x, y);
+                if (GetBit(BlackBishops, idx) != 0) DrawPiece(PieceType.BlackBishop, x, y);
+                if (GetBit(BlackKnights, idx) != 0) DrawPiece(PieceType.BlackKnight, x, y);
+                if (GetBit(BlackPawns, idx) != 0) DrawPiece(PieceType.BlackPawn, x, y);
+            }
     }
 
     private void DrawPiece(PieceType pieceType, int x, int y)

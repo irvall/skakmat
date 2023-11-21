@@ -11,53 +11,53 @@ internal static class BoardHelpers
         const double chanceOfDrop = 0.3;
 
         for (var y = 0; y < 8; y++)
-        for (var x = 0; x < 8; x++)
-        {
-            if (rng.NextDouble() > chanceOfDrop) continue;
-            var isWhite = rng.NextDouble() < 0.5;
-            var index = y * 8 + x;
-            Console.WriteLine($"Placing piece at {x}, {y} - index {index}");
-            switch (rng.NextInt64(6))
+            for (var x = 0; x < 8; x++)
             {
-                case 0:
+                if (rng.NextDouble() > chanceOfDrop) continue;
+                var isWhite = rng.NextDouble() < 0.5;
+                var index = y * 8 + x;
+                Console.WriteLine($"Placing piece at {x}, {y} - index {index}");
+                switch (rng.NextInt64(6))
                 {
-                    if (y is 0 or 7) break;
-                    if (isWhite) Board.SetBit(ref board.WhitePawns, x, y);
-                    else Board.SetBit(ref board.BlackPawns, x, y);
-                    break;
-                }
-                case 1:
-                {
-                    if (isWhite) Board.SetBit(ref board.WhiteKnights, x, y);
-                    else Board.SetBit(ref board.BlackKnights, x, y);
-                    break;
-                }
-                case 2:
-                {
-                    if (isWhite) Board.SetBit(ref board.WhiteBishops, x, y);
-                    else Board.SetBit(ref board.BlackBishops, x, y);
-                    break;
-                }
-                case 3:
-                {
-                    if (isWhite) Board.SetBit(ref board.WhiteRooks, x, y);
-                    else Board.SetBit(ref board.BlackRooks, x, y);
-                    break;
-                }
-                case 4:
-                {
-                    if (isWhite) Board.SetBit(ref board.WhiteQueens, x, y);
-                    else Board.SetBit(ref board.BlackQueens, x, y);
-                    break;
-                }
-                case 5:
-                {
-                    if (isWhite) Board.SetBit(ref board.WhiteKings, x, y);
-                    else Board.SetBit(ref board.BlackKings, x, y);
-                    break;
+                    case 0:
+                        {
+                            if (y is 0 or 7) break;
+                            if (isWhite) Board.SetBit(ref board.WhitePawns, x, y);
+                            else Board.SetBit(ref board.BlackPawns, x, y);
+                            break;
+                        }
+                    case 1:
+                        {
+                            if (isWhite) Board.SetBit(ref board.WhiteKnights, x, y);
+                            else Board.SetBit(ref board.BlackKnights, x, y);
+                            break;
+                        }
+                    case 2:
+                        {
+                            if (isWhite) Board.SetBit(ref board.WhiteBishops, x, y);
+                            else Board.SetBit(ref board.BlackBishops, x, y);
+                            break;
+                        }
+                    case 3:
+                        {
+                            if (isWhite) Board.SetBit(ref board.WhiteRooks, x, y);
+                            else Board.SetBit(ref board.BlackRooks, x, y);
+                            break;
+                        }
+                    case 4:
+                        {
+                            if (isWhite) Board.SetBit(ref board.WhiteQueens, x, y);
+                            else Board.SetBit(ref board.BlackQueens, x, y);
+                            break;
+                        }
+                    case 5:
+                        {
+                            if (isWhite) Board.SetBit(ref board.WhiteKings, x, y);
+                            else Board.SetBit(ref board.BlackKings, x, y);
+                            break;
+                        }
                 }
             }
-        }
 
 
         return board;
@@ -65,7 +65,7 @@ internal static class BoardHelpers
 
     public static Board FromFen(string fen, bool laptop = false)
     {
-        var board = new Board(laptop ? 800 : 1024, laptop ? 800 : 1024);
+        var board = new Board(laptop ? 600 : 1024, laptop ? 600 : 1024);
         var parts = fen.Split(' ');
         var rows = parts[0].Split('/');
         var row = 0;
