@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace ChessMate;
 
@@ -24,7 +25,13 @@ public class BoardMasks
     public static ulong Corners { get; } = 0x8100000000000081;
     public static ulong CornersAndCenter { get; } = 0x8100001818000081;
     public static ulong CornersAndCenterAndAdjacent { get; } = 0xFF000018181800FF;
-    
+
+    public static ulong a1g7Square { get; } = 0x7f7f7f7f7f7f7f00;
+    public static ulong a2g8Square { get; } = 0x7f7f7f7f7f7f7f;
+    public static ulong b1h7Square { get; } = 0xfefefefefefefe00;
+    public static ulong b2h8Square { get; } = 0xfefefefefefefe;
+
+
 
 
 }
@@ -49,6 +56,11 @@ public class Board
     private ulong[] _whitePawnAttacks;
     private ulong[] _blackPawnMoves;
     private ulong[] _blackPawnAttacks;
+    
+    private const int RankOffset = 8;
+    private const int FileOffset = 1;
+    private const int DiagonalOffset = 7;
+    private const int AntiDiagonalOffset = 9;
     
     public void PrintBoardMasks()
     {
@@ -76,6 +88,31 @@ public class Board
         }
     }
     
+    private void InitializeKingMoves()
+    {
+        _whiteKingMoves = new ulong[64];
+        foreach (var idx in _boardSquareToIndex.Values)
+        {
+            var bit = 1UL << idx;
+            if((bit & BoardMasks.Rank8) == 0)
+                _whiteKingMoves[idx] |= bit >> RankOffset;
+            if((bit & BoardMasks.Rank1) == 0)
+                _whiteKingMoves[idx] |= bit << RankOffset;
+            if((bit & BoardMasks.FileH) == 0)    
+                _whiteKingMoves[idx] |= bit << FileOffset;
+            if ((bit & BoardMasks.FileA) == 0)
+                _whiteKingMoves[idx] |= bit >> FileOffset;
+            if ((bit & BoardMasks.a1g7Square) != 0)
+                _whiteKingMoves[idx] |= bit >> DiagonalOffset;
+            if((bit & BoardMasks.b2h8Square) != 0)
+                _whiteKingMoves[idx] |= bit << DiagonalOffset;
+            if((bit & BoardMasks.a2g8Square) != 0)
+                _whiteKingMoves[idx] |= bit << AntiDiagonalOffset;
+            if((bit & BoardMasks.b1h7Square) != 0)
+                _whiteKingMoves[idx] |= bit >> AntiDiagonalOffset;
+        }
+    }
+    
     private void InitializePawnMoves()
     {
         _whitePawnMoves = new ulong[64];
@@ -89,31 +126,31 @@ public class Board
 
             // Black Pawns
             if ((bit & BoardMasks.Rank7) != 0)
-                _blackPawnMoves[idx] |= bit << 16;
+                _blackPawnMoves[idx] |= bit << (RankOffset * 2);
             if ((bit & BoardMasks.Rank1) == 0)
             {
-                _blackPawnMoves[idx] |= bit << 8;
+                _blackPawnMoves[idx] |= bit << RankOffset;
 
                 if ((bit & BoardMasks.FileA) == 0)
-                    _blackPawnAttacks[idx] |= bit << 7;
+                    _blackPawnAttacks[idx] |= bit << DiagonalOffset;
 
                 if ((bit & BoardMasks.FileH) == 0)
-                    _blackPawnAttacks[idx] |= bit << 9;
+                    _blackPawnAttacks[idx] |= bit << AntiDiagonalOffset;
             }
 
             // White Pawns
             if ((bit & BoardMasks.Rank2) != 0)
-                _whitePawnMoves[idx] |= bit >> 16;
+                _whitePawnMoves[idx] |= bit >> (RankOffset*2);
 
             if ((bit & BoardMasks.Rank8) == 0)
             {
-                _whitePawnMoves[idx] |= bit >> 8;
+                _whitePawnMoves[idx] |= bit >> RankOffset;
 
                 if ((bit & BoardMasks.FileA) == 0)
-                    _whitePawnAttacks[idx] |= bit >> 9;
+                    _whitePawnAttacks[idx] |= bit >> AntiDiagonalOffset;
 
                 if ((bit & BoardMasks.FileH) == 0)
-                    _whitePawnAttacks[idx] |= bit >> 7;
+                    _whitePawnAttacks[idx] |= bit >> DiagonalOffset;
             }
         }
     }
@@ -123,11 +160,19 @@ public class Board
         _boardSquareToIndex = new Dictionary<string, int>();
         InitializeBoardSquareToIndex();
         InitializePawnMoves();
-        if (_whitePawnMoves == null || _whitePawnAttacks == null || _blackPawnMoves == null ||
-            _blackPawnAttacks == null) return;
-        
+        InitializeKingMoves();
+        if (_whiteKingMoves == null) return;
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.a8], (int?)BoardSquare.a8);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.a1], (int?)BoardSquare.a1);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.h8], (int?)BoardSquare.h8);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.h1], (int?)BoardSquare.h1);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.d5], (int?)BoardSquare.d5);
+    }
+
+    private void PawnTests()
+    {
         Console.WriteLine("MOVES");
-        
+
         PrintBoard(_blackPawnMoves[(int)BoardSquare.e2]);
         PrintBoard(_blackPawnMoves[(int)BoardSquare.e7]);
         PrintBoard(_blackPawnMoves[(int)BoardSquare.a1]);
@@ -135,16 +180,15 @@ public class Board
         PrintBoard(_blackPawnMoves[(int)BoardSquare.d5]);
 
         Console.WriteLine("ATTACKS");
-        
+
         PrintBoard(_blackPawnAttacks[(int)BoardSquare.e2]);
         PrintBoard(_blackPawnAttacks[(int)BoardSquare.e7]);
         PrintBoard(_blackPawnAttacks[(int)BoardSquare.a1]);
         PrintBoard(_blackPawnAttacks[(int)BoardSquare.h8]);
         PrintBoard(_blackPawnAttacks[(int)BoardSquare.d5]);
-        
     }
-    
-    public void PrintBoard(ulong bitboard)
+
+    public void PrintBoard(ulong bitboard, int? optIndexToHighlight = null)
     {
         var row = 8;
         for (int i = 0; i < 64; i++)
@@ -156,7 +200,10 @@ public class Board
             var bit = 1UL << i;
             var bitboardValue = bitboard & bit;
             var value = bitboardValue > 0 ? 1 : 0;
-            Console.Write($"{value} ");
+            if(optIndexToHighlight != null && i == optIndexToHighlight)
+                Console.Write($"x ");
+            else
+                Console.Write($"{value} ");
             if (i % 8 == 7)
             {
                 Console.WriteLine();
