@@ -26,10 +26,19 @@ public class BoardMasks
     public static ulong CornersAndCenter { get; } = 0x8100001818000081;
     public static ulong CornersAndCenterAndAdjacent { get; } = 0xFF000018181800FF;
 
-    public static ulong a1g7Square { get; } = 0x7f7f7f7f7f7f7f00;
-    public static ulong a2g8Square { get; } = 0x7f7f7f7f7f7f7f;
-    public static ulong b1h7Square { get; } = 0xfefefefefefefe00;
-    public static ulong b2h8Square { get; } = 0xfefefefefefefe;
+    public struct Boxes
+    {
+        public static ulong A1G7 { get; } = 0x7f7f7f7f7f7f7f00;
+        public static ulong A2G8 { get; } = 0x7f7f7f7f7f7f7f;
+        public static ulong B1H7 { get; } = 0xfefefefefefefe00;
+        public static ulong B2H8 { get; } = 0xfefefefefefefe;
+
+        public static ulong A1F6 = 0x3f3f3f3f3f3f0000;
+        public static ulong A3F8 = 0x3f3f3f3f3f3f;
+        public static ulong C3H8 = 0xfcfcfcfcfcfc;
+        public static ulong C1H6 = 0xfcfcfcfcfcfc0000;
+    }
+
 
 
 
@@ -39,14 +48,14 @@ public class BoardMasks
 public class Board
 {
     private enum BoardSquare: byte {
-        a8, b8, c8, d8, e8, f8, g8, h8,
-        a7, b7, c7, d7, e7, f7, g7, h7,
-        a6, b6, c6, d6, e6, f6, g6, h6,
-        a5, b5, c5, d5, e5, f5, g5, h5,
-        a4, b4, c4, d4, e4, f4, g4, h4,
-        a3, b3, c3, d3, e3, f3, g3, h3,
-        a2, b2, c2, d2, e2, f2, g2, h2,
-        a1, b1, c1, d1, e1, f1, g1, h1
+        A8, B8, C8, D8, E8, F8, G8, H8,
+        A7, B7, C7, D7, E7, F7, G7, H7,
+        A6, B6, C6, D6, E6, F6, G6, H6,
+        A5, B5, C5, D5, E5, F5, G5, H5,
+        A4, B4, C4, D4, E4, F4, G4, H4,
+        A3, B3, C3, D3, E3, F3, G3, H3,
+        A2, B2, C2, D2, E2, F2, G2, H2,
+        A1, B1, C1, D1, E1, F1, G1, H1
     }
 
     private readonly Dictionary<string, int> _boardSquareToIndex;
@@ -102,13 +111,13 @@ public class Board
                 _whiteKingMoves[idx] |= bit << FileOffset;
             if ((bit & BoardMasks.FileA) == 0)
                 _whiteKingMoves[idx] |= bit >> FileOffset;
-            if ((bit & BoardMasks.a1g7Square) != 0)
+            if ((bit & BoardMasks.Boxes.A1G7) != 0)
                 _whiteKingMoves[idx] |= bit >> DiagonalOffset;
-            if((bit & BoardMasks.b2h8Square) != 0)
+            if((bit & BoardMasks.Boxes.B2H8) != 0)
                 _whiteKingMoves[idx] |= bit << DiagonalOffset;
-            if((bit & BoardMasks.a2g8Square) != 0)
+            if((bit & BoardMasks.Boxes.A2G8) != 0)
                 _whiteKingMoves[idx] |= bit << AntiDiagonalOffset;
-            if((bit & BoardMasks.b1h7Square) != 0)
+            if((bit & BoardMasks.Boxes.B1H7) != 0)
                 _whiteKingMoves[idx] |= bit >> AntiDiagonalOffset;
         }
     }
@@ -162,30 +171,30 @@ public class Board
         InitializePawnMoves();
         InitializeKingMoves();
         if (_whiteKingMoves == null) return;
-        PrintBoard(_whiteKingMoves[(int)BoardSquare.a8], (int?)BoardSquare.a8);
-        PrintBoard(_whiteKingMoves[(int)BoardSquare.a1], (int?)BoardSquare.a1);
-        PrintBoard(_whiteKingMoves[(int)BoardSquare.h8], (int?)BoardSquare.h8);
-        PrintBoard(_whiteKingMoves[(int)BoardSquare.h1], (int?)BoardSquare.h1);
-        PrintBoard(_whiteKingMoves[(int)BoardSquare.d5], (int?)BoardSquare.d5);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.A1], (int?)BoardSquare.A1);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.H8], (int?)BoardSquare.H8);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.H1], (int?)BoardSquare.H1);
+        PrintBoard(_whiteKingMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);
     }
 
     private void PawnTests()
     {
         Console.WriteLine("MOVES");
 
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.e2]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.e7]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.a1]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.h8]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.d5]);
+        PrintBoard(_blackPawnMoves[(int)BoardSquare.E2]);
+        PrintBoard(_blackPawnMoves[(int)BoardSquare.E7]);
+        PrintBoard(_blackPawnMoves[(int)BoardSquare.A1]);
+        PrintBoard(_blackPawnMoves[(int)BoardSquare.H8]);
+        PrintBoard(_blackPawnMoves[(int)BoardSquare.D5]);
 
         Console.WriteLine("ATTACKS");
 
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.e2]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.e7]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.a1]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.h8]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.d5]);
+        PrintBoard(_blackPawnAttacks[(int)BoardSquare.E2]);
+        PrintBoard(_blackPawnAttacks[(int)BoardSquare.E7]);
+        PrintBoard(_blackPawnAttacks[(int)BoardSquare.A1]);
+        PrintBoard(_blackPawnAttacks[(int)BoardSquare.H8]);
+        PrintBoard(_blackPawnAttacks[(int)BoardSquare.D5]);
     }
 
     public void PrintBoard(ulong bitboard, int? optIndexToHighlight = null)

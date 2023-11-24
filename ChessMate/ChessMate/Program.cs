@@ -1,5 +1,13 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using ChessMate;
+namespace ChessMate;
 
-var board = new Board();
+internal abstract class Program
+{
+    [STAThread]
+    public static void Main()
+    {
+        var board = new Board();
+        var visualiser = new BitboardVisualiser(800);
+    }
+}
