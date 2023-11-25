@@ -16,13 +16,15 @@ public class BitboardVisualiser
     private bool _isDragging;
     private Vector2? _rectBeginPos;
     private Vector2? _rectEndPos;
+    private readonly int _halfSideLength;
 
 
     public BitboardVisualiser(int windowHeight)
     {
         _sideLength = windowHeight / SquareCount;
-        _windowSize.width = windowHeight;
-        _windowSize.height = windowHeight;
+        _halfSideLength = _sideLength / 2;
+        _windowSize.width = windowHeight + _sideLength;
+        _windowSize.height = windowHeight + _sideLength;
         _boundingBoxes = new List<HighlightSquare>();
         _upperBounds = new Vector2(SquareCount - 1);
         _rectBeginPos = null;
@@ -49,8 +51,8 @@ public class BitboardVisualiser
 
     private Vector2 ScreenToGrid(int screenX, int screenY)
     {
-        var gridX = screenX / _sideLength;
-        var gridY = screenY / _sideLength;
+        var gridX = (screenX - _halfSideLength)/ _sideLength;
+        var gridY = (screenY - _halfSideLength) / _sideLength;
         return new Vector2(gridX, gridY);
     }
 
@@ -80,9 +82,25 @@ public class BitboardVisualiser
         for (var i = 0; i < SquareCount; i++)
         for (var j = 0; j < SquareCount; j++)
         {
+            if (j == 0)
+            {
+                var posX = _halfSideLength / 3;
+                var posY = (int)(_sideLength * .85);
+                Raylib.DrawText(8- i + "", posX, i * _sideLength + posY, _halfSideLength, Color.WHITE);
+            }
+
             var draw = (i + j) % 2 == 0;
             DrawTile(j, i, draw ? Color.BROWN : Color.RAYWHITE);
         }
+        
+        for(char c = 'A'; c <= 'H'; c++)
+        {
+            var posX = (int)(_sideLength * .85);
+            var posY = _windowSize.height - _halfSideLength;
+            Raylib.DrawText(c + "", (c - 'A') * _sideLength + posX, posY, _halfSideLength, Color.WHITE);
+        }
+        
+        
 
         _boundingBoxes.ForEach(bb => DrawRect(bb.StartPosition, bb.EndPosition, bb.Color));
     }
@@ -90,15 +108,21 @@ public class BitboardVisualiser
     private static string GetAreaAsVariable(HighlightSquare bb)
     {
         var bitboard = BoundingBoxToBitboard(bb);
-        var startSquare = VectorToSquare(bb.StartPosition);
-        var endSquare = VectorToSquare(bb.EndPosition);
+        var lowerBound = Math.Min(bb.StartPosition.X, bb.EndPosition.X);
+        var upperBound = Math.Max(bb.StartPosition.X, bb.EndPosition.X);
+        var leftBound = Math.Max(bb.StartPosition.Y, bb.EndPosition.Y);
+        var rightBound = Math.Min(bb.StartPosition.Y, bb.EndPosition.Y);
+        var lowerVector = new Vector2(lowerBound, leftBound);
+        var upperVector = new Vector2(upperBound, rightBound);
+        var startSquare = VectorToSquare(lowerVector);
+        var endSquare = VectorToSquare(upperVector);
         var bitboardAsHex = Convert.ToString((long)bitboard, 16);
         return $"public static ulong {startSquare}{endSquare} = 0x{bitboardAsHex};";
     }
 
     private static string VectorToSquare(Vector2 vector)
     {
-        var x = (char)('a' + vector.X);
+        var x = (char)('A' + vector.X);
         var y = (char)('8' - vector.Y);
         return $"{x}{y}";
     }
@@ -129,7 +153,7 @@ public class BitboardVisualiser
             }
 
             var variables = string.Join("\n", _boundingBoxes.Select(GetAreaAsVariable));
-            Console.WriteLine("Copied to clipboard:");
+            Console.WriteLine("\nCopied to clipboard:");
             Console.WriteLine(variables);
             Clipboard.SetText(variables);
             _isDragging = false;
@@ -150,8 +174,8 @@ public class BitboardVisualiser
 
     private void DrawTile(int col, int row, Color tileColor)
     {
-        var posX = col * _sideLength;
-        var posY = row * _sideLength;
+        var posX = col * _sideLength + _halfSideLength;
+        var posY = row * _sideLength + _halfSideLength;
         Raylib.DrawRectangle(posX, posY, _sideLength, _sideLength, tileColor);
     }
 
