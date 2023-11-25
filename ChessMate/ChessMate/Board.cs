@@ -35,7 +35,12 @@ public class Board
         var elapsedMilliseconds = sw.ElapsedMilliseconds;
         Console.WriteLine($"Populating moves in {elapsedMilliseconds}ms");
         for (var i = 0; i < 64; i++)
+        {
             PrintBoard(_knightMoves[i], "Knight at ", i);
+            PrintBoard(_whitePawnMoves[i], "White Pawn at ", i);
+            PrintBoard(_blackPawnMoves[i], "Black Pawn at ", i);
+            PrintBoard(_kingMoves[i], "King at ", i);
+        }
     }
 
     private void TestKnightMoves()
@@ -61,8 +66,7 @@ public class Board
     {
         var boardMasksType = typeof(Masks);
 
-        foreach (var property in boardMasksType.GetProperties(BindingFlags.Public | BindingFlags.Static |
-                                                              BindingFlags.GetProperty | BindingFlags.NonPublic))
+        foreach (var property in boardMasksType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic))
         {
             var propertyName = property.Name;
             var propertyValue = (ulong)property.GetValue(null);
@@ -75,11 +79,11 @@ public class Board
     {
         var index = 0;
         for (var i = 8; i >= 1; i--)
-        for (var c = 'a'; c <= 'h'; c++)
-        {
-            var boardSquare = $"{c}{i}";
-            _boardSquareToIndex.Add(boardSquare, index++);
-        }
+            for (var c = 'a'; c <= 'h'; c++)
+            {
+                var boardSquare = $"{c}{i}";
+                _boardSquareToIndex.Add(boardSquare, index++);
+            }
 
         foreach (var kvp in _boardSquareToIndex) _indexToBoardSquare[kvp.Value] = kvp.Key;
     }
@@ -89,22 +93,23 @@ public class Board
         _kingMoves = new ulong[64];
         foreach (var idx in _boardSquareToIndex.Values)
         {
+            // TODO: Broken king
             var bit = 1UL << idx;
-            if ((bit & Masks.Rank8) == 0)
+            if (!Masks.Rank8.Contains(bit))
                 _kingMoves[idx] |= bit >> RankOffset;
-            if ((bit & Masks.Rank1) == 0)
+            if (!Masks.Rank1.Contains(bit))
                 _kingMoves[idx] |= bit << RankOffset;
-            if ((bit & Masks.FileH) == 0)
+            if (!Masks.FileH.Contains(bit))
                 _kingMoves[idx] |= bit << FileOffset;
-            if ((bit & Masks.FileA) == 0)
+            if (!Masks.FileA.Contains(bit))
                 _kingMoves[idx] |= bit >> FileOffset;
-            if ((bit & Masks.Boxes.A1G7) != 0)
+            if (!Masks.Boxes.A1G7.Contains(bit))
                 _kingMoves[idx] |= bit >> DiagonalOffset;
-            if ((bit & Masks.Boxes.B2H8) != 0)
+            if (!Masks.Boxes.B2H8.Contains(bit))
                 _kingMoves[idx] |= bit << DiagonalOffset;
-            if ((bit & Masks.Boxes.A2G8) != 0)
+            if (!Masks.Boxes.A2G8.Contains(bit))
                 _kingMoves[idx] |= bit << AntiDiagonalOffset;
-            if ((bit & Masks.Boxes.B1H7) != 0)
+            if (!Masks.Boxes.B1H7.Contains(bit))
                 _kingMoves[idx] |= bit >> AntiDiagonalOffset;
         }
     }
@@ -115,16 +120,28 @@ public class Board
         foreach (var idx in _boardSquareToIndex.Values)
         {
             var bit = 1UL << idx;
-            if ((bit & Masks.Boxes.A1G6) != 0)
+            if (Masks.Boxes.A1G6.Contains(bit))
                 _knightMoves[idx] |= bit >> (RankOffset * 2 - FileOffset);
-            if ((bit & Masks.Boxes.B1H6) != 0)
+            if (Masks.Boxes.B1H6.Contains(bit))
                 _knightMoves[idx] |= bit >> (RankOffset * 2 + FileOffset);
+            if (Masks.Boxes.A1F7.Contains(bit))
+                _knightMoves[idx] |= bit >> (RankOffset - FileOffset * 2);
+            if (Masks.Boxes.A2F8.Contains(bit))
+                _knightMoves[idx] |= bit << (RankOffset + FileOffset * 2);
+            if (Masks.Boxes.C1H7.Contains(bit))
+                _knightMoves[idx] |= bit >> (RankOffset + FileOffset * 2);
+            if (Masks.Boxes.C2H8.Contains(bit))
+                _knightMoves[idx] |= bit << (RankOffset - FileOffset * 2);
+            if (Masks.Boxes.B3H8.Contains(bit))
+                _knightMoves[idx] |= bit << (RankOffset * 2 - FileOffset);
+            if (Masks.Boxes.A3G8.Contains(bit))
+                _knightMoves[idx] |= bit << (RankOffset * 2 + FileOffset);
+
         }
     }
 
     private static ulong MoveBit(ulong bitboard, int x, int y)
     {
-        // 0b00100
         var xOffset = Math.Abs(x) * FileOffset;
         var yOffset = Math.Abs(y) * RankOffset;
         var shiftedX = x > 0 ? bitboard << xOffset : bitboard >> xOffset;
@@ -144,31 +161,31 @@ public class Board
             var bit = 1UL << idx;
 
             // Black Pawns
-            if ((bit & Masks.Rank7) != 0)
+            if (Masks.Rank7.Contains(bit))
                 _blackPawnMoves[idx] |= bit << (RankOffset * 2);
-            if ((bit & Masks.Rank1) == 0)
+            if (!Masks.Rank1.Contains(bit))
             {
                 _blackPawnMoves[idx] |= bit << RankOffset;
 
-                if ((bit & Masks.FileA) == 0)
+                if (!Masks.FileA.Contains(bit))
                     _blackPawnAttacks[idx] |= bit << DiagonalOffset;
 
-                if ((bit & Masks.FileH) == 0)
+                if (!Masks.FileH.Contains(bit))
                     _blackPawnAttacks[idx] |= bit << AntiDiagonalOffset;
             }
 
             // White Pawns
-            if ((bit & Masks.Rank2) != 0)
+            if (Masks.Rank2.Contains(bit))
                 _whitePawnMoves[idx] |= bit >> (RankOffset * 2);
 
-            if ((bit & Masks.Rank8) == 0)
+            if (!Masks.Rank8.Contains(bit))
             {
                 _whitePawnMoves[idx] |= bit >> RankOffset;
 
-                if ((bit & Masks.FileA) == 0)
+                if (!Masks.FileA.Contains(bit))
                     _whitePawnAttacks[idx] |= bit >> AntiDiagonalOffset;
 
-                if ((bit & Masks.FileH) == 0)
+                if (!Masks.FileH.Contains(bit))
                     _whitePawnAttacks[idx] |= bit >> DiagonalOffset;
             }
         }
@@ -210,7 +227,11 @@ public class Board
             if (theBit != 0)
                 Console.Write(LogUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
             else
-                LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+            {
+                if (optIndex != null && i == optIndex)
+                    LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
+                else LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+            }
         }
 
         Console.WriteLine(Environment.NewLine);

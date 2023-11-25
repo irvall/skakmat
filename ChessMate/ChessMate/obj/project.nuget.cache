@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "H/edA5q9XMBLxOM2fbLm7P4Qu+goCPIhwKdKbVVzd4D0REi+lsv3cKPAGOUZb8hUoIpv191fYC01bIraYdEZ3A==",
+  "dgSpecHash": "ble7aU4qk7zRH4nn6sGYNumZr+S/PlbzWkldZnU3gQMvhnj305ItieaQqirwUANZpty1GKTl5TQC0J9wjfAybw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\JohanIrvallRasmussen\\repo\\chessmate\\ChessMate\\ChessMate\\ChessMate.csproj",
+  "projectFilePath": "/Users/johan/repo/chess-rts/ChessMate/ChessMate/ChessMate.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\JohanIrvallRasmussen\\.nuget\\packages\\raylib-cs\\5.0.0\\raylib-cs.5.0.0.nupkg.sha512",
-    "C:\\Users\\JohanIrvallRasmussen\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512"
+    "/Users/johan/.nuget/packages/raylib-cs/5.0.0/raylib-cs.5.0.0.nupkg.sha512",
+    "/Users/johan/.nuget/packages/system.numerics.vectors/4.5.0/system.numerics.vectors.4.5.0.nupkg.sha512"
   ],
   "logs": []
 }

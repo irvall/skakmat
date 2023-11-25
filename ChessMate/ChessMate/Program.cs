@@ -8,6 +8,6 @@ internal abstract class Program
     public static void Main()
     {
         var board = new Board();
-        var visualiser = new BitboardVisualiser(800);
+        var visualiser = new BitboardVisualiser();
     }
 }

@@ -30,8 +30,13 @@ public class Masks
         public static ulong B1H7 { get; } = 0xfefefefefefefe00;
         public static ulong B2H8 { get; } = 0xfefefefefefefe;
         public static ulong A1G6 = 0x7f7f7f7f7f7f0000;
-        public static ulong a1f7 = 0x3f3f3f3f3f3f3f00;
+        public static ulong A1F7 = 0x3f3f3f3f3f3f3f00;
         public static ulong B1H6 = 0xfefefefefefe0000;
-        public static ulong a2f8 = 0x3f3f3f3f3f3f3f;
+        public static ulong A2F8 = 0x3f3f3f3f3f3f3f;
+        public static ulong A3G8 = 0x7f7f7f7f7f7f;
+        public static ulong C1H7 = 0xfcfcfcfcfcfcfc00;
+        public static ulong C2H8 = 0xfcfcfcfcfcfcfc;
+
+        public static ulong B3H8 = 0xfefefefefefe;
     }
 }

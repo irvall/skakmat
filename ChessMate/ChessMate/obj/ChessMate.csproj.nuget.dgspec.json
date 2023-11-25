@@ -1,36 +1,34 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\JohanIrvallRasmussen\\repo\\chessmate\\ChessMate\\ChessMate\\ChessMate.csproj": {}
+    "/Users/johan/repo/chess-rts/ChessMate/ChessMate/ChessMate.csproj": {}
   },
   "projects": {
-    "C:\\Users\\JohanIrvallRasmussen\\repo\\chessmate\\ChessMate\\ChessMate\\ChessMate.csproj": {
+    "/Users/johan/repo/chess-rts/ChessMate/ChessMate/ChessMate.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\JohanIrvallRasmussen\\repo\\chessmate\\ChessMate\\ChessMate\\ChessMate.csproj",
+        "projectUniqueName": "/Users/johan/repo/chess-rts/ChessMate/ChessMate/ChessMate.csproj",
         "projectName": "ChessMate",
-        "projectPath": "C:\\Users\\JohanIrvallRasmussen\\repo\\chessmate\\ChessMate\\ChessMate\\ChessMate.csproj",
-        "packagesPath": "C:\\Users\\JohanIrvallRasmussen\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\JohanIrvallRasmussen\\repo\\chessmate\\ChessMate\\ChessMate\\obj\\",
+        "projectPath": "/Users/johan/repo/chess-rts/ChessMate/ChessMate/ChessMate.csproj",
+        "packagesPath": "/Users/johan/.nuget/packages/",
+        "outputPath": "/Users/johan/repo/chess-rts/ChessMate/ChessMate/obj/",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Users\\JohanIrvallRasmussen\\AppData\\Roaming\\Godot\\mono\\GodotNuGetFallbackFolder"
+          "/Users/johan/Library/Application Support/Godot/mono/GodotNuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\JohanIrvallRasmussen\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Users\\JohanIrvallRasmussen\\AppData\\Roaming\\NuGet\\config\\Godot.Offline.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/johan/.nuget/NuGet/NuGet.Config",
+          "/Users/johan/.nuget/NuGet/config/Godot.Offline.Config"
         ],
         "originalTargetFrameworks": [
-          "net6.0-windows"
+          "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net6.0-windows7.0": {
-            "targetAlias": "net6.0-windows",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -41,8 +39,8 @@
         }
       },
       "frameworks": {
-        "net6.0-windows7.0": {
-          "targetAlias": "net6.0-windows",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "dependencies": {
             "Raylib-cs": {
               "target": "Package",
@@ -63,12 +61,9 @@
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
-            },
-            "Microsoft.WindowsDesktop.App.WindowsForms": {
-              "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.417\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
