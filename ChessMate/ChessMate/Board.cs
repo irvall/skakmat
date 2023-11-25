@@ -35,25 +35,25 @@ public class Board
         var elapsedMilliseconds = sw.ElapsedMilliseconds;
         Console.WriteLine($"Populating moves in {elapsedMilliseconds}ms");
         for (var i = 0; i < 64; i++)
-            PrintBoard(_knightMoves[i], i.ToString());
+            PrintBoard(_knightMoves[i], "Knight at ", i);
     }
 
     private void TestKnightMoves()
     {
-        PrintBoard(_knightMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
+        /*PrintBoard(_knightMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
         PrintBoard(_knightMoves[(int)BoardSquare.A1], (int?)BoardSquare.A1);
         PrintBoard(_knightMoves[(int)BoardSquare.H8], (int?)BoardSquare.H8);
         PrintBoard(_knightMoves[(int)BoardSquare.H1], (int?)BoardSquare.H1);
-        PrintBoard(_knightMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);
+        PrintBoard(_knightMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);*/
     }
 
     private void TestKingMoves()
     {
-        PrintBoard(_kingMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
+        /*PrintBoard(_kingMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
         PrintBoard(_kingMoves[(int)BoardSquare.A1], (int?)BoardSquare.A1);
         PrintBoard(_kingMoves[(int)BoardSquare.H8], (int?)BoardSquare.H8);
         PrintBoard(_kingMoves[(int)BoardSquare.H1], (int?)BoardSquare.H1);
-        PrintBoard(_kingMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);
+        PrintBoard(_kingMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);*/
     }
 
 
@@ -195,12 +195,12 @@ public class Board
     }
 
 
-    private void PrintBoard(ulong bitBoard, object? optional = null)
+    private void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
     {
         if (optional != null)
         {
-            var optMessage = optional is int i and >= 0 and < 64 ? _indexToBoardSquare[i] : optional.ToString();
-            LogUtility.WriteColor(LogUtility.BoldText(optMessage ?? string.Empty), ConsoleColor.Green);
+            var optMessage = optIndex is { } i and >= 0 and < 64 ? _indexToBoardSquare[i] : optional;
+            LogUtility.WriteColor(optional + LogUtility.BoldText(optMessage), ConsoleColor.Green);
         }
 
         for (var i = 0; i < 64; i++)
