@@ -5,12 +5,13 @@
         <TargetFramework>net6.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-		      <UseWindowsForms>true</UseWindowsForms>
-      <IsPackable>false</IsPackable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <IsPackable>false</IsPackable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Raylib-cs" Version="5.0.0" />
+        <PackageReference Include="Raylib-cs" Version="5.0.0"/>
     </ItemGroup>
 
 </Project>

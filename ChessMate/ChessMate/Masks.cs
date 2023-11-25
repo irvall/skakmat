@@ -33,11 +33,5 @@ public class Masks
         public static ulong a1f7 = 0x3f3f3f3f3f3f3f00;
         public static ulong B1H6 = 0xfefefefefefe0000;
         public static ulong a2f8 = 0x3f3f3f3f3f3f3f;
-
     }
-
-
-
-
-
 }

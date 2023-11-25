@@ -5,12 +5,14 @@ namespace ChessMate;
 
 public class Board
 {
+    private const int SquareNo = 8;
     private const int RankOffset = 8;
     private const int FileOffset = 1;
     private const int DiagonalOffset = 7;
     private const int AntiDiagonalOffset = 9;
 
     private readonly Dictionary<string, int> _boardSquareToIndex;
+    private readonly Dictionary<int, string> _indexToBoardSquare;
     private ulong[] _blackPawnAttacks;
     private ulong[] _blackPawnMoves;
     private ulong[] _kingMoves;
@@ -22,17 +24,18 @@ public class Board
 
     public Board()
     {
+        _boardSquareToIndex = new Dictionary<string, int>();
+        _indexToBoardSquare = new Dictionary<int, string>();
         var sw = new Stopwatch();
         sw.Start();
-        _boardSquareToIndex = new Dictionary<string, int>();
         InitializeBoardSquareToIndex();
         InitializePawnMoves();
         InitializeKingMoves();
         InitializeKnightMoves();
-        var elapsedMilliseconds= sw.ElapsedMilliseconds;
+        var elapsedMilliseconds = sw.ElapsedMilliseconds;
         Console.WriteLine($"Populating moves in {elapsedMilliseconds}ms");
-        for(int i = 0; i < 64; i++)
-            PrintBoard(_knightMoves[i], i);
+        for (var i = 0; i < 64; i++)
+            PrintBoard(_knightMoves[i], i.ToString());
     }
 
     private void TestKnightMoves()
@@ -77,6 +80,8 @@ public class Board
             var boardSquare = $"{c}{i}";
             _boardSquareToIndex.Add(boardSquare, index++);
         }
+
+        foreach (var kvp in _boardSquareToIndex) _indexToBoardSquare[kvp.Value] = kvp.Key;
     }
 
     private void InitializeKingMoves()
@@ -110,11 +115,10 @@ public class Board
         foreach (var idx in _boardSquareToIndex.Values)
         {
             var bit = 1UL << idx;
-            if((bit & Masks.Boxes.A1G6) != 0)
-                _knightMoves[idx] |= bit >> (RankOffset * 2) - FileOffset;
-            if((bit & Masks.Boxes.B1H6) != 0)
-                _knightMoves[idx] |= bit >> (RankOffset * 2) + FileOffset;
-                
+            if ((bit & Masks.Boxes.A1G6) != 0)
+                _knightMoves[idx] |= bit >> (RankOffset * 2 - FileOffset);
+            if ((bit & Masks.Boxes.B1H6) != 0)
+                _knightMoves[idx] |= bit >> (RankOffset * 2 + FileOffset);
         }
     }
 
@@ -190,25 +194,28 @@ public class Board
         PrintBoard(_blackPawnAttacks[(int)BoardSquare.D5]);
     }
 
-    public void PrintBoard(ulong bitboard, int? optIndexToHighlight = null)
+
+    private void PrintBoard(ulong bitBoard, object? optional = null)
     {
-        var row = 8;
-        for (var i = 0; i < 64; i++)
+        if (optional != null)
         {
-            if (i % 8 == 0) Console.Write($"{row--} | ");
-            var bit = 1UL << i;
-            var bitboardValue = bitboard & bit;
-            var value = bitboardValue > 0 ? 1 : 0;
-            if (optIndexToHighlight != null && i == optIndexToHighlight)
-                Console.Write("x ");
-            else
-                Console.Write($"{value} ");
-            if (i % 8 == 7) Console.WriteLine();
+            var optMessage = optional is int i and >= 0 and < 64 ? _indexToBoardSquare[i] : optional.ToString();
+            LogUtility.WriteColor(LogUtility.BoldText(optMessage ?? string.Empty), ConsoleColor.Green);
         }
 
-        Console.WriteLine("    a b c d e f g h");
-        Console.WriteLine();
+        for (var i = 0; i < 64; i++)
+        {
+            if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
+            var theBit = (1UL << i) & bitBoard;
+            if (theBit != 0)
+                Console.Write(LogUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
+            else
+                LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+        }
+
+        Console.WriteLine(Environment.NewLine);
     }
+
 
     private enum BoardSquare : byte
     {

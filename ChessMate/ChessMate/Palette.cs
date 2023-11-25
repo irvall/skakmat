@@ -19,7 +19,7 @@ public abstract class Palette
     };
 
     private static int _colorIndex;
-   
+
     public static Color GetNextColor()
     {
         if (_colorIndex >= DistinctColors.Length)

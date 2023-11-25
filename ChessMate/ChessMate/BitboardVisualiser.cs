@@ -8,6 +8,7 @@ public class BitboardVisualiser
 {
     private const int SquareCount = 8;
     private readonly List<HighlightSquare> _boundingBoxes;
+    private readonly int _halfSideLength;
     private readonly int _sideLength;
     private readonly Vector2 _upperBounds;
     private readonly (int width, int height) _windowSize;
@@ -16,7 +17,6 @@ public class BitboardVisualiser
     private bool _isDragging;
     private Vector2? _rectBeginPos;
     private Vector2? _rectEndPos;
-    private readonly int _halfSideLength;
 
 
     public BitboardVisualiser(int windowHeight)
@@ -51,13 +51,14 @@ public class BitboardVisualiser
 
     private Vector2 ScreenToGrid(int screenX, int screenY)
     {
-        var gridX = (screenX - _halfSideLength)/ _sideLength;
+        var gridX = (screenX - _halfSideLength) / _sideLength;
         var gridY = (screenY - _halfSideLength) / _sideLength;
         return new Vector2(gridX, gridY);
     }
 
     private void DrawWindow()
     {
+        LogUtility.IgnoreRaylibLogs();
         Raylib.InitWindow(_windowSize.width, _windowSize.height, "Bitboard Helper");
         var bgColor = new Color(4, 15, 15, 1);
         while (!Raylib.WindowShouldClose())
@@ -86,21 +87,20 @@ public class BitboardVisualiser
             {
                 var posX = _halfSideLength / 3;
                 var posY = (int)(_sideLength * .85);
-                Raylib.DrawText(8- i + "", posX, i * _sideLength + posY, _halfSideLength, Color.WHITE);
+                Raylib.DrawText(8 - i + "", posX, i * _sideLength + posY, _halfSideLength, Color.WHITE);
             }
 
             var draw = (i + j) % 2 == 0;
             DrawTile(j, i, draw ? Color.BROWN : Color.RAYWHITE);
         }
-        
-        for(char c = 'A'; c <= 'H'; c++)
+
+        for (var c = 'A'; c <= 'H'; c++)
         {
             var posX = (int)(_sideLength * .85);
             var posY = _windowSize.height - _halfSideLength;
             Raylib.DrawText(c + "", (c - 'A') * _sideLength + posX, posY, _halfSideLength, Color.WHITE);
         }
-        
-        
+
 
         _boundingBoxes.ForEach(bb => DrawRect(bb.StartPosition, bb.EndPosition, bb.Color));
     }
