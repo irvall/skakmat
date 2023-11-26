@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Numerics;
+
 
 namespace skakmat;
 
@@ -34,10 +36,25 @@ public class Board
         InitializeKingMoves();
         InitializeKnightMoves();
         var elapsedMilliseconds = sw.ElapsedMilliseconds;
-        Console.WriteLine($"Populating moves in {elapsedMilliseconds}ms");
+        Console.WriteLine($"Precomputed moves in {elapsedMilliseconds}ms");
     }
 
-    private static ulong BishopAttacks(int square)
+    private static ulong GetBit(int index)
+    {
+        return 1UL << index;
+    }
+
+    private static ulong GetBit(BoardSquare boardSquare)
+    {
+        return 1UL << (int)boardSquare;
+    }
+
+    private static int CountBits(ulong bitBoard)
+    {
+        return BitOperations.PopCount(bitBoard);
+    }
+
+    private static ulong BishopAttackMask(int square)
     {
         var attacks = 0UL;
         var directions = new[] { DiagonalOffset, -DiagonalOffset, AntiDiagonalOffset, -AntiDiagonalOffset };
@@ -56,7 +73,7 @@ public class Board
         return attacks;
     }
 
-    private static ulong RookAttacks(int square)
+    private static ulong RookAttackMask(int square)
     {
         var attacks = 0UL;
         var directions = new[] { RankOffset, -RankOffset, FileOffset, -FileOffset };
@@ -84,6 +101,80 @@ public class Board
 
         return attacks;
     }
+
+    private static ulong RookAttacks(int square, ulong blockers)
+    {
+        var attacks = 0UL;
+        var lowerY = square % 8;
+        var upperY = square + (64 - ((square / 8 + 1) * 8));
+        var lowerX = square - lowerY;
+        var upperX = lowerX + 8;
+        for (int s = square + FileOffset; s < upperX; s += FileOffset)
+        {
+            var bit = 1UL << s;
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+        for (int s = square - FileOffset; s >= lowerX; s -= FileOffset)
+        {
+            var bit = 1UL << s;
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+
+        for (int s = square + RankOffset; s <= upperY; s += RankOffset)
+        {
+            var bit = 1UL << s;
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+
+        for (int s = square - RankOffset; s >= lowerY; s -= RankOffset)
+        {
+            var bit = 1UL << s;
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+
+        return attacks;
+    }
+
+    private static ulong BishopAttacks(int square, ulong blockers)
+    {
+        var attacks = 0UL;
+        var targetRank = square / 8;
+        var targetFile = square % 8;
+
+        int currentRank, currentFile;
+
+        for (currentRank = targetRank + 1, currentFile = targetFile + 1; currentRank < SquareNo && currentFile < SquareNo; currentRank++, currentFile++)
+        {
+            var bit = 1UL << (currentRank * 8 + currentFile);
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+        for (currentRank = targetRank + 1, currentFile = targetFile - 1; currentRank < SquareNo && currentFile >= 0; currentRank++, currentFile--)
+        {
+            var bit = 1UL << (currentRank * 8 + currentFile);
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+        for (currentRank = targetRank - 1, currentFile = targetFile + 1; currentRank >= 0 && currentFile < SquareNo; currentRank--, currentFile++)
+        {
+            var bit = 1UL << (currentRank * 8 + currentFile);
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+        for (currentRank = targetRank - 1, currentFile = targetFile - 1; currentRank >= 0 && currentFile >= 0; currentRank--, currentFile--)
+        {
+            var bit = 1UL << (currentRank * 8 + currentFile);
+            if (blockers.Contains(bit)) break;
+            attacks |= bit;
+        }
+
+        return attacks;
+    }
+
 
     public void PrintBoardMasks()
     {
@@ -216,10 +307,9 @@ public class Board
 
     private void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
     {
-        if (optional != null)
+        if (optional != null && optIndex != null)
         {
-            var optMessage = optIndex is { } i and >= 0 and < 64 ? _indexToBoardSquare[i] : optional;
-            LogUtility.WriteColor(LogUtility.BoldText(optMessage), ConsoleColor.Green);
+            LogUtility.WriteColor(LogUtility.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
         }
 
         for (var i = 0; i < 64; i++)
@@ -241,7 +331,7 @@ public class Board
 
     private enum BoardSquare : byte
     {
-        A8, B8, C8, D8, E8, F8, G8, H8,
+        A8 = 0, B8, C8, D8, E8, F8, G8, H8,
         A7, B7, C7, D7, E7, F7, G7, H7,
         A6, B6, C6, D6, E6, F6, G6, H6,
         A5, B5, C5, D5, E5, F5, G5, H5,

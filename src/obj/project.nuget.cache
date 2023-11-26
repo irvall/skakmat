@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Js0zIndH+2LL9ZVkqORHHe2NhTU/LWZ8RIkfBQnuhodRgYZM0UeH/b/XTNoTez2O4uNJSy4iHlUEfHRFnSJ9dg==",
+  "dgSpecHash": "BGmflMstz/nM2OW610MXoRGIl5SKjMYFxDH2UY/YrrkE6qpRkxXaN+Olm+uHrlhz0V6zgKiNxlqYUy0frt085w==",
   "success": true,
-  "projectFilePath": "/Users/johan/repo/skakmat/src/ChessMate.csproj",
+  "projectFilePath": "/Users/johan/repo/skakmat/src/skakmat.csproj",
   "expectedPackageFiles": [
     "/Users/johan/.nuget/packages/raylib-cs/5.0.0/raylib-cs.5.0.0.nupkg.sha512",
     "/Users/johan/.nuget/packages/system.numerics.vectors/4.5.0/system.numerics.vectors.4.5.0.nupkg.sha512"

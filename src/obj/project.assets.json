@@ -134,9 +134,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/johan/repo/skakmat/src/ChessMate.csproj",
-      "projectName": "ChessMate",
-      "projectPath": "/Users/johan/repo/skakmat/src/ChessMate.csproj",
+      "projectUniqueName": "/Users/johan/repo/skakmat/src/skakmat.csproj",
+      "projectName": "skakmat",
+      "projectPath": "/Users/johan/repo/skakmat/src/skakmat.csproj",
       "packagesPath": "/Users/johan/.nuget/packages/",
       "outputPath": "/Users/johan/repo/skakmat/src/obj/",
       "projectStyle": "PackageReference",
