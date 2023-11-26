@@ -77,6 +77,7 @@ public class BitboardVisualiser
         Raylib.CloseWindow();
     }
 
+
     private static int GridIndex(int x, int y)
     {
         return y * SquareCount + x;
@@ -157,7 +158,7 @@ public class BitboardVisualiser
             }
 
             var variables = string.Join("\n", _boundingBoxes.Select(GetAreaAsVariable));
-            System.Console.WriteLine("\n### Currently selected areas ###");
+            Console.WriteLine("\n### Currently selected areas ###");
             Console.WriteLine(variables);
             _isDragging = false;
         }
@@ -195,17 +196,10 @@ public class BitboardVisualiser
                 DrawTile(x, y, tileColor);
     }
 
-    private struct HighlightSquare
+    private readonly struct HighlightSquare(Vector2 startPosition, Vector2 endPosition, Color color)
     {
-        public readonly Color Color;
-        public readonly Vector2 StartPosition;
-        public readonly Vector2 EndPosition;
-
-        public HighlightSquare(Vector2 startPosition, Vector2 endPosition, Color color)
-        {
-            StartPosition = startPosition;
-            EndPosition = endPosition;
-            Color = color;
-        }
+        public readonly Color Color = color;
+        public readonly Vector2 StartPosition = startPosition;
+        public readonly Vector2 EndPosition = endPosition;
     }
 }

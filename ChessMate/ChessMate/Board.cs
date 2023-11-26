@@ -13,54 +13,77 @@ public class Board
 
     private readonly Dictionary<string, int> _boardSquareToIndex;
     private readonly Dictionary<int, string> _indexToBoardSquare;
-    private ulong[] _blackPawnAttacks;
-    private ulong[] _blackPawnMoves;
-    private ulong[] _kingMoves;
-    private ulong[] _knightMoves;
+    private ulong[] _blackPawnAttacks = new ulong[64];
+    private ulong[] _blackPawnMoves = new ulong[64];
+    private ulong[] _kingMoves = new ulong[64];
+    private ulong[] _knightMoves = new ulong[64];
 
-    private ulong[] _whitePawnAttacks;
+    private ulong[] _whitePawnAttacks = new ulong[64];
 
-    private ulong[] _whitePawnMoves;
+    private ulong[] _whitePawnMoves = new ulong[64];
+    private readonly ulong[][] rayAttacks = new ulong[64][];
 
     public Board()
     {
-        _boardSquareToIndex = new Dictionary<string, int>();
-        _indexToBoardSquare = new Dictionary<int, string>();
+        _boardSquareToIndex = [];
+        _indexToBoardSquare = [];
         var sw = new Stopwatch();
         sw.Start();
-        InitializeBoardSquareToIndex();
+        InitializeBoardMaps();
         InitializePawnMoves();
         InitializeKingMoves();
         InitializeKnightMoves();
         var elapsedMilliseconds = sw.ElapsedMilliseconds;
         Console.WriteLine($"Populating moves in {elapsedMilliseconds}ms");
-        for (var i = 0; i < 64; i++)
+    }
+
+    private static ulong BishopAttacks(int square)
+    {
+        var attacks = 0UL;
+        var directions = new[] { DiagonalOffset, -DiagonalOffset, AntiDiagonalOffset, -AntiDiagonalOffset };
+        foreach (var direction in directions)
         {
-            PrintBoard(_knightMoves[i], "Knight at ", i);
-            PrintBoard(_whitePawnMoves[i], "White Pawn at ", i);
-            PrintBoard(_blackPawnMoves[i], "Black Pawn at ", i);
-            PrintBoard(_kingMoves[i], "King at ", i);
+            var targetSquare = square + direction;
+            var targetBit = 1UL << targetSquare;
+            while (!Masks.Edge.Contains(targetBit))
+            {
+                attacks |= targetBit;
+                targetSquare += direction;
+                targetBit = 1UL << targetSquare;
+            }
         }
+
+        return attacks;
     }
 
-    private void TestKnightMoves()
+    private static ulong RookAttacks(int square)
     {
-        /*PrintBoard(_knightMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
-        PrintBoard(_knightMoves[(int)BoardSquare.A1], (int?)BoardSquare.A1);
-        PrintBoard(_knightMoves[(int)BoardSquare.H8], (int?)BoardSquare.H8);
-        PrintBoard(_knightMoves[(int)BoardSquare.H1], (int?)BoardSquare.H1);
-        PrintBoard(_knightMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);*/
-    }
+        var attacks = 0UL;
+        var directions = new[] { RankOffset, -RankOffset, FileOffset, -FileOffset };
+        var bit = 1UL << square;
+        foreach (var direction in directions)
+        {
+            var targetSquare = square + direction;
+            var targetBit = 1UL << targetSquare;
+            var theEdge = Masks.Edge;
+            if (Masks.Edge.Contains(bit))
+            {
+                // If the bit is on the edge, we need to remove the edge from the attack mask, but not the corners
+                if (Masks.FileA.Contains(bit)) theEdge &= ~Masks.FileA | Masks.Corners;
+                if (Masks.FileH.Contains(bit)) theEdge &= ~Masks.FileH | Masks.Corners;
+                if (Masks.Rank1.Contains(bit)) theEdge &= ~Masks.Rank1 | Masks.Corners;
+                if (Masks.Rank8.Contains(bit)) theEdge &= ~Masks.Rank8 | Masks.Corners;
+            }
+            while (!theEdge.Contains(targetBit))
+            {
+                attacks |= targetBit;
+                targetSquare += direction;
+                targetBit = 1UL << targetSquare;
+            }
+        }
 
-    private void TestKingMoves()
-    {
-        /*PrintBoard(_kingMoves[(int)BoardSquare.A8], (int?)BoardSquare.A8);
-        PrintBoard(_kingMoves[(int)BoardSquare.A1], (int?)BoardSquare.A1);
-        PrintBoard(_kingMoves[(int)BoardSquare.H8], (int?)BoardSquare.H8);
-        PrintBoard(_kingMoves[(int)BoardSquare.H1], (int?)BoardSquare.H1);
-        PrintBoard(_kingMoves[(int)BoardSquare.D5], (int?)BoardSquare.D5);*/
+        return attacks;
     }
-
 
     public void PrintBoardMasks()
     {
@@ -69,13 +92,13 @@ public class Board
         foreach (var property in boardMasksType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic))
         {
             var propertyName = property.Name;
-            var propertyValue = (ulong)property.GetValue(null);
+            var propertyValue = (ulong?)property.GetValue(null);
             Console.WriteLine($"{propertyName}");
-            PrintBoard(propertyValue);
+            PrintBoard(propertyValue ?? 0UL);
         }
     }
 
-    private void InitializeBoardSquareToIndex()
+    private void InitializeBoardMaps()
     {
         var index = 0;
         for (var i = 8; i >= 1; i--)
@@ -85,7 +108,8 @@ public class Board
                 _boardSquareToIndex.Add(boardSquare, index++);
             }
 
-        foreach (var kvp in _boardSquareToIndex) _indexToBoardSquare[kvp.Value] = kvp.Key;
+        foreach (var kvp in _boardSquareToIndex)
+            _indexToBoardSquare[kvp.Value] = kvp.Key;
     }
 
     private void InitializeKingMoves()
@@ -93,7 +117,6 @@ public class Board
         _kingMoves = new ulong[64];
         foreach (var idx in _boardSquareToIndex.Values)
         {
-            // TODO: Broken king
             var bit = 1UL << idx;
             if (!Masks.Rank8.Contains(bit))
                 _kingMoves[idx] |= bit >> RankOffset;
@@ -103,13 +126,13 @@ public class Board
                 _kingMoves[idx] |= bit << FileOffset;
             if (!Masks.FileA.Contains(bit))
                 _kingMoves[idx] |= bit >> FileOffset;
-            if (!Masks.Boxes.A1G7.Contains(bit))
+            if (Masks.Boxes.A1G7.Contains(bit))
                 _kingMoves[idx] |= bit >> DiagonalOffset;
-            if (!Masks.Boxes.B2H8.Contains(bit))
+            if (Masks.Boxes.B2H8.Contains(bit))
                 _kingMoves[idx] |= bit << DiagonalOffset;
-            if (!Masks.Boxes.A2G8.Contains(bit))
+            if (Masks.Boxes.A2G8.Contains(bit))
                 _kingMoves[idx] |= bit << AntiDiagonalOffset;
-            if (!Masks.Boxes.B1H7.Contains(bit))
+            if (Masks.Boxes.B1H7.Contains(bit))
                 _kingMoves[idx] |= bit >> AntiDiagonalOffset;
         }
     }
@@ -191,33 +214,12 @@ public class Board
         }
     }
 
-
-    private void PawnTests()
-    {
-        Console.WriteLine("MOVES");
-
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.E2]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.E7]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.A1]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.H8]);
-        PrintBoard(_blackPawnMoves[(int)BoardSquare.D5]);
-
-        Console.WriteLine("ATTACKS");
-
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.E2]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.E7]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.A1]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.H8]);
-        PrintBoard(_blackPawnAttacks[(int)BoardSquare.D5]);
-    }
-
-
     private void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
     {
         if (optional != null)
         {
             var optMessage = optIndex is { } i and >= 0 and < 64 ? _indexToBoardSquare[i] : optional;
-            LogUtility.WriteColor(optional + LogUtility.BoldText(optMessage), ConsoleColor.Green);
+            LogUtility.WriteColor(LogUtility.BoldText(optMessage), ConsoleColor.Green);
         }
 
         for (var i = 0; i < 64; i++)
@@ -236,7 +238,6 @@ public class Board
 
         Console.WriteLine(Environment.NewLine);
     }
-
 
     private enum BoardSquare : byte
     {

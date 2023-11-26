@@ -22,9 +22,11 @@ public class Masks
     public static ulong Corners { get; } = 0x8100000000000081;
     public static ulong CornersAndCenter { get; } = 0x8100001818000081;
     public static ulong CornersAndCenterAndAdjacent { get; } = 0xFF000018181800FF;
+    public static ulong Edge = Rank1 | Rank8 | FileA | FileH;
 
     public struct Boxes
     {
+
         public static ulong A1G7 { get; } = 0x7f7f7f7f7f7f7f00;
         public static ulong A2G8 { get; } = 0x7f7f7f7f7f7f7f;
         public static ulong B1H7 { get; } = 0xfefefefefefefe00;
@@ -38,5 +40,6 @@ public class Masks
         public static ulong C2H8 = 0xfcfcfcfcfcfcfc;
 
         public static ulong B3H8 = 0xfefefefefefe;
+
     }
 }
