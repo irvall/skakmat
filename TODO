@@ -1,0 +1,10 @@
+# Pieces
+
+- Finish all basic movement (no attacks)
+- Add attacks
+
+# Game
+
+- Add FEN parser
+- Add "Copy to FEN" button
+- Add state with undo/redo using arrow keys

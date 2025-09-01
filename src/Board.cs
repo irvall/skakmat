@@ -1,192 +1,127 @@
-﻿using System.Diagnostics;
-using System.Reflection;
 using System.Numerics;
-
+using Raylib_cs;
 
 namespace skakmat;
 
-public class Board
+class Board
 {
-    private const int SquareNo = 8;
-    private const int RankOffset = 8;
-    private const int FileOffset = 1;
-    private const int DiagonalOffset = 7;
-    private const int AntiDiagonalOffset = 9;
+
+    /****************
+    /** White pieces 
+    ****************/
+    internal ulong WhitePawns = Masks.Rank2;
+    internal ulong WhiteKnights = 0x4200000000000000;
+    internal ulong WhiteBishops = 0x2400000000000000;
+    internal ulong WhiteRooks = 0x8100000000000000;
+    internal ulong WhiteKing = 0x1000000000000000;
+    internal ulong WhiteQueen = 0x800000000000000;
+    internal ulong WhitePieces => WhitePawns | WhiteKnights | WhiteBishops | WhiteRooks | WhiteQueen | WhiteKing;
+
+    /****************
+    /** Black pieces 
+    ****************/
+    internal ulong BlackPawns = Masks.Rank7;
+    internal ulong BlackKnights = 0x42;
+    internal ulong BlackBishops = 0x24;
+    internal ulong BlackRooks = 0x81;
+    internal ulong BlackQueen = 0x8;
+    internal ulong BlackKing = 0x10;
+    internal ulong BlackPieces => BlackPawns | BlackKnights | BlackBishops | BlackRooks | BlackQueen | BlackKing;
+
+    internal ulong AllPieces => WhitePieces | BlackPieces;
+
+    private const int SquareCount = 8;
+    private readonly int _halfSideLength;
+    private readonly int _sideLength;
+    private readonly Vector2 _upperBounds;
+    private readonly (int width, int height) _windowSize;
 
     private readonly Dictionary<string, int> _boardSquareToIndex;
     private readonly Dictionary<int, string> _indexToBoardSquare;
-    private ulong[] _blackPawnAttacks = new ulong[64];
-    private ulong[] _blackPawnMoves = new ulong[64];
-    private ulong[] _kingMoves = new ulong[64];
-    private ulong[] _knightMoves = new ulong[64];
 
-    private ulong[] _whitePawnAttacks = new ulong[64];
+    private Texture2D _spriteTexture;
+    private readonly MoveTables moveTables;
+    private PieceSelection? pieceSelected;
 
-    private ulong[] _whitePawnMoves = new ulong[64];
-    private readonly ulong[][] rayAttacks = new ulong[64][];
+    public Dictionary<PieceType, (int, int)> pieceToSpriteCoords = new()
+    {
+        { PieceType.WhitePawn, (5, 0) },
+        { PieceType.WhiteKnight, (3, 0) },
+        { PieceType.WhiteBishop, (2, 0) },
+        { PieceType.WhiteRook, (4, 0) },
+        { PieceType.WhiteQueen, (1, 0) },
+        { PieceType.WhiteKing, (0, 0) },
+        { PieceType.BlackPawn, (5, 1) },
+        { PieceType.BlackKnight, (3, 1) },
+        { PieceType.BlackBishop, (2, 1) },
+        { PieceType.BlackRook, (4, 1) },
+        { PieceType.BlackQueen, (1, 1) },
+        { PieceType.BlackKing, (0, 1) },
+    };
 
     public Board()
     {
+        moveTables = new MoveTables();
         _boardSquareToIndex = [];
         _indexToBoardSquare = [];
-        var sw = new Stopwatch();
-        sw.Start();
+
+        int windowHeight = GetWindowHeightDynamically();
+        _spriteTexture = LoadTextureChecked("assets/sprite.png");
+
+        _sideLength = windowHeight / SquareCount;
+        _halfSideLength = _sideLength / 2;
+        _windowSize.width = windowHeight + _sideLength;
+        _windowSize.height = windowHeight + _sideLength;
+        _upperBounds = new Vector2(SquareCount - 1);
+
         InitializeBoardMaps();
-        InitializePawnMoves();
-        InitializeKingMoves();
-        InitializeKnightMoves();
-        var elapsedMilliseconds = sw.ElapsedMilliseconds;
-        Console.WriteLine($"Precomputed moves in {elapsedMilliseconds}ms");
     }
 
-    private static ulong GetBit(int index)
+    public void Run()
     {
-        return 1UL << index;
+        DrawWindow();
     }
 
-    private static ulong GetBit(BoardSquare boardSquare)
+    private void DrawPieces()
     {
-        return 1UL << (int)boardSquare;
+        for (var idx = 0; idx < 64; idx++)
+        {
+            var type = GetPieceTypeFromSquare(1UL << idx);
+            if (!type.HasValue) continue;
+            DrawPiece(idx % 8, idx / 8, type.Value);
+        }
     }
 
-    private static int CountBits(ulong bitBoard)
+    private PieceType? GetPieceTypeFromSquare(ulong square)
     {
-        return BitOperations.PopCount(bitBoard);
+        if (WhiteKing.Contains(square)) return PieceType.WhiteKing;
+        if (BlackKing.Contains(square)) return PieceType.BlackKing;
+        if (WhitePawns.Contains(square)) return PieceType.WhitePawn;
+        if (WhiteRooks.Contains(square)) return PieceType.WhiteRook;
+        if (WhiteQueen.Contains(square)) return PieceType.WhiteQueen;
+        if (BlackPawns.Contains(square)) return PieceType.BlackPawn;
+        if (BlackRooks.Contains(square)) return PieceType.BlackRook;
+        if (BlackQueen.Contains(square)) return PieceType.BlackQueen;
+        if (BlackKnights.Contains(square)) return PieceType.BlackKnight;
+        if (BlackBishops.Contains(square)) return PieceType.BlackBishop;
+        if (WhiteKnights.Contains(square)) return PieceType.WhiteKnight;
+        if (WhiteBishops.Contains(square)) return PieceType.WhiteBishop;
+        return null;
     }
 
-    private static ulong BishopAttackMask(int square)
+    private static int GetWindowHeightDynamically()
     {
-        var attacks = 0UL;
-        var directions = new[] { DiagonalOffset, -DiagonalOffset, AntiDiagonalOffset, -AntiDiagonalOffset };
-        foreach (var direction in directions)
-        {
-            var targetSquare = square + direction;
-            var targetBit = 1UL << targetSquare;
-            while (!Masks.Edge.Contains(targetBit))
-            {
-                attacks |= targetBit;
-                targetSquare += direction;
-                targetBit = 1UL << targetSquare;
-            }
-        }
-
-        return attacks;
+        Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
+        var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
+        Raylib.CloseWindow();
+        return windowHeight;
     }
 
-    private static ulong RookAttackMask(int square)
+    public static Texture2D LoadTextureChecked(string path)
     {
-        var attacks = 0UL;
-        var directions = new[] { RankOffset, -RankOffset, FileOffset, -FileOffset };
-        var bit = 1UL << square;
-        foreach (var direction in directions)
-        {
-            var targetSquare = square + direction;
-            var targetBit = 1UL << targetSquare;
-            var theEdge = Masks.Edge;
-            if (Masks.Edge.Contains(bit))
-            {
-                // If the bit is on the edge, we need to remove the edge from the attack mask, but not the corners
-                if (Masks.FileA.Contains(bit)) theEdge &= ~Masks.FileA | Masks.Corners;
-                if (Masks.FileH.Contains(bit)) theEdge &= ~Masks.FileH | Masks.Corners;
-                if (Masks.Rank1.Contains(bit)) theEdge &= ~Masks.Rank1 | Masks.Corners;
-                if (Masks.Rank8.Contains(bit)) theEdge &= ~Masks.Rank8 | Masks.Corners;
-            }
-            while (!theEdge.Contains(targetBit))
-            {
-                attacks |= targetBit;
-                targetSquare += direction;
-                targetBit = 1UL << targetSquare;
-            }
-        }
-
-        return attacks;
-    }
-
-    private static ulong RookAttacks(int square, ulong blockers)
-    {
-        var attacks = 0UL;
-        var lowerY = square % 8;
-        var upperY = square + (64 - ((square / 8 + 1) * 8));
-        var lowerX = square - lowerY;
-        var upperX = lowerX + 8;
-        for (int s = square + FileOffset; s < upperX; s += FileOffset)
-        {
-            var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-        for (int s = square - FileOffset; s >= lowerX; s -= FileOffset)
-        {
-            var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-
-        for (int s = square + RankOffset; s <= upperY; s += RankOffset)
-        {
-            var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-
-        for (int s = square - RankOffset; s >= lowerY; s -= RankOffset)
-        {
-            var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-
-        return attacks;
-    }
-
-    private static ulong BishopAttacks(int square, ulong blockers)
-    {
-        var attacks = 0UL;
-        var targetRank = square / 8;
-        var targetFile = square % 8;
-
-        int currentRank, currentFile;
-
-        for (currentRank = targetRank + 1, currentFile = targetFile + 1; currentRank < SquareNo && currentFile < SquareNo; currentRank++, currentFile++)
-        {
-            var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-        for (currentRank = targetRank + 1, currentFile = targetFile - 1; currentRank < SquareNo && currentFile >= 0; currentRank++, currentFile--)
-        {
-            var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-        for (currentRank = targetRank - 1, currentFile = targetFile + 1; currentRank >= 0 && currentFile < SquareNo; currentRank--, currentFile++)
-        {
-            var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-        for (currentRank = targetRank - 1, currentFile = targetFile - 1; currentRank >= 0 && currentFile >= 0; currentRank--, currentFile--)
-        {
-            var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
-            attacks |= bit;
-        }
-
-        return attacks;
-    }
-
-
-    public void PrintBoardMasks()
-    {
-        var boardMasksType = typeof(Masks);
-
-        foreach (var property in boardMasksType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic))
-        {
-            var propertyName = property.Name;
-            var propertyValue = (ulong?)property.GetValue(null);
-            Console.WriteLine($"{propertyName}");
-            PrintBoard(propertyValue ?? 0UL);
-        }
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Asset not found: {path}");
+        return Raylib.LoadTexture(path);
     }
 
     private void InitializeBoardMaps()
@@ -203,141 +138,242 @@ public class Board
             _indexToBoardSquare[kvp.Value] = kvp.Key;
     }
 
-    private void InitializeKingMoves()
+
+
+    private void DrawWindow()
     {
-        _kingMoves = new ulong[64];
-        foreach (var idx in _boardSquareToIndex.Values)
+        Raylib.InitWindow(_windowSize.width, _windowSize.height, "Chess Board");
+        _spriteTexture = LoadTextureChecked("assets/sprite.png");
+        var bgColor = new Color(4, 15, 15, 1);
+        while (!Raylib.WindowShouldClose())
         {
-            var bit = 1UL << idx;
-            if (!Masks.Rank8.Contains(bit))
-                _kingMoves[idx] |= bit >> RankOffset;
-            if (!Masks.Rank1.Contains(bit))
-                _kingMoves[idx] |= bit << RankOffset;
-            if (!Masks.FileH.Contains(bit))
-                _kingMoves[idx] |= bit << FileOffset;
-            if (!Masks.FileA.Contains(bit))
-                _kingMoves[idx] |= bit >> FileOffset;
-            if (Masks.Boxes.A1G7.Contains(bit))
-                _kingMoves[idx] |= bit >> DiagonalOffset;
-            if (Masks.Boxes.B2H8.Contains(bit))
-                _kingMoves[idx] |= bit << DiagonalOffset;
-            if (Masks.Boxes.A2G8.Contains(bit))
-                _kingMoves[idx] |= bit << AntiDiagonalOffset;
-            if (Masks.Boxes.B1H7.Contains(bit))
-                _kingMoves[idx] |= bit >> AntiDiagonalOffset;
-        }
-    }
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(bgColor);
+            DrawBoard();
+            HandleInteractions();
+            DrawPieces();
 
-    private void InitializeKnightMoves()
-    {
-        _knightMoves = new ulong[64];
-        foreach (var idx in _boardSquareToIndex.Values)
-        {
-            var bit = 1UL << idx;
-            if (Masks.Boxes.A1G6.Contains(bit))
-                _knightMoves[idx] |= bit >> (RankOffset * 2 - FileOffset);
-            if (Masks.Boxes.B1H6.Contains(bit))
-                _knightMoves[idx] |= bit >> (RankOffset * 2 + FileOffset);
-            if (Masks.Boxes.A1F7.Contains(bit))
-                _knightMoves[idx] |= bit >> (RankOffset - FileOffset * 2);
-            if (Masks.Boxes.A2F8.Contains(bit))
-                _knightMoves[idx] |= bit << (RankOffset + FileOffset * 2);
-            if (Masks.Boxes.C1H7.Contains(bit))
-                _knightMoves[idx] |= bit >> (RankOffset + FileOffset * 2);
-            if (Masks.Boxes.C2H8.Contains(bit))
-                _knightMoves[idx] |= bit << (RankOffset - FileOffset * 2);
-            if (Masks.Boxes.B3H8.Contains(bit))
-                _knightMoves[idx] |= bit << (RankOffset * 2 - FileOffset);
-            if (Masks.Boxes.A3G8.Contains(bit))
-                _knightMoves[idx] |= bit << (RankOffset * 2 + FileOffset);
-
-        }
-    }
-
-    private static ulong MoveBit(ulong bitboard, int x, int y)
-    {
-        var xOffset = Math.Abs(x) * FileOffset;
-        var yOffset = Math.Abs(y) * RankOffset;
-        var shiftedX = x > 0 ? bitboard << xOffset : bitboard >> xOffset;
-        var shiftedY = y > 0 ? shiftedX << yOffset : shiftedX >> yOffset;
-        return shiftedY;
-    }
-
-    private void InitializePawnMoves()
-    {
-        _whitePawnMoves = new ulong[64];
-        _blackPawnMoves = new ulong[64];
-        _whitePawnAttacks = new ulong[64];
-        _blackPawnAttacks = new ulong[64];
-
-        foreach (var idx in _boardSquareToIndex.Values)
-        {
-            var bit = 1UL << idx;
-
-            // Black Pawns
-            if (Masks.Rank7.Contains(bit))
-                _blackPawnMoves[idx] |= bit << (RankOffset * 2);
-            if (!Masks.Rank1.Contains(bit))
+            if (pieceSelected.HasValue)
             {
-                _blackPawnMoves[idx] |= bit << RankOffset;
+                HighlightSquares(pieceSelected.Value.LegalMoves, Color.GREEN);
+            }
+            Raylib.EndDrawing();
+        }
 
-                if (!Masks.FileA.Contains(bit))
-                    _blackPawnAttacks[idx] |= bit << DiagonalOffset;
+        Raylib.CloseWindow();
+    }
 
-                if (!Masks.FileH.Contains(bit))
-                    _blackPawnAttacks[idx] |= bit << AntiDiagonalOffset;
+    private void DrawBoard()
+    {
+        var primaryTileColor = Palette.FromHex("C7D59F");
+        var whiteTiles = Palette.WhiteVersion(primaryTileColor);
+        for (var i = 0; i < SquareCount; i++)
+            for (var j = 0; j < SquareCount; j++)
+            {
+                if (j == 0)
+                {
+                    var posX = _halfSideLength / 3;
+                    var posY = (int)(_sideLength * .85);
+                    Raylib.DrawText(8 - i + "", posX, i * _sideLength + posY, _halfSideLength, Color.WHITE);
+                }
+
+                var draw = (i + j) % 2 != 0;
+                DrawTile(j, i, draw ? primaryTileColor : whiteTiles);
             }
 
-            // White Pawns
-            if (Masks.Rank2.Contains(bit))
-                _whitePawnMoves[idx] |= bit >> (RankOffset * 2);
+        for (var c = 'A'; c <= 'H'; c++)
+        {
+            var posX = (int)(_sideLength * .85);
+            var posY = _windowSize.height - _halfSideLength;
+            Raylib.DrawText(c + "", (c - 'A') * _sideLength + posX, posY, _halfSideLength, Color.WHITE);
+        }
 
-            if (!Masks.Rank8.Contains(bit))
+    }
+
+
+
+    private void DrawPiece(int col, int row, PieceType pieceType)
+    {
+        int cellWidth = _spriteTexture.Width / 6;  // 6 columns now
+        int cellHeight = _spriteTexture.Height / 2; // 2 rows (white/black)
+
+        if (!pieceToSpriteCoords.TryGetValue(pieceType, out var tup))
+            throw new Exception("Piece type not supported " + pieceType);
+
+        var (pieceIndexX, pieceIndexY) = tup;
+        var src = new Rectangle(
+            pieceIndexX * cellWidth,
+            pieceIndexY * cellHeight,
+            cellWidth,
+            cellHeight
+        );
+
+        var dest = new Rectangle(
+            col * _sideLength + _halfSideLength,
+            row * _sideLength + _halfSideLength,
+            _sideLength,
+            _sideLength
+        );
+
+        Raylib.DrawTexturePro(_spriteTexture, src, dest, Vector2.Zero, 0f, Color.WHITE);
+    }
+
+    private void DrawTile(Vector2 tilePosition, Color tileColor, double alpha = 1.0)
+    {
+        DrawTile((int)tilePosition.X, (int)tilePosition.Y, tileColor, alpha);
+    }
+
+    private void DrawTile(int col, int row, Color tileColor, double alpha = 1.0)
+    {
+        var posX = col * _sideLength + _halfSideLength;
+        var posY = row * _sideLength + _halfSideLength;
+        tileColor.A = (byte)(255.0 * alpha);
+        Raylib.DrawRectangle(posX, posY, _sideLength, _sideLength, tileColor);
+    }
+
+    private void HighlightSquares(ulong legalMoves, Color color)
+    {
+        for (var idx = 63; idx >= 0; idx--)
+        {
+            var bit = 1UL << idx;
+            if (legalMoves.Contains(bit))
             {
-                _whitePawnMoves[idx] |= bit >> RankOffset;
-
-                if (!Masks.FileA.Contains(bit))
-                    _whitePawnAttacks[idx] |= bit >> AntiDiagonalOffset;
-
-                if (!Masks.FileH.Contains(bit))
-                    _whitePawnAttacks[idx] |= bit >> DiagonalOffset;
+                DrawTile(idx % 8, idx / 8, color, 0.5f);
             }
         }
     }
 
-    private void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
+    private static (int, ulong) IndexAndBitUnderMouse(Vector2 mousePosition)
     {
-        if (optional != null && optIndex != null)
+        var idx = (int)(mousePosition.X + mousePosition.Y * 8);
+        return (idx, 1UL << idx);
+    }
+
+    private PieceSelection HandlePawnMove(int index, ulong bit, bool isWhite)
+    {
+        var moveBits = isWhite ? moveTables.WhitePawnMoves[index] : moveTables.BlackPawnMoves[index];
+        var startRow = isWhite ? Masks.Rank2 : Masks.Rank7;
+        var firstMoveBlokingRow = isWhite ? Masks.Rank3 : Masks.Rank6;
+        if (startRow.Contains(bit))
         {
-            LogUtility.WriteColor(LogUtility.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
+            // It's the first move of pawn, check for blocking pieces
+            if (firstMoveBlokingRow.Contains(moveBits & AllPieces))
+            {
+                moveBits = 0;
+            }
+
+            // TODO: Attacks are ok, despite blocking piece
+        }
+        return new PieceSelection(bit, moveBits & ~AllPieces, isWhite ? PieceType.WhitePawn : PieceType.BlackPawn, index);
+    }
+
+    private PieceSelection? DetectPieceSelection(Vector2 mouseGridPos)
+    {
+        var (idx, bit) = IndexAndBitUnderMouse(mouseGridPos);
+        System.Console.WriteLine("Detect piece selection " + mouseGridPos);
+        if (WhitePawns.Contains(bit))
+        {
+            return HandlePawnMove(idx, bit, true);
+        }
+        if (BlackPawns.Contains(bit))
+        {
+            return HandlePawnMove(idx, bit, false);
+        }
+        if (WhiteKnights.Contains(bit))
+        {
+            var moveBits = moveTables.KnightMoves[idx] & ~WhitePieces;
+            return new PieceSelection(bit, moveBits, PieceType.WhiteKnight, idx);
+        }
+        if (WhiteKing.Contains(bit))
+        {
+            var moveBits = moveTables.KingMoves[idx] & ~AllPieces;
+            return new PieceSelection(bit, moveBits, PieceType.WhiteKing, idx);
+        }
+        return null;
+    }
+
+    private enum InteractionResult
+    {
+        None,
+        MoveMade,
+        SwitchedPiece,
+        Deselected
+    }
+
+    private InteractionResult CheckPiece(Vector2 mouseGridPos)
+    {
+        var (index, bit) = IndexAndBitUnderMouse(mouseGridPos);
+
+        if (!pieceSelected.HasValue)
+            return InteractionResult.None;
+
+        if (pieceSelected.Value.LegalMoves.Contains(bit))
+        {
+            switch (pieceSelected.Value.Type)
+            {
+                case PieceType.WhitePawn:
+                    WhitePawns ^= pieceSelected.Value.Bit;
+                    WhitePawns |= bit;
+                    break;
+                case PieceType.BlackPawn:
+                    BlackPawns ^= pieceSelected.Value.Bit;
+                    BlackPawns |= bit;
+                    break;
+                case PieceType.WhiteKnight:
+                    WhiteKnights ^= pieceSelected.Value.Bit;
+                    WhiteKnights |= bit;
+                    break;
+                case PieceType.WhiteKing:
+                    WhiteKing ^= pieceSelected.Value.Bit;
+                    WhiteKing |= bit;
+                    break;
+
+            }
+
+            pieceSelected = null;
+            return InteractionResult.MoveMade;
         }
 
-        for (var i = 0; i < 64; i++)
+        var maybeNewSelection = DetectPieceSelection(mouseGridPos);
+        if (maybeNewSelection.HasValue)
         {
-            if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
-            var theBit = (1UL << i) & bitBoard;
-            if (theBit != 0)
-                Console.Write(LogUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
-            else
+            pieceSelected = maybeNewSelection;
+            return InteractionResult.SwitchedPiece;
+        }
+        pieceSelected = null;
+        return InteractionResult.Deselected;
+    }
+
+    private void HandleInteractions()
+    {
+        var mouseScreenPos = Raylib.GetMousePosition();
+        var mouseGridPos = ScreenToGrid((int)mouseScreenPos.X, (int)mouseScreenPos.Y);
+        var isMouseOnBoard = mouseGridPos is { X: >= 0 and < SquareCount, Y: >= 0 and < SquareCount };
+        if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT))
+        {
+            if (isMouseOnBoard)
             {
-                if (optIndex != null && i == optIndex)
-                    LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
-                else LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+                var result = CheckPiece(mouseGridPos);
+
+                if (result == InteractionResult.None)
+                {
+                    // No move, no selection yet → try selecting
+                    mouseGridPos = Vector2.Clamp(mouseGridPos, Vector2.Zero, _upperBounds);
+                    pieceSelected = DetectPieceSelection(mouseGridPos);
+                }
             }
         }
 
-        Console.WriteLine(Environment.NewLine);
+        if (!isMouseOnBoard) return;
+
+        DrawTile(mouseGridPos, Color.RED, 0.75);
     }
 
-    private enum BoardSquare : byte
+    private Vector2 ScreenToGrid(int screenX, int screenY)
     {
-        A8 = 0, B8, C8, D8, E8, F8, G8, H8,
-        A7, B7, C7, D7, E7, F7, G7, H7,
-        A6, B6, C6, D6, E6, F6, G6, H6,
-        A5, B5, C5, D5, E5, F5, G5, H5,
-        A4, B4, C4, D4, E4, F4, G4, H4,
-        A3, B3, C3, D3, E3, F3, G3, H3,
-        A2, B2, C2, D2, E2, F2, G2, H2,
-        A1, B1, C1, D1, E1, F1, G1, H1
+        var gridX = (screenX - _halfSideLength) / _sideLength;
+        var gridY = (screenY - _halfSideLength) / _sideLength;
+        return new Vector2(gridX, gridY);
     }
+
 }

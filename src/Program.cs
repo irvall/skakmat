@@ -4,9 +4,13 @@ namespace skakmat;
 
 internal abstract class Program
 {
+
+
     [STAThread]
     public static void Main()
     {
+        LogUtility.IgnoreRaylibLogs();
         var board = new Board();
+        board.Run();
     }
 }

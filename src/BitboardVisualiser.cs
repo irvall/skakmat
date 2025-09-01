@@ -22,7 +22,7 @@ public class BitboardVisualiser
     public BitboardVisualiser()
     {
         LogUtility.IgnoreRaylibLogs();
-        Raylib.InitWindow(0, 0, "Dummy window to get window size");
+        Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
         var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
         Raylib.CloseWindow();
         _sideLength = windowHeight / SquareCount;
@@ -34,9 +34,19 @@ public class BitboardVisualiser
         _rectBeginPos = null;
         _rectEndPos = null;
         _boundingBoxColor = Palette.GetNextColor();
+    }
+
+    public void Run()
+    {
         DrawWindow();
     }
 
+
+    private static ulong BoundingBoxesToBitboard(List<HighlightSquare> squares)
+    {
+        return squares.Aggregate(0UL,
+            (bitboard, nextSquare) => bitboard | BoundingBoxToBitboard(nextSquare));
+    }
     private static ulong BoundingBoxToBitboard(HighlightSquare bb)
     {
         var bitboard = 0UL;
@@ -95,7 +105,7 @@ public class BitboardVisualiser
                     Raylib.DrawText(8 - i + "", posX, i * _sideLength + posY, _halfSideLength, Color.WHITE);
                 }
 
-                var draw = (i + j) % 2 == 0;
+                var draw = (i + j) % 2 != 0;
                 DrawTile(j, i, draw ? Color.BROWN : Color.RAYWHITE);
             }
 
@@ -160,6 +170,9 @@ public class BitboardVisualiser
             var variables = string.Join("\n", _boundingBoxes.Select(GetAreaAsVariable));
             Console.WriteLine("\n### Currently selected areas ###");
             Console.WriteLine(variables);
+            Console.Write("\n### As a single bitboard: ");
+            var selectionsToBitboard = BoundingBoxesToBitboard(_boundingBoxes);
+            Console.WriteLine($"0x{Convert.ToString((long)selectionsToBitboard, 16)}");
             _isDragging = false;
         }
 
