@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using System.Numerics;
-
 
 namespace skakmat;
 
@@ -35,16 +33,8 @@ public partial class MoveTables
         InitializePawnMoves();
         InitializeKingMoves();
         InitializeKnightMoves();
-        // InitializeRookMoves();
         var elapsedMilliseconds = sw.ElapsedMilliseconds;
         Console.WriteLine($"Precomputed moves in {elapsedMilliseconds}ms");
-    }
-
-    public static IEnumerable<ulong> SquareGenerator()
-    {
-        var sq = 1UL;
-        for (var i = 0; i < 63; i++)
-            yield return sq << i;
     }
 
     public static ulong RookAttacks(int square, ulong blockers)
@@ -174,45 +164,6 @@ public partial class MoveTables
         }
     }
 
-    private void InitializeRookMoves()
-    {
-        RookMoves = new ulong[64];
-        foreach (var idx in _boardSquareToIndex.Values)
-        {
-            // Extend all the way to the left
-            var pos = 1UL << idx;
-            while (!Masks.FileA.Contains(pos))
-            {
-                pos >>= FileOffset;
-                RookMoves[idx] |= pos;
-            }
-            // Extend all the way to the right 
-            pos = 1UL << idx;
-            while (!Masks.FileH.Contains(pos))
-            {
-                pos <<= FileOffset;
-                RookMoves[idx] |= pos;
-            }
-            // Extend all the way down
-            pos = 1UL << idx;
-            while (!Masks.Rank1.Contains(pos))
-            {
-                pos <<= RankOffset;
-                RookMoves[idx] |= pos;
-            }
-            // Extend all the way up 
-            pos = 1UL << idx;
-            while (!Masks.Rank8.Contains(pos))
-            {
-                pos >>= RankOffset;
-                RookMoves[idx] |= pos;
-            }
-            PrintBoard(RookMoves[idx], "Rook moves", idx);
-
-        }
-
-    }
-
     private void InitializeKnightMoves()
     {
         KnightMoves = new ulong[64];
@@ -237,15 +188,6 @@ public partial class MoveTables
                 KnightMoves[idx] |= bit << (RankOffset * 2 + FileOffset);
 
         }
-    }
-
-    private static ulong MoveBit(ulong bitboard, int x, int y)
-    {
-        var xOffset = Math.Abs(x) * FileOffset;
-        var yOffset = Math.Abs(y) * RankOffset;
-        var shiftedX = x > 0 ? bitboard << xOffset : bitboard >> xOffset;
-        var shiftedY = y > 0 ? shiftedX << yOffset : shiftedX >> yOffset;
-        return shiftedY;
     }
 
     private void InitializePawnMoves()

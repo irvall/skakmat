@@ -1,5 +1,4 @@
-﻿using Raylib_cs;
-using Color = Raylib_cs.Color;
+﻿using Color = Raylib_cs.Color;
 
 namespace skakmat;
 
