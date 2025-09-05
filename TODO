@@ -1,9 +1,33 @@
-# Pieces
+# King
 
-- Add attacks
+- Make sure cannot step into line of attack
+- Add pinning logic
+- Castling
+- Add check
+- Add checkmate 
+
+# Pawns
+
+- Promotion to queen 
+- En passant
 
 # Game
 
 - Add FEN parser
 - Add "Copy to FEN" button
-- Add state with undo/redo using arrow keys
+- Import/Export
+  - Make it possible to undo/redo moves using arrow keys
+  - Export the current game to clipboard ("1. e4 e5, 2. Nf3 b7..." etc.)
+  - Import a game and replay the moves
+- UI enhancements
+  - Arrow-like lines using "Lshift", i.e.
+  - Show optional timer if game format supports it
+- Zobrist hashing
+- Magic bitboards for sliding pieces
+
+# Refactor
+
+- Break out `Board.cs` into multiple files
+  - Currently contains game logic + controller + view
+- Fix namespace issue
+

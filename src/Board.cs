@@ -119,15 +119,15 @@ class Board
         return windowHeight;
     }
 
-    private ulong OpponentsAttacks(bool isWhite)
+    private ulong AttacksByColor(bool isWhite)
     {
         var attacks = 0UL;
         for (var i = 0; i < 64; i++)
         {
             var sq = 1UL << i;
-            if (bitboards[isWhite ? PieceConstants.BlackPawn : PieceConstants.WhitePawn].Contains(sq))
-                attacks |= isWhite ? moveTables.BlackPawnAttacks[i] : moveTables.WhitePawnAttacks[i];
-            if (bitboards[isWhite ? PieceConstants.BlackKnight : PieceConstants.WhiteKnight].Contains(sq))
+            if (bitboards[isWhite ? PieceConstants.WhitePawn : PieceConstants.BlackPawn].Contains(sq))
+                attacks |= isWhite ? moveTables.WhitePawnAttacks[i] : moveTables.BlackPawnAttacks[i];
+            if (bitboards[isWhite ? PieceConstants.WhiteKnight : PieceConstants.BlackKnight].Contains(sq))
                 attacks |= moveTables.KnightMoves[i];
 
         }
@@ -331,12 +331,12 @@ class Board
         if (bitboards[PieceConstants.WhiteKing].Contains(bit))
         {
             var moveBits = moveTables.KingMoves[idx] & ~WhitePieces;
-            return new PieceSelection(bit, moveBits & ~OpponentsAttacks(true), PieceConstants.WhiteKing, idx);
+            return new PieceSelection(bit, moveBits & ~AttacksByColor(isWhite: false), PieceConstants.WhiteKing, idx);
         }
         if (bitboards[PieceConstants.BlackKing].Contains(bit))
         {
             var moveBits = moveTables.KingMoves[idx] & ~BlackPieces;
-            return new PieceSelection(bit, moveBits & ~OpponentsAttacks(false), PieceConstants.BlackKing, idx);
+            return new PieceSelection(bit, moveBits & ~AttacksByColor(isWhite: true), PieceConstants.BlackKing, idx);
         }
         return null;
     }
