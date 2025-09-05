@@ -13,7 +13,6 @@
 
 # Game
 
-- Add FEN parser
 - Add "Copy to FEN" button
 - Import/Export
   - Make it possible to undo/redo moves using arrow keys
@@ -22,6 +21,7 @@
 - UI enhancements
   - Arrow-like lines using "Lshift", i.e.
   - Show optional timer if game format supports it
+- Extend FEN parser
 - Zobrist hashing
 - Magic bitboards for sliding pieces
 

@@ -29,5 +29,10 @@ public static class PieceConstants
         { BlackQueen, (1, 1) },
         { BlackKing, (0, 1) },
     };
+    public const string FenDefaultPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    public const string FenRookCheck = "8/5pk1/p4pp1/2p4p/2P1P2P/1P3PP1/P2r2K1/4R3 w - - 0 40";
+    public const string FenMaxPieceDensity = "rnbqkb1r/pp1p1ppp/2p5/4P3/2B5/8/PPP1NnPP/RNBQK2R w KQkq - 0 6";
+    public const string FenNasty = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq a3 5 17";
 
 }

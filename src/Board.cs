@@ -43,8 +43,7 @@ class Board
 
     public Board()
     {
-        bitboards = new ulong[12];
-        SetupStandardBoard(bitboards);
+        bitboards = BitboardFromFen(PieceConstants.FenNasty);
         moveTables = new MoveTables();
         _boardSquareToIndex = [];
         _indexToBoardSquare = [];
@@ -81,6 +80,83 @@ class Board
         bbs[PieceConstants.BlackRook] = 0x81;
         bbs[PieceConstants.BlackQueen] = 0x8;
         bbs[PieceConstants.BlackKing] = 0x10;
+    }
+
+    public static ulong[] BitboardFromFen(string fen)
+    {
+        // Standard: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+        // TODO: Support 'w KQkq - 0 1' part
+        var bbs = new ulong[12];
+        var parts = fen.Split(' ');
+        var position = parts[0];
+        var slashCount = position.Count(ch => ch == '/');
+        if (slashCount != 7)
+        {
+            throw new FormatException("Expected 7 '/' in a FEN string: " + fen);
+        }
+        var rows = position.Split('/');
+        for (var row = 0; row < 8; row++)
+        {
+            var currentRow = rows[row];
+            var ri = 0;
+            var i = 0;
+            while (ri < currentRow.Length)
+            {
+                var bit = 1UL << i << row * 8;
+                var ch = currentRow[ri];
+                var isWhite = char.IsUpper(ch);
+                switch (char.ToLower(ch))
+                {
+                    case 'p':
+                        {
+                            var idx = isWhite ? PieceConstants.WhitePawn : PieceConstants.BlackPawn;
+                            bbs[idx] |= bit;
+                            break;
+                        }
+                    case 'r':
+                        {
+                            var idx = isWhite ? PieceConstants.WhiteRook : PieceConstants.BlackRook;
+                            bbs[idx] |= bit;
+                            break;
+                        }
+                    case 'n':
+                        {
+                            var idx = isWhite ? PieceConstants.WhiteKnight : PieceConstants.BlackKnight;
+                            bbs[idx] |= bit;
+                            break;
+                        }
+                    case 'b':
+                        {
+                            var idx = isWhite ? PieceConstants.WhiteBishop : PieceConstants.BlackBishop;
+                            bbs[idx] |= bit;
+                            break;
+                        }
+                    case 'q':
+                        {
+                            var idx = isWhite ? PieceConstants.WhiteQueen : PieceConstants.BlackQueen;
+                            bbs[idx] |= bit;
+                            break;
+                        }
+                    case 'k':
+                        {
+                            var idx = isWhite ? PieceConstants.WhiteKing : PieceConstants.BlackKing;
+                            bbs[idx] |= bit;
+                            break;
+                        }
+                }
+                if (char.IsNumber(ch))
+                {
+                    i += (int)char.GetNumericValue(ch);
+                }
+                else
+                {
+                    i++;
+                }
+                ri++;
+            }
+
+        }
+        return bbs;
     }
 
     private int GetPieceTypeFromSquare(ulong square)
