@@ -46,28 +46,28 @@ public partial class MoveTables
         for (int s = square + FileOffset; s < upperX; s += FileOffset)
         {
             var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
         for (int s = square - FileOffset; s >= lowerX; s -= FileOffset)
         {
             var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
 
         for (int s = square + RankOffset; s <= upperY; s += RankOffset)
         {
             var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
 
         for (int s = square - RankOffset; s >= lowerY; s -= RankOffset)
         {
             var bit = 1UL << s;
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
 
         return attacks;
@@ -84,26 +84,26 @@ public partial class MoveTables
         for (currentRank = targetRank + 1, currentFile = targetFile + 1; currentRank < SquareNo && currentFile < SquareNo; currentRank++, currentFile++)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
         for (currentRank = targetRank + 1, currentFile = targetFile - 1; currentRank < SquareNo && currentFile >= 0; currentRank++, currentFile--)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
         for (currentRank = targetRank - 1, currentFile = targetFile + 1; currentRank >= 0 && currentFile < SquareNo; currentRank--, currentFile++)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
         for (currentRank = targetRank - 1, currentFile = targetFile - 1; currentRank >= 0 && currentFile >= 0; currentRank--, currentFile--)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
-            if (blockers.Contains(bit)) break;
             attacks |= bit;
+            if (blockers.Contains(bit)) break;
         }
 
         return attacks;
