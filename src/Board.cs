@@ -9,36 +9,23 @@ class Board
     readonly ulong[] bitboards;
 
     internal ulong WhitePieces =>
-        bitboards[WhitePawn]
-        | bitboards[WhiteRook]
-        | bitboards[WhiteKnight]
-        | bitboards[WhiteBishop]
-        | bitboards[WhiteQueen]
-        | bitboards[WhiteKing];
+        bitboards[PieceConstants.WhitePawn]
+        | bitboards[PieceConstants.WhiteRook]
+        | bitboards[PieceConstants.WhiteKnight]
+        | bitboards[PieceConstants.WhiteBishop]
+        | bitboards[PieceConstants.WhiteQueen]
+        | bitboards[PieceConstants.WhiteKing];
 
     internal ulong BlackPieces =>
-        bitboards[BlackPawn]
-        | bitboards[BlackRook]
-        | bitboards[BlackKnight]
-        | bitboards[BlackBishop]
-        | bitboards[BlackQueen]
-        | bitboards[BlackKing];
+        bitboards[PieceConstants.BlackPawn]
+        | bitboards[PieceConstants.BlackRook]
+        | bitboards[PieceConstants.BlackKnight]
+        | bitboards[PieceConstants.BlackBishop]
+        | bitboards[PieceConstants.BlackQueen]
+        | bitboards[PieceConstants.BlackKing];
 
     internal ulong AllPieces => WhitePieces | BlackPieces;
 
-    // Indices
-    internal const int WhitePawn = 0;
-    internal const int WhiteRook = 1;
-    internal const int WhiteKnight = 2;
-    internal const int WhiteBishop = 3;
-    internal const int WhiteQueen = 4;
-    internal const int WhiteKing = 5;
-    internal const int BlackPawn = 6;
-    internal const int BlackRook = 7;
-    internal const int BlackKnight = 8;
-    internal const int BlackBishop = 9;
-    internal const int BlackQueen = 10;
-    internal const int BlackKing = 11;
 
     private const int SquareCount = 8;
     private readonly int _halfSideLength;
@@ -53,21 +40,6 @@ class Board
     private readonly MoveTables moveTables;
     private PieceSelection? pieceSelected;
 
-    public Dictionary<int, (int, int)> PieceToSpriteCoords = new()
-    {
-        { WhitePawn, (5, 0) },
-        { WhiteKnight, (3, 0) },
-        { WhiteBishop, (2, 0) },
-        { WhiteRook, (4, 0) },
-        { WhiteQueen, (1, 0) },
-        { WhiteKing, (0, 0) },
-        { BlackPawn, (5, 1) },
-        { BlackKnight, (3, 1) },
-        { BlackBishop, (2, 1) },
-        { BlackRook, (4, 1) },
-        { BlackQueen, (1, 1) },
-        { BlackKing, (0, 1) },
-    };
 
     public Board()
     {
@@ -96,35 +68,35 @@ class Board
 
     private static void SetupStandardBoard(ulong[] bbs)
     {
-        bbs[WhitePawn] = Masks.Rank2;
-        bbs[WhiteRook] = 0x8100000000000000;
-        bbs[WhiteKnight] = 0x4200000000000000;
-        bbs[WhiteBishop] = 0x2400000000000000;
-        bbs[WhiteQueen] = 0x800000000000000;
-        bbs[WhiteKing] = 0x1000000000000000;
+        bbs[PieceConstants.WhitePawn] = Masks.Rank2;
+        bbs[PieceConstants.WhiteRook] = 0x8100000000000000;
+        bbs[PieceConstants.WhiteKnight] = 0x4200000000000000;
+        bbs[PieceConstants.WhiteBishop] = 0x2400000000000000;
+        bbs[PieceConstants.WhiteQueen] = 0x800000000000000;
+        bbs[PieceConstants.WhiteKing] = 0x1000000000000000;
 
-        bbs[BlackPawn] = Masks.Rank7;
-        bbs[BlackKnight] = 0x42;
-        bbs[BlackBishop] = 0x24;
-        bbs[BlackRook] = 0x81;
-        bbs[BlackQueen] = 0x8;
-        bbs[BlackKing] = 0x10;
+        bbs[PieceConstants.BlackPawn] = Masks.Rank7;
+        bbs[PieceConstants.BlackKnight] = 0x42;
+        bbs[PieceConstants.BlackBishop] = 0x24;
+        bbs[PieceConstants.BlackRook] = 0x81;
+        bbs[PieceConstants.BlackQueen] = 0x8;
+        bbs[PieceConstants.BlackKing] = 0x10;
     }
 
     private int GetPieceTypeFromSquare(ulong square)
     {
-        if (bitboards[WhitePawn].Contains(square)) return WhitePawn;
-        if (bitboards[BlackPawn].Contains(square)) return BlackPawn;
-        if (bitboards[WhiteRook].Contains(square)) return WhiteRook;
-        if (bitboards[BlackRook].Contains(square)) return BlackRook;
-        if (bitboards[WhiteKnight].Contains(square)) return WhiteKnight;
-        if (bitboards[BlackKnight].Contains(square)) return BlackKnight;
-        if (bitboards[WhiteBishop].Contains(square)) return WhiteBishop;
-        if (bitboards[BlackBishop].Contains(square)) return BlackBishop;
-        if (bitboards[WhiteQueen].Contains(square)) return WhiteQueen;
-        if (bitboards[BlackQueen].Contains(square)) return BlackQueen;
-        if (bitboards[WhiteKing].Contains(square)) return WhiteKing;
-        if (bitboards[BlackKing].Contains(square)) return BlackKing;
+        if (bitboards[PieceConstants.WhitePawn].Contains(square)) return PieceConstants.WhitePawn;
+        if (bitboards[PieceConstants.BlackPawn].Contains(square)) return PieceConstants.BlackPawn;
+        if (bitboards[PieceConstants.WhiteRook].Contains(square)) return PieceConstants.WhiteRook;
+        if (bitboards[PieceConstants.BlackRook].Contains(square)) return PieceConstants.BlackRook;
+        if (bitboards[PieceConstants.WhiteKnight].Contains(square)) return PieceConstants.WhiteKnight;
+        if (bitboards[PieceConstants.BlackKnight].Contains(square)) return PieceConstants.BlackKnight;
+        if (bitboards[PieceConstants.WhiteBishop].Contains(square)) return PieceConstants.WhiteBishop;
+        if (bitboards[PieceConstants.BlackBishop].Contains(square)) return PieceConstants.BlackBishop;
+        if (bitboards[PieceConstants.WhiteQueen].Contains(square)) return PieceConstants.WhiteQueen;
+        if (bitboards[PieceConstants.BlackQueen].Contains(square)) return PieceConstants.BlackQueen;
+        if (bitboards[PieceConstants.WhiteKing].Contains(square)) return PieceConstants.WhiteKing;
+        if (bitboards[PieceConstants.BlackKing].Contains(square)) return PieceConstants.BlackKing;
         return -1;
     }
 
@@ -145,6 +117,21 @@ class Board
         var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
         Raylib.CloseWindow();
         return windowHeight;
+    }
+
+    private ulong OpponentsAttacks(bool isWhite)
+    {
+        var attacks = 0UL;
+        for (var i = 0; i < 64; i++)
+        {
+            var sq = 1UL << i;
+            if (bitboards[isWhite ? PieceConstants.BlackPawn : PieceConstants.WhitePawn].Contains(sq))
+                attacks |= isWhite ? moveTables.BlackPawnAttacks[i] : moveTables.WhitePawnAttacks[i];
+            if (bitboards[isWhite ? PieceConstants.BlackKnight : PieceConstants.WhiteKnight].Contains(sq))
+                attacks |= moveTables.KnightMoves[i];
+
+        }
+        return attacks;
     }
 
     public static Texture2D LoadTextureChecked(string path)
@@ -220,10 +207,10 @@ class Board
 
     private void DrawPiece(int col, int row, int pieceType)
     {
-        int cellWidth = _spriteTexture.Width / 6;  // 6 columns now
-        int cellHeight = _spriteTexture.Height / 2; // 2 rows (white/black)
+        int cellWidth = _spriteTexture.Width / 6;
+        int cellHeight = _spriteTexture.Height / 2;
 
-        if (!PieceToSpriteCoords.TryGetValue(pieceType, out var tup))
+        if (!PieceConstants.PieceToSpriteCoords.TryGetValue(pieceType, out var tup))
             throw new Exception("Piece type not supported " + pieceType);
 
         var (pieceIndexX, pieceIndexY) = tup;
@@ -286,70 +273,70 @@ class Board
             moveBits = 0;
         }
         attackBits &= isWhite ? BlackPieces : WhitePieces;
-        return new PieceSelection(bit, moveBits & ~AllPieces | attackBits, isWhite ? WhitePawn : BlackPawn, index);
+        return new PieceSelection(bit, moveBits & ~AllPieces | attackBits, isWhite ? PieceConstants.WhitePawn : PieceConstants.BlackPawn, index);
     }
 
     private PieceSelection? DetectPieceSelection(Vector2 mouseGridPos)
     {
         var (idx, bit) = IndexAndBitUnderMouse(mouseGridPos);
-        if (bitboards[WhitePawn].Contains(bit))
+        if (bitboards[PieceConstants.WhitePawn].Contains(bit))
         {
             return HandlePawnMove(idx, bit, true);
         }
-        if (bitboards[BlackPawn].Contains(bit))
+        if (bitboards[PieceConstants.BlackPawn].Contains(bit))
         {
             return HandlePawnMove(idx, bit, false);
         }
-        if (bitboards[WhiteKnight].Contains(bit))
+        if (bitboards[PieceConstants.WhiteKnight].Contains(bit))
         {
             var moveBits = moveTables.KnightMoves[idx] & ~WhitePieces;
-            return new PieceSelection(bit, moveBits, WhiteKnight, idx);
+            return new PieceSelection(bit, moveBits, PieceConstants.WhiteKnight, idx);
         }
-        if (bitboards[BlackKnight].Contains(bit))
+        if (bitboards[PieceConstants.BlackKnight].Contains(bit))
         {
             var moveBits = moveTables.KnightMoves[idx] & ~BlackPieces;
-            return new PieceSelection(bit, moveBits, BlackKnight, idx);
+            return new PieceSelection(bit, moveBits, PieceConstants.BlackKnight, idx);
         }
 
-        if (bitboards[WhiteBishop].Contains(bit))
+        if (bitboards[PieceConstants.WhiteBishop].Contains(bit))
         {
             var moveBits = MoveTables.BishopAttacks(idx, AllPieces);
-            return new PieceSelection(bit, moveBits & ~WhitePieces, WhiteBishop, idx);
+            return new PieceSelection(bit, moveBits & ~WhitePieces, PieceConstants.WhiteBishop, idx);
         }
-        if (bitboards[BlackBishop].Contains(bit))
+        if (bitboards[PieceConstants.BlackBishop].Contains(bit))
         {
             var moveBits = MoveTables.BishopAttacks(idx, AllPieces);
-            return new PieceSelection(bit, moveBits & ~BlackPieces, BlackBishop, idx);
+            return new PieceSelection(bit, moveBits & ~BlackPieces, PieceConstants.BlackBishop, idx);
         }
-        if (bitboards[WhiteRook].Contains(bit))
+        if (bitboards[PieceConstants.WhiteRook].Contains(bit))
         {
             var moveBits = MoveTables.RookAttacks(idx, AllPieces);
-            return new PieceSelection(bit, moveBits & ~WhitePieces, WhiteRook, idx);
+            return new PieceSelection(bit, moveBits & ~WhitePieces, PieceConstants.WhiteRook, idx);
         }
-        if (bitboards[BlackRook].Contains(bit))
+        if (bitboards[PieceConstants.BlackRook].Contains(bit))
         {
             var moveBits = MoveTables.RookAttacks(idx, AllPieces);
-            return new PieceSelection(bit, moveBits & ~BlackPieces, BlackRook, idx);
+            return new PieceSelection(bit, moveBits & ~BlackPieces, PieceConstants.BlackRook, idx);
         }
-        if (bitboards[WhiteQueen].Contains(bit))
+        if (bitboards[PieceConstants.WhiteQueen].Contains(bit))
         {
             var moveBits = MoveTables.RookAttacks(idx, AllPieces) | MoveTables.BishopAttacks(idx, AllPieces);
-            return new PieceSelection(bit, moveBits & ~WhitePieces, WhiteQueen, idx);
+            return new PieceSelection(bit, moveBits & ~WhitePieces, PieceConstants.WhiteQueen, idx);
         }
-        if (bitboards[BlackQueen].Contains(bit))
+        if (bitboards[PieceConstants.BlackQueen].Contains(bit))
         {
             var moveBits = MoveTables.RookAttacks(idx, AllPieces) | MoveTables.BishopAttacks(idx, AllPieces);
-            return new PieceSelection(bit, moveBits & ~BlackPieces, BlackQueen, idx);
+            return new PieceSelection(bit, moveBits & ~BlackPieces, PieceConstants.BlackQueen, idx);
         }
-        if (bitboards[WhiteKing].Contains(bit))
+        if (bitboards[PieceConstants.WhiteKing].Contains(bit))
         {
             var moveBits = moveTables.KingMoves[idx] & ~WhitePieces;
-            return new PieceSelection(bit, moveBits, WhiteKing, idx);
+            return new PieceSelection(bit, moveBits & ~OpponentsAttacks(true), PieceConstants.WhiteKing, idx);
         }
-        if (bitboards[BlackKing].Contains(bit))
+        if (bitboards[PieceConstants.BlackKing].Contains(bit))
         {
             var moveBits = moveTables.KingMoves[idx] & ~BlackPieces;
-            return new PieceSelection(bit, moveBits, BlackKing, idx);
+            return new PieceSelection(bit, moveBits & ~OpponentsAttacks(false), PieceConstants.BlackKing, idx);
         }
         return null;
     }
