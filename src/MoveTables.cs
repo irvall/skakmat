@@ -21,7 +21,6 @@ public partial class MoveTables
     public ulong[] WhitePawnAttacks = new ulong[64];
 
     public ulong[] WhitePawnMoves = new ulong[64];
-    public ulong[] RookMoves = new ulong[64];
 
     public MoveTables()
     {
@@ -74,7 +73,7 @@ public partial class MoveTables
         return attacks;
     }
 
-    private static ulong BishopAttacks(int square, ulong blockers)
+    public static ulong BishopAttacks(int square, ulong blockers)
     {
         var attacks = 0UL;
         var targetRank = square / 8;

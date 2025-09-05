@@ -6,29 +6,39 @@ namespace skakmat;
 class Board
 {
 
-    /****************
-    /** White pieces 
-    ****************/
-    internal ulong WhitePawns = Masks.Rank2;
-    internal ulong WhiteKnights = 0x4200000000000000;
-    internal ulong WhiteBishops = 0x2400000000000000;
-    internal ulong WhiteRooks = 0x8100000000000000;
-    internal ulong WhiteKing = 0x1000000000000000;
-    internal ulong WhiteQueen = 0x800000000000000;
-    internal ulong WhitePieces => WhitePawns | WhiteKnights | WhiteBishops | WhiteRooks | WhiteQueen | WhiteKing;
+    readonly ulong[] bitboards;
 
-    /****************
-    /** Black pieces 
-    ****************/
-    internal ulong BlackPawns = Masks.Rank7;
-    internal ulong BlackKnights = 0x42;
-    internal ulong BlackBishops = 0x24;
-    internal ulong BlackRooks = 0x81;
-    internal ulong BlackQueen = 0x8;
-    internal ulong BlackKing = 0x10;
-    internal ulong BlackPieces => BlackPawns | BlackKnights | BlackBishops | BlackRooks | BlackQueen | BlackKing;
+    internal ulong WhitePieces =>
+        bitboards[WhitePawn]
+        | bitboards[WhiteRook]
+        | bitboards[WhiteKnight]
+        | bitboards[WhiteBishop]
+        | bitboards[WhiteQueen]
+        | bitboards[WhiteKing];
+
+    internal ulong BlackPieces =>
+        bitboards[BlackPawn]
+        | bitboards[BlackRook]
+        | bitboards[BlackKnight]
+        | bitboards[BlackBishop]
+        | bitboards[BlackQueen]
+        | bitboards[BlackKing];
 
     internal ulong AllPieces => WhitePieces | BlackPieces;
+
+    // Indices
+    internal const int WhitePawn = 0;
+    internal const int WhiteRook = 1;
+    internal const int WhiteKnight = 2;
+    internal const int WhiteBishop = 3;
+    internal const int WhiteQueen = 4;
+    internal const int WhiteKing = 5;
+    internal const int BlackPawn = 6;
+    internal const int BlackRook = 7;
+    internal const int BlackKnight = 8;
+    internal const int BlackBishop = 9;
+    internal const int BlackQueen = 10;
+    internal const int BlackKing = 11;
 
     private const int SquareCount = 8;
     private readonly int _halfSideLength;
@@ -43,7 +53,7 @@ class Board
     private readonly MoveTables moveTables;
     private PieceSelection? pieceSelected;
 
-    public Dictionary<PieceType, (int, int)> pieceToSpriteCoords = new()
+    public Dictionary<PieceType, (int, int)> PieceToSpriteCoords = new()
     {
         { PieceType.WhitePawn, (5, 0) },
         { PieceType.WhiteKnight, (3, 0) },
@@ -61,6 +71,8 @@ class Board
 
     public Board()
     {
+        bitboards = new ulong[12];
+        SetupStandardBoard(bitboards);
         moveTables = new MoveTables();
         _boardSquareToIndex = [];
         _indexToBoardSquare = [];
@@ -82,32 +94,50 @@ class Board
         DrawWindow();
     }
 
-    private void DrawPieces()
+    private static void SetupStandardBoard(ulong[] bbs)
     {
-        for (var idx = 0; idx < 64; idx++)
-        {
-            var type = GetPieceTypeFromSquare(1UL << idx);
-            if (!type.HasValue) continue;
-            DrawPiece(idx % 8, idx / 8, type.Value);
-        }
+        bbs[WhitePawn] = Masks.Rank2;
+        bbs[WhiteRook] = 0x8100000000000000;
+        bbs[WhiteKnight] = 0x4200000000000000;
+        bbs[WhiteBishop] = 0x2400000000000000;
+        bbs[WhiteQueen] = 0x800000000000000;
+        bbs[WhiteKing] = 0x1000000000000000;
+
+        bbs[BlackPawn] = Masks.Rank7;
+        bbs[BlackKnight] = 0x42;
+        bbs[BlackBishop] = 0x24;
+        bbs[BlackRook] = 0x81;
+        bbs[BlackQueen] = 0x8;
+        bbs[BlackKing] = 0x10;
     }
 
     private PieceType? GetPieceTypeFromSquare(ulong square)
     {
-        if (WhiteKing.Contains(square)) return PieceType.WhiteKing;
-        if (BlackKing.Contains(square)) return PieceType.BlackKing;
-        if (WhitePawns.Contains(square)) return PieceType.WhitePawn;
-        if (WhiteRooks.Contains(square)) return PieceType.WhiteRook;
-        if (WhiteQueen.Contains(square)) return PieceType.WhiteQueen;
-        if (BlackPawns.Contains(square)) return PieceType.BlackPawn;
-        if (BlackRooks.Contains(square)) return PieceType.BlackRook;
-        if (BlackQueen.Contains(square)) return PieceType.BlackQueen;
-        if (BlackKnights.Contains(square)) return PieceType.BlackKnight;
-        if (BlackBishops.Contains(square)) return PieceType.BlackBishop;
-        if (WhiteKnights.Contains(square)) return PieceType.WhiteKnight;
-        if (WhiteBishops.Contains(square)) return PieceType.WhiteBishop;
+        if (bitboards[WhitePawn].Contains(square)) return PieceType.WhitePawn;
+        if (bitboards[BlackPawn].Contains(square)) return PieceType.BlackPawn;
+        if (bitboards[WhiteRook].Contains(square)) return PieceType.WhiteRook;
+        if (bitboards[BlackRook].Contains(square)) return PieceType.BlackRook;
+        if (bitboards[WhiteKnight].Contains(square)) return PieceType.WhiteKnight;
+        if (bitboards[BlackKnight].Contains(square)) return PieceType.BlackKnight;
+        if (bitboards[WhiteBishop].Contains(square)) return PieceType.WhiteBishop;
+        if (bitboards[BlackBishop].Contains(square)) return PieceType.BlackBishop;
+        if (bitboards[WhiteQueen].Contains(square)) return PieceType.WhiteQueen;
+        if (bitboards[BlackQueen].Contains(square)) return PieceType.BlackQueen;
+        if (bitboards[WhiteKing].Contains(square)) return PieceType.WhiteKing;
+        if (bitboards[BlackKing].Contains(square)) return PieceType.BlackKing;
         return null;
     }
+
+    private void DrawPieces()
+    {
+        for (var sq = 0; sq < 64; sq++)
+        {
+            var type = GetPieceTypeFromSquare(1UL << sq);
+            if (!type.HasValue) continue;
+            DrawPiece(sq % 8, sq / 8, type.Value);
+        }
+    }
+
 
     private static int GetWindowHeightDynamically()
     {
@@ -138,11 +168,9 @@ class Board
             _indexToBoardSquare[kvp.Value] = kvp.Key;
     }
 
-
-
     private void DrawWindow()
     {
-        Raylib.InitWindow(_windowSize.width, _windowSize.height, "Chess Board");
+        Raylib.InitWindow(_windowSize.width, _windowSize.height, "Skakmat");
         _spriteTexture = LoadTextureChecked("assets/sprite.png");
         var bgColor = new Color(4, 15, 15, 1);
         while (!Raylib.WindowShouldClose())
@@ -190,14 +218,12 @@ class Board
 
     }
 
-
-
     private void DrawPiece(int col, int row, PieceType pieceType)
     {
         int cellWidth = _spriteTexture.Width / 6;  // 6 columns now
         int cellHeight = _spriteTexture.Height / 2; // 2 rows (white/black)
 
-        if (!pieceToSpriteCoords.TryGetValue(pieceType, out var tup))
+        if (!PieceToSpriteCoords.TryGetValue(pieceType, out var tup))
             throw new Exception("Piece type not supported " + pieceType);
 
         var (pieceIndexX, pieceIndexY) = tup;
@@ -264,30 +290,76 @@ class Board
 
             // TODO: Attacks are ok, despite blocking piece
         }
-        return new PieceSelection(bit, moveBits & ~AllPieces, isWhite ? PieceType.WhitePawn : PieceType.BlackPawn, index);
+        return new PieceSelection(bit, moveBits & ~AllPieces, isWhite ? PieceType.WhitePawn : PieceType.BlackPawn, isWhite ? WhitePawn : BlackPawn, index);
     }
 
     private PieceSelection? DetectPieceSelection(Vector2 mouseGridPos)
     {
         var (idx, bit) = IndexAndBitUnderMouse(mouseGridPos);
-        System.Console.WriteLine("Detect piece selection " + mouseGridPos);
-        if (WhitePawns.Contains(bit))
+        if (bitboards[WhitePawn].Contains(bit))
         {
             return HandlePawnMove(idx, bit, true);
         }
-        if (BlackPawns.Contains(bit))
+        if (bitboards[BlackPawn].Contains(bit))
         {
             return HandlePawnMove(idx, bit, false);
         }
-        if (WhiteKnights.Contains(bit))
+        if (bitboards[WhiteKnight].Contains(bit))
         {
             var moveBits = moveTables.KnightMoves[idx] & ~WhitePieces;
-            return new PieceSelection(bit, moveBits, PieceType.WhiteKnight, idx);
+            return new PieceSelection(bit, moveBits, PieceType.WhiteKnight, WhiteKnight, idx);
         }
-        if (WhiteKing.Contains(bit))
+        if (bitboards[BlackKnight].Contains(bit))
+        {
+            var moveBits = moveTables.KnightMoves[idx] & ~BlackPieces;
+            return new PieceSelection(bit, moveBits, PieceType.BlackKnight, BlackKnight, idx);
+        }
+
+        if (bitboards[WhiteBishop].Contains(bit))
+        {
+            var moveBits = MoveTables.BishopAttacks(idx, AllPieces);
+            return new PieceSelection(bit, moveBits, PieceType.WhiteBishop, WhiteBishop, idx);
+        }
+        if (bitboards[BlackBishop].Contains(bit))
+        {
+            var moveBits = MoveTables.BishopAttacks(idx, AllPieces);
+            return new PieceSelection(bit, moveBits, PieceType.BlackBishop, BlackBishop, idx);
+        }
+        if (bitboards[WhiteRook].Contains(bit))
+        {
+            var moveBits = MoveTables.RookAttacks(idx, AllPieces);
+            return new PieceSelection(bit, moveBits, PieceType.WhiteRook, WhiteRook, idx);
+        }
+        if (bitboards[BlackRook].Contains(bit))
+        {
+            var moveBits = MoveTables.RookAttacks(idx, AllPieces);
+            return new PieceSelection(bit, moveBits, PieceType.BlackRook, BlackRook, idx);
+        }
+        if (bitboards[WhiteQueen].Contains(bit))
+        {
+            var moveBits = MoveTables.RookAttacks(idx, AllPieces) | MoveTables.BishopAttacks(idx, AllPieces);
+            return new PieceSelection(bit, moveBits, PieceType.WhiteQueen, WhiteQueen, idx);
+        }
+        if (bitboards[BlackQueen].Contains(bit))
+        {
+            var moveBits = MoveTables.RookAttacks(idx, AllPieces) | MoveTables.BishopAttacks(idx, AllPieces);
+            return new PieceSelection(bit, moveBits, PieceType.BlackQueen, BlackQueen, idx);
+        }
+        if (bitboards[BlackKing].Contains(bit))
         {
             var moveBits = moveTables.KingMoves[idx] & ~AllPieces;
-            return new PieceSelection(bit, moveBits, PieceType.WhiteKing, idx);
+            return new PieceSelection(bit, moveBits, PieceType.BlackKing, BlackKing, idx);
+        }
+
+        if (bitboards[WhiteKing].Contains(bit))
+        {
+            var moveBits = moveTables.KingMoves[idx] & ~AllPieces;
+            return new PieceSelection(bit, moveBits, PieceType.WhiteKing, WhiteKing, idx);
+        }
+        if (bitboards[BlackKing].Contains(bit))
+        {
+            var moveBits = moveTables.KingMoves[idx] & ~AllPieces;
+            return new PieceSelection(bit, moveBits, PieceType.BlackKing, BlackKing, idx);
         }
         return null;
     }
@@ -302,34 +374,15 @@ class Board
 
     private InteractionResult CheckPiece(Vector2 mouseGridPos)
     {
-        var (index, bit) = IndexAndBitUnderMouse(mouseGridPos);
+        var (_, bit) = IndexAndBitUnderMouse(mouseGridPos);
 
         if (!pieceSelected.HasValue)
             return InteractionResult.None;
 
         if (pieceSelected.Value.LegalMoves.Contains(bit))
         {
-            switch (pieceSelected.Value.Type)
-            {
-                case PieceType.WhitePawn:
-                    WhitePawns ^= pieceSelected.Value.Bit;
-                    WhitePawns |= bit;
-                    break;
-                case PieceType.BlackPawn:
-                    BlackPawns ^= pieceSelected.Value.Bit;
-                    BlackPawns |= bit;
-                    break;
-                case PieceType.WhiteKnight:
-                    WhiteKnights ^= pieceSelected.Value.Bit;
-                    WhiteKnights |= bit;
-                    break;
-                case PieceType.WhiteKing:
-                    WhiteKing ^= pieceSelected.Value.Bit;
-                    WhiteKing |= bit;
-                    break;
-
-            }
-
+            bitboards[pieceSelected.Value.PieceIndex] ^= pieceSelected.Value.Bit;
+            bitboards[pieceSelected.Value.PieceIndex] |= bit;
             pieceSelected = null;
             return InteractionResult.MoveMade;
         }
@@ -357,7 +410,7 @@ class Board
 
                 if (result == InteractionResult.None)
                 {
-                    // No move, no selection yet → try selecting
+                    // No move, no selection yet -> try selecting
                     mouseGridPos = Vector2.Clamp(mouseGridPos, Vector2.Zero, _upperBounds);
                     pieceSelected = DetectPieceSelection(mouseGridPos);
                 }
