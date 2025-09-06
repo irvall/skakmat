@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-namespace skakmat;
+﻿namespace skakmat;
 
 internal abstract class Program
 {
@@ -9,8 +7,8 @@ internal abstract class Program
     [STAThread]
     public static void Main()
     {
-        LogUtility.IgnoreRaylibLogs();
-        var board = new Board();
-        board.Run();
+        RaylibUtility.IgnoreLogs();
+        var engine = new Engine();
+        engine.Run();
     }
 }

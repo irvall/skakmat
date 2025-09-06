@@ -118,9 +118,9 @@ public partial class MoveTables
         {
             var propertyName = property.Name;
             var propertyValue = (ulong?)property.GetValue(null);
-            Console.WriteLine($"{LogUtility.BoldText(propertyName)}\n");
+            Console.WriteLine($"{RaylibUtility.BoldText(propertyName)}\n");
             PrintBoard(propertyValue ?? 0UL);
-            System.Console.WriteLine("///\n");
+            Console.WriteLine("///\n");
         }
     }
 
@@ -235,7 +235,7 @@ public partial class MoveTables
     {
         if (optional != null && optIndex != null)
         {
-            LogUtility.WriteColor(LogUtility.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
+            RaylibUtility.WriteColor(RaylibUtility.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
         }
 
         for (var i = 0; i < 64; i++)
@@ -243,12 +243,12 @@ public partial class MoveTables
             if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
             var theBit = (1UL << i) & bitBoard;
             if (theBit != 0)
-                Console.Write(LogUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
+                Console.Write(RaylibUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
             else
             {
                 if (optIndex != null && i == optIndex)
-                    LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
-                else LogUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+                    RaylibUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
+                else RaylibUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
             }
         }
 

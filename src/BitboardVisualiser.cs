@@ -6,7 +6,6 @@ namespace skakmat;
 
 public class BitboardVisualiser
 {
-    private const int SquareCount = 8;
     private readonly List<HighlightSquare> _boundingBoxes;
     private readonly int _halfSideLength;
     private readonly int _sideLength;
@@ -21,16 +20,16 @@ public class BitboardVisualiser
 
     public BitboardVisualiser()
     {
-        LogUtility.IgnoreRaylibLogs();
+        RaylibUtility.IgnoreLogs();
         Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
         var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
         Raylib.CloseWindow();
-        _sideLength = windowHeight / SquareCount;
+        _sideLength = windowHeight / Constants.SquareCount;
         _halfSideLength = _sideLength / 2;
         _windowSize.width = windowHeight + _sideLength;
         _windowSize.height = windowHeight + _sideLength;
         _boundingBoxes = [];
-        _upperBounds = new Vector2(SquareCount - 1);
+        _upperBounds = new Vector2(Constants.SquareCount - 1);
         _rectBeginPos = null;
         _rectEndPos = null;
         _boundingBoxColor = Palette.GetNextColor();
@@ -72,7 +71,6 @@ public class BitboardVisualiser
 
     private void DrawWindow()
     {
-        LogUtility.IgnoreRaylibLogs();
         Raylib.InitWindow(_windowSize.width, _windowSize.height, "Bitboard Helper");
         var bgColor = new Color(4, 15, 15, 1);
         while (!Raylib.WindowShouldClose())
@@ -90,13 +88,13 @@ public class BitboardVisualiser
 
     private static int GridIndex(int x, int y)
     {
-        return y * SquareCount + x;
+        return y * Constants.SquareCount + x;
     }
 
     private void DrawBoard()
     {
-        for (var i = 0; i < SquareCount; i++)
-            for (var j = 0; j < SquareCount; j++)
+        for (var i = 0; i < Constants.SquareCount; i++)
+            for (var j = 0; j < Constants.SquareCount; j++)
             {
                 if (j == 0)
                 {
@@ -146,7 +144,7 @@ public class BitboardVisualiser
     {
         var mouseScreenPos = Raylib.GetMousePosition();
         var mouseGridPos = ScreenToGrid((int)mouseScreenPos.X, (int)mouseScreenPos.Y);
-        var isMouseOnBoard = mouseGridPos is { X: >= 0 and < SquareCount, Y: >= 0 and < SquareCount };
+        var isMouseOnBoard = mouseGridPos is { X: >= 0 and < Constants.SquareCount, Y: >= 0 and < Constants.SquareCount };
         if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
         {
             if (isMouseOnBoard)

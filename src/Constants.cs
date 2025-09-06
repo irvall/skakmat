@@ -1,6 +1,7 @@
 namespace skakmat;
-public static class PieceConstants
+public static class Constants
 {
+    public const int EmptySquare = -1;
     public const int WhitePawn = 0;
     public const int WhiteRook = 1;
     public const int WhiteKnight = 2;
@@ -29,6 +30,7 @@ public static class PieceConstants
         { BlackQueen, (1, 1) },
         { BlackKing, (0, 1) },
     };
+    public const int SquareCount = 8;
     public const string FenDefaultPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     public const string FenRookCheck = "8/5pk1/p4pp1/2p4p/2P1P2P/1P3PP1/P2r2K1/4R3 w - - 0 40";

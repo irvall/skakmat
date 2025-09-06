@@ -7,4 +7,9 @@ internal static class NumberExtensions
         return (bitboard & targetBit) != 0;
     }
 
+    public static ulong Exclude(this ulong bitboard, ulong excludedBits)
+    {
+        return bitboard & ~excludedBits;
+    }
+
 }

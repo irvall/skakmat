@@ -13,6 +13,7 @@
 
 # Game
 
+- Add idea of "moves"
 - Add "Copy to FEN" button
 - Import/Export
   - Make it possible to undo/redo moves using arrow keys

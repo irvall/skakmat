@@ -3,13 +3,13 @@ using Raylib_cs;
 
 namespace skakmat;
 
-public abstract class LogUtility
+public abstract class RaylibUtility
 {
     private static void CustomLog(int logType, string text, nint args)
     {
     }
 
-    public static void IgnoreRaylibLogs()
+    public static void IgnoreLogs()
     {
         var traceLog = new TraceLogDelegate(CustomLog);
         unsafe
@@ -37,4 +37,19 @@ public abstract class LogUtility
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void TraceLogDelegate(int logType, string text, nint args);
+
+    public static int GetWindowHeightDynamically()
+    {
+        Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
+        var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
+        Raylib.CloseWindow();
+        return windowHeight;
+    }
+
+    public static Texture2D LoadTextureChecked(string path)
+    {
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Asset not found: {path}");
+        return Raylib.LoadTexture(path);
+    }
 }
