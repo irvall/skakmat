@@ -1,6 +1,7 @@
 using System.Numerics;
+using skakmat.Game;
 
-namespace skakmat;
+namespace skakmat.Utilities;
 
 public class BoardUtility
 {

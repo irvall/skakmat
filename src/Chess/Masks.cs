@@ -1,4 +1,4 @@
-namespace skakmat;
+namespace skakmat.Chess;
 
 public class Masks
 {

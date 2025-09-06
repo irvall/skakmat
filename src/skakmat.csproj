@@ -6,11 +6,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>skakmat</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Raylib-cs" Version="5.0.0" />
-        <None Include="assets/sprite.png">
+        <None Include="../assets/sprite.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

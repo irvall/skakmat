@@ -1,4 +1,4 @@
-namespace skakmat;
+namespace skakmat.Game;
 public readonly struct PieceSelection(int pieceType, int squareIndex, ulong legalMoves)
 {
     public int PieceType { get; } = pieceType;

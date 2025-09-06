@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using skakmat.Utilites;
+using skakmat.Utilities;
 
-namespace skakmat;
+namespace skakmat.Chess;
 
 public partial class MoveTables
 {

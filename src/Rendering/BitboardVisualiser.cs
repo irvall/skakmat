@@ -1,8 +1,10 @@
 ﻿using System.Numerics;
 using Raylib_cs;
+using skakmat.Game;
+using skakmat.Utilites;
 using Color = Raylib_cs.Color;
 
-namespace skakmat;
+namespace skakmat.Rendering;
 
 public class BitboardVisualiser
 {

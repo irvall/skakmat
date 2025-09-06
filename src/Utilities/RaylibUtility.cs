@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Raylib_cs;
 
-namespace skakmat;
+namespace skakmat.Utilites;
 
 public abstract class RaylibUtility
 {

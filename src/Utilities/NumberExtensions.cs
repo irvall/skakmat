@@ -1,4 +1,4 @@
-namespace skakmat;
+namespace skakmat.Utilities;
 internal static class NumberExtensions
 {
 

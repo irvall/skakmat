@@ -1,4 +1,7 @@
-namespace skakmat;
+using skakmat.Chess;
+using skakmat.Utilities;
+
+namespace skakmat.Game;
 
 public class Board
 {

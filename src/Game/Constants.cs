@@ -1,4 +1,4 @@
-namespace skakmat;
+namespace skakmat.Game;
 public static class Constants
 {
     public const int EmptySquare = -1;

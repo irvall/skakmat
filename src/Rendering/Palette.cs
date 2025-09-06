@@ -1,6 +1,6 @@
 ﻿using Color = Raylib_cs.Color;
 
-namespace skakmat;
+namespace skakmat.Rendering;
 
 public abstract class Palette
 {

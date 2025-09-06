@@ -1,7 +1,10 @@
 using System.Numerics;
 using Raylib_cs;
+using skakmat.Game;
+using skakmat.Utilites;
+using skakmat.Utilities;
 
-namespace skakmat;
+namespace skakmat.Rendering;
 
 public class BoardRenderer
 {
@@ -20,7 +23,7 @@ public class BoardRenderer
 
     public void Initialize()
     {
-        _spriteTexture = RaylibUtility.LoadTextureChecked("assets/sprite.png");
+        _spriteTexture = RaylibUtility.LoadTextureChecked("../assets/sprite.png");
     }
 
     public void DrawBoard()

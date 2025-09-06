@@ -1,9 +1,12 @@
 using Raylib_cs;
-using static skakmat.Board;
+using skakmat.Game;
+using skakmat.Rendering;
+using skakmat.Utilites;
+using skakmat.Utilities;
 
-namespace skakmat;
+namespace skakmat.Engine;
 
-class Engine
+class GameEngine
 
 {
     private readonly Board _board;
@@ -14,7 +17,7 @@ class Engine
     private readonly int _sideLength;
     private PieceSelection? _selectedPiece;
 
-    public Engine()
+    public GameEngine()
     {
         var windowHeight = RaylibUtility.GetWindowHeightDynamically();
         _sideLength = windowHeight / Constants.SquareCount;
@@ -59,7 +62,7 @@ class Engine
         {
             var (index, bit) = BoardUtility.IndexAndBitUnderMouse(mouseGridPos);
 
-            if (_selectedPiece.HasValue && IsValidMove(_selectedPiece.Value, bit))
+            if (_selectedPiece.HasValue && Board.IsValidMove(_selectedPiece.Value, bit))
             {
                 _board.MakeMove(_selectedPiece.Value, bit);
                 _selectedPiece = null;

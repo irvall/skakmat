@@ -1,7 +1,8 @@
 using System.Numerics;
 using Raylib_cs;
+using skakmat.Game;
 
-namespace skakmat;
+namespace skakmat.Engine;
 public class InputHandler(int sideLength)
 {
     public static bool IsLeftMouseButtonPressed =>
