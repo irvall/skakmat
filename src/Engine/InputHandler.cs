@@ -5,6 +5,11 @@ using skakmat.Game;
 namespace skakmat.Engine;
 public class InputHandler(int sideLength)
 {
+
+    public static bool IsLeftArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT);
+    public static bool IsRightArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT);
+    public static bool IsLetterDPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_D);
+
     public static bool IsLeftMouseButtonPressed =>
         Raylib.IsMouseButtonPressed(MouseButton.MOUSE_LEFT_BUTTON);
 

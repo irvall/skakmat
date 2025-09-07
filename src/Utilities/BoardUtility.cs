@@ -89,4 +89,39 @@ public class BoardUtility
         return (idx, 1UL << idx);
     }
 
+    public static string IndexToSquareString(int index)
+    {
+        var letter = (char)('a' + (index % 8));
+        return letter + (8 - (index / 8)).ToString();
+
+    }
+
+    public static int BitToIndex(ulong bit)
+    {
+        for (var i = 0; i < 64; i++)
+            if (bit.Contains(1UL << i))
+                return i;
+        return -1;
+    }
+
+    public static string PieceTypeToString(int pieceType)
+    {
+        return pieceType switch
+        {
+            Constants.WhitePawn or Constants.BlackPawn => "",
+            Constants.WhiteRook or Constants.BlackRook => "R",
+            Constants.WhiteKnight or Constants.BlackKnight => "N",
+            Constants.WhiteBishop or Constants.BlackBishop => "B",
+            Constants.WhiteQueen or Constants.BlackQueen => "Q",
+            Constants.WhiteKing or Constants.BlackKing => "K",
+            _ => throw new NotImplementedException(),
+        };
+    }
+
+
+    public static Move InvertMove(Move move)
+    {
+        return new Move(move.PieceType, move.TargetBit, move.OriginBit);
+    }
+
 }

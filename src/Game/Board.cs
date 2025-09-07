@@ -6,7 +6,10 @@ namespace skakmat.Game;
 public class Board
 {
 
+    private bool _whiteToPlay = true;
     private readonly ulong[] _bbs;
+    private int _moveIndex = 0;
+    private readonly List<Move> _movesPlayed = [];
 
     internal ulong WhitePieces =>
         _bbs[Constants.WhitePawn]
@@ -50,6 +53,16 @@ public class Board
         if (_bbs[Constants.BlackKing].Contains(square)) return Constants.BlackKing;
         return Constants.EmptySquare;
     }
+
+    public Move GetMoveAt(int index)
+    {
+        if (index < 0 || index >= _movesPlayed.Count)
+            throw new IndexOutOfRangeException("Move index invalid: " + index);
+        return _movesPlayed[index];
+    }
+
+    public bool WhiteToPlay => _whiteToPlay;
+    public int MovesPlayed => _movesPlayed.Count;
 
     public int GetPieceTypeAtIndex(int index)
     {
@@ -146,15 +159,36 @@ public class Board
         return selection.LegalMoves.Contains(targetBit);
     }
 
-    public bool MakeMove(Move move)
+    public bool UndoMove()
     {
-        var originBit = 1UL << move.FromIndex;
-        var targetBit = 1UL << move.ToIndex;
-        var pieceType = GetPieceTypeAtIndex(move.FromIndex);
-        return MakeMove(originBit, targetBit, pieceType);
+        if (MovesPlayed == 0)
+            return false;
+        var latestMove = _movesPlayed[^1];
+        var invertedMove = BoardUtility.InvertMove(latestMove);
+        return MakeMove(invertedMove, false);
     }
 
-    public bool MakeMove(ulong originBit, ulong targetBit, int pieceType)
+    public bool UndoFullMove()
+    {
+        if (MovesPlayed == 0 || MovesPlayed % 2 != 0)
+            return false;
+
+        return UndoMove() && UndoMove();
+    }
+
+    public bool MakeMove(Move move, bool incrementIndex = true)
+    {
+        var moveMade = MakeMove(move.OriginBit, move.TargetBit, move.PieceType);
+        if (moveMade)
+        {
+            if (incrementIndex)
+                _moveIndex++;
+            _movesPlayed.Add(move);
+        }
+        return moveMade;
+    }
+
+    private bool MakeMove(ulong originBit, ulong targetBit, int pieceType)
     {
         var optCapturedPiece = GetPieceTypeFromSquare(targetBit);
         if (optCapturedPiece != Constants.EmptySquare)
@@ -163,53 +197,56 @@ public class Board
         }
         _bbs[pieceType] ^= originBit;
         _bbs[pieceType] |= targetBit;
+        _whiteToPlay = !_whiteToPlay;
         return true;
     }
 
-    public bool MakeMove(PieceSelection selection, ulong targetBit)
-    {
-        if (!IsValidMove(selection, targetBit))
-            return false;
-
-        var originBit = 1UL << selection.SquareIndex;
-        return MakeMove(originBit, targetBit, selection.PieceType);
-    }
-
-    public PieceSelection? TrySelectPiece(int index, bool whiteToPlay)
+    public PieceSelection? TrySelectPiece(int index)
     {
         var pieceType = GetPieceTypeAtIndex(index);
-        if (pieceType == Constants.EmptySquare || !IsCorrectColor(pieceType, whiteToPlay)) return null;
+        if (pieceType == Constants.EmptySquare || !IsCorrectColor(pieceType, _whiteToPlay)) return null;
         var legalMoves = GetLegalMoves(pieceType, index);
         return new PieceSelection(pieceType, index, legalMoves);
     }
 
-    public readonly struct Move(int pieceType, int fromIndex, int toIndex)
-    {
-        public readonly int PieceType = pieceType;
-        public readonly int FromIndex = fromIndex;
-        public readonly int ToIndex = toIndex;
-    }
 
-    public List<Move> GetValidMoves(bool whiteToPlay)
+    public List<Move> GenerateMoves()
     {
         var validMoves = new List<Move>();
         for (var idx = 0; idx < 64; idx++)
         {
-            var pieceType = GetPieceTypeAtIndex(idx);
+            var originBit = 1UL << idx;
+            var pieceType = GetPieceTypeFromSquare(originBit);
             if (pieceType == Constants.EmptySquare) continue;
-            if (!IsCorrectColor(pieceType, whiteToPlay)) continue;
+            if (!IsCorrectColor(pieceType, _whiteToPlay)) continue;
 
             var legalMoves = GetLegalMoves(pieceType, idx);
             for (var j = 0; j < 64; j++)
             {
-                if (legalMoves.Contains(1UL << j))
+                var targetBit = 1UL << j;
+                if (legalMoves.Contains(targetBit))
                 {
-                    validMoves.Add(new Move(pieceType, idx, j));
+                    validMoves.Add(new Move(pieceType, originBit, targetBit));
                 }
             }
         }
 
         return validMoves;
+    }
+
+    public void DumpBoardData()
+    {
+        Console.WriteLine("=== BOARD DUMP ===");
+        Console.WriteLine($"{(_whiteToPlay ? "White" : "Black")} to play");
+        Console.WriteLine("Move index: " + _moveIndex);
+        Console.WriteLine("Moves:");
+        var moveIndex = 1;
+        for (var i = 0; i < _movesPlayed.Count; i += 2)
+        {
+            var whiteMove = _movesPlayed[i];
+            var blackMove = _movesPlayed[i + 1];
+            Console.WriteLine($"{moveIndex++}. {whiteMove.ToSanNotation()} {blackMove.ToSanNotation()}");
+        }
     }
 
 }

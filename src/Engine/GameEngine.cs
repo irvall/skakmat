@@ -15,8 +15,10 @@ class GameEngine
 
     private readonly (int width, int height) _windowSize;
     private readonly int _sideLength;
+    private readonly Random _random;
     private PieceSelection? _selectedPiece;
-    private bool _whiteToPlay;
+    private bool _debug = true;
+    private bool _dumpBoard = true;
 
     public GameEngine()
     {
@@ -24,7 +26,7 @@ class GameEngine
         _sideLength = windowHeight / Constants.SquareCount;
 
         _windowSize = (windowHeight, windowHeight);
-        _whiteToPlay = true;
+        _random = new Random(256);
 
         _board = new Board();
         _renderer = new BoardRenderer(windowHeight, _sideLength);
@@ -51,19 +53,23 @@ class GameEngine
         {
             HandleInput();
             Render();
+            if (_debug && _dumpBoard)
+            {
+                _board.DumpBoardData();
+                _dumpBoard = false;
+            }
         }
     }
 
     private void HandleInput()
     {
-        if (!_whiteToPlay)
+        if (!_board.WhiteToPlay)
         {
-            var random = new Random();
-            var validMoves = _board.GetValidMoves(_whiteToPlay);
-            var randomMove = validMoves[random.Next(validMoves.Count)];
+            var validMoves = _board.GenerateMoves();
+            var randomMove = validMoves[_random.Next(validMoves.Count)];
             _board.MakeMove(randomMove);
-            _whiteToPlay = !_whiteToPlay;
-            return;
+            Thread.Sleep(_random.Next(200, 800));
+            _dumpBoard = true;
         }
         var mouseGridPos = _inputHandler.GetMouseGridPosition();
         var isMouseOnBoard = InputHandler.IsMouseOnBoard(mouseGridPos);
@@ -73,15 +79,19 @@ class GameEngine
 
             if (_selectedPiece.HasValue && Board.IsValidMove(_selectedPiece.Value, bit))
             {
-                _board.MakeMove(_selectedPiece.Value, bit);
+                var originBit = 1UL << _selectedPiece.Value.SquareIndex;
+                var move = new Move(_selectedPiece.Value.PieceType, originBit, bit);
+                _board.MakeMove(move);
                 _selectedPiece = null;
-                _whiteToPlay = !_whiteToPlay;
             }
             else
             {
-                _selectedPiece = _board.TrySelectPiece(index, _whiteToPlay);
+                _selectedPiece = _board.TrySelectPiece(index);
             }
         }
+        if (InputHandler.IsLeftArrowPressed)
+            _board.UndoMove();
+
     }
 
     private void Render()
@@ -90,13 +100,21 @@ class GameEngine
         Raylib.BeginDrawing();
         Raylib.ClearBackground(bgColor);
         _renderer.DrawBoard();
-        _renderer.DrawPieces(_board);
 
         if (_selectedPiece.HasValue)
         {
             _renderer.HighlightSquares(_selectedPiece.Value.LegalMoves, Color.GREEN);
         }
 
+
+        if (_board.MovesPlayed > 0)
+        {
+            var lastMove = _board.GetMoveAt(_board.MovesPlayed - 1);
+            _renderer.HighlightSquares(lastMove.OriginBit, Color.BLUE);
+            _renderer.HighlightSquares(lastMove.TargetBit, Color.BLUE);
+        }
+
+        _renderer.DrawPieces(_board);
         Raylib.EndDrawing();
     }
 
