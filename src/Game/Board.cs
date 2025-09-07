@@ -107,7 +107,7 @@ public class Board
     };
 
 
-    public ulong LegalPawnMoves(int index, bool isWhite)
+    public ulong GetLegalPawnMoves(int index, bool isWhite)
     {
         var moveBits = isWhite ? _moveTables.WhitePawnMoves[index] : _moveTables.BlackPawnMoves[index];
         var attackBits = isWhite ? _moveTables.WhitePawnAttacks[index] : _moveTables.BlackPawnAttacks[index];
@@ -121,20 +121,20 @@ public class Board
         return moveBits.Exclude(AllPieces) | attackBits;
     }
 
-    public ulong LegalMoves(int pieceType, int index)
+    public ulong GetLegalMoves(int pieceType, int index)
     {
         return pieceType switch
         {
-            Constants.WhitePawn => LegalPawnMoves(index, true),
-            Constants.BlackPawn => LegalPawnMoves(index, false),
+            Constants.WhitePawn => GetLegalPawnMoves(index, true),
+            Constants.BlackPawn => GetLegalPawnMoves(index, false),
             Constants.WhiteBishop => MoveTables.BishopAttacks(index, AllPieces).Exclude(WhitePieces),
             Constants.BlackBishop => MoveTables.BishopAttacks(index, AllPieces).Exclude(BlackPieces),
             Constants.WhiteKnight => _moveTables.KnightMoves[index].Exclude(WhitePieces),
             Constants.BlackKnight => _moveTables.KnightMoves[index].Exclude(BlackPieces),
             Constants.WhiteRook => MoveTables.RookAttacks(index, AllPieces).Exclude(WhitePieces),
             Constants.BlackRook => MoveTables.RookAttacks(index, AllPieces).Exclude(BlackPieces),
-            Constants.WhiteQueen => LegalMoves(Constants.WhiteRook, index) | LegalMoves(Constants.WhiteBishop, index),
-            Constants.BlackQueen => LegalMoves(Constants.BlackRook, index) | LegalMoves(Constants.BlackBishop, index),
+            Constants.WhiteQueen => GetLegalMoves(Constants.WhiteRook, index) | GetLegalMoves(Constants.WhiteBishop, index),
+            Constants.BlackQueen => GetLegalMoves(Constants.BlackRook, index) | GetLegalMoves(Constants.BlackBishop, index),
             Constants.WhiteKing => _moveTables.KingMoves[index].Exclude(ControlledSquares(false) | WhitePieces),
             Constants.BlackKing => _moveTables.KingMoves[index].Exclude(ControlledSquares(true) | BlackPieces),
             _ => 0UL,
@@ -146,29 +146,70 @@ public class Board
         return selection.LegalMoves.Contains(targetBit);
     }
 
-    public bool MakeMove(PieceSelection selection, ulong targetBit)
+    public bool MakeMove(Move move)
     {
-        if (!IsValidMove(selection, targetBit))
-            return false;
+        var originBit = 1UL << move.FromIndex;
+        var targetBit = 1UL << move.ToIndex;
+        var pieceType = GetPieceTypeAtIndex(move.FromIndex);
+        return MakeMove(originBit, targetBit, pieceType);
+    }
 
+    public bool MakeMove(ulong originBit, ulong targetBit, int pieceType)
+    {
         var optCapturedPiece = GetPieceTypeFromSquare(targetBit);
         if (optCapturedPiece != Constants.EmptySquare)
         {
             _bbs[optCapturedPiece] ^= targetBit;
         }
-        var originBit = 1UL << selection.SquareIndex;
-        _bbs[selection.PieceType] ^= originBit;
-        _bbs[selection.PieceType] |= targetBit;
+        _bbs[pieceType] ^= originBit;
+        _bbs[pieceType] |= targetBit;
         return true;
+    }
 
+    public bool MakeMove(PieceSelection selection, ulong targetBit)
+    {
+        if (!IsValidMove(selection, targetBit))
+            return false;
+
+        var originBit = 1UL << selection.SquareIndex;
+        return MakeMove(originBit, targetBit, selection.PieceType);
     }
 
     public PieceSelection? TrySelectPiece(int index, bool whiteToPlay)
     {
         var pieceType = GetPieceTypeAtIndex(index);
         if (pieceType == Constants.EmptySquare || !IsCorrectColor(pieceType, whiteToPlay)) return null;
-        var legalMoves = LegalMoves(pieceType, index);
+        var legalMoves = GetLegalMoves(pieceType, index);
         return new PieceSelection(pieceType, index, legalMoves);
+    }
+
+    public readonly struct Move(int pieceType, int fromIndex, int toIndex)
+    {
+        public readonly int PieceType = pieceType;
+        public readonly int FromIndex = fromIndex;
+        public readonly int ToIndex = toIndex;
+    }
+
+    public List<Move> GetValidMoves(bool whiteToPlay)
+    {
+        var validMoves = new List<Move>();
+        for (var idx = 0; idx < 64; idx++)
+        {
+            var pieceType = GetPieceTypeAtIndex(idx);
+            if (pieceType == Constants.EmptySquare) continue;
+            if (!IsCorrectColor(pieceType, whiteToPlay)) continue;
+
+            var legalMoves = GetLegalMoves(pieceType, idx);
+            for (var j = 0; j < 64; j++)
+            {
+                if (legalMoves.Contains(1UL << j))
+                {
+                    validMoves.Add(new Move(pieceType, idx, j));
+                }
+            }
+        }
+
+        return validMoves;
     }
 
 }

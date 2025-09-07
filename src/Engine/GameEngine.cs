@@ -56,6 +56,15 @@ class GameEngine
 
     private void HandleInput()
     {
+        if (!_whiteToPlay)
+        {
+            var random = new Random();
+            var validMoves = _board.GetValidMoves(_whiteToPlay);
+            var randomMove = validMoves[random.Next(validMoves.Count)];
+            _board.MakeMove(randomMove);
+            _whiteToPlay = !_whiteToPlay;
+            return;
+        }
         var mouseGridPos = _inputHandler.GetMouseGridPosition();
         var isMouseOnBoard = InputHandler.IsMouseOnBoard(mouseGridPos);
         if (InputHandler.IsLeftMouseButtonPressed && isMouseOnBoard)
