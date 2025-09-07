@@ -71,7 +71,7 @@ public class Board
     {
         return isWhite ?
             pieceType >= Constants.WhitePawn && pieceType <= Constants.WhiteKing
-            : pieceType >= Constants.BlackPawn && pieceType <= Constants.BlackPawn;
+            : pieceType >= Constants.BlackPawn && pieceType <= Constants.BlackKing;
     }
 
     private ulong ControlledSquares(bool isWhite)
@@ -163,10 +163,10 @@ public class Board
 
     }
 
-    public PieceSelection? TrySelectPiece(int index)
+    public PieceSelection? TrySelectPiece(int index, bool whiteToPlay)
     {
         var pieceType = GetPieceTypeAtIndex(index);
-        if (pieceType == Constants.EmptySquare) return null;
+        if (pieceType == Constants.EmptySquare || !IsCorrectColor(pieceType, whiteToPlay)) return null;
         var legalMoves = LegalMoves(pieceType, index);
         return new PieceSelection(pieceType, index, legalMoves);
     }

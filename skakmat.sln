@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "skakmat", "skakmat.csproj", "{53CC293D-49BD-4C75-9ECF-6E60774DBB35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "skakmat", "src/skakmat.csproj", "{53CC293D-49BD-4C75-9ECF-6E60774DBB35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

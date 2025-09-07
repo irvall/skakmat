@@ -23,7 +23,7 @@ public class BoardRenderer
 
     public void Initialize()
     {
-        _spriteTexture = RaylibUtility.LoadTextureChecked("../assets/sprite.png");
+        _spriteTexture = RaylibUtility.LoadTextureChecked("assets/sprite.png");
     }
 
     public void DrawBoard()

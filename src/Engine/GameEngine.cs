@@ -16,6 +16,7 @@ class GameEngine
     private readonly (int width, int height) _windowSize;
     private readonly int _sideLength;
     private PieceSelection? _selectedPiece;
+    private bool _whiteToPlay;
 
     public GameEngine()
     {
@@ -23,6 +24,7 @@ class GameEngine
         _sideLength = windowHeight / Constants.SquareCount;
 
         _windowSize = (windowHeight, windowHeight);
+        _whiteToPlay = true;
 
         _board = new Board();
         _renderer = new BoardRenderer(windowHeight, _sideLength);
@@ -52,8 +54,6 @@ class GameEngine
         }
     }
 
-
-
     private void HandleInput()
     {
         var mouseGridPos = _inputHandler.GetMouseGridPosition();
@@ -66,17 +66,17 @@ class GameEngine
             {
                 _board.MakeMove(_selectedPiece.Value, bit);
                 _selectedPiece = null;
+                _whiteToPlay = !_whiteToPlay;
             }
             else
             {
-                _selectedPiece = _board.TrySelectPiece(index);
+                _selectedPiece = _board.TrySelectPiece(index, _whiteToPlay);
             }
         }
     }
 
     private void Render()
     {
-
         var bgColor = new Color(4, 15, 15, 1);
         Raylib.BeginDrawing();
         Raylib.ClearBackground(bgColor);
@@ -90,6 +90,5 @@ class GameEngine
 
         Raylib.EndDrawing();
     }
-
 
 }
