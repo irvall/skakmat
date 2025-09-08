@@ -1,3 +1,5 @@
+using skakmat.Game;
+
 namespace skakmat.Chess;
 
 public class Masks
@@ -26,13 +28,26 @@ public class Masks
 
     public static ulong WhiteKingShortGap = 0x6000000000000000;
     public static ulong WhiteKingLongGap = 0xe00000000000000;
-    public static ulong WhiteKingTryCastleShort = 0xc000000000000000;
-    public static ulong WhiteKingTryCastleLong = 0x700000000000000;
+    private const ulong WhiteKingTryCastleShort = 0xc000000000000000;
+    private static ulong WhiteKingTryCastleLong = 0x700000000000000;
 
-    public static ulong BlackKingShortGap = 0x60;
+
+    public const ulong BlackKingShortGap = 0x60;
     public static ulong BlackKingLongGap = 0xe;
-    public static ulong BlackKingTryCastleShort = 0xc0;
+    private static ulong BlackKingTryCastleShort = 0xc0;
     public static ulong BlackKingTryCastleLong = 0x7;
+
+    public static ulong KingAttemptsShortCastle(bool isWhite) =>
+        isWhite ? WhiteKingTryCastleShort : BlackKingTryCastleShort;
+
+    public static ulong KingStartSquare(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.E1.AsBit() : BoardSquares.Squares.E8.AsBit();
+
+    public static ulong RookRightCorner(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.H1.AsBit() : BoardSquares.Squares.H8.AsBit();
+    
+    public static ulong RookShortCastlePosition(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.F1.AsBit() : BoardSquares.Squares.F8.AsBit();
 
 
     public struct Boxes

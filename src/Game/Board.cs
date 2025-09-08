@@ -184,24 +184,45 @@ public class Board(bool debug)
         _bbs[pawnType] ^= lastRank & _bbs[pawnType];
     }
 
-    private void HandleCastling(Move move)
+    private bool CanSideCastle(Move move)
     {
-        var whiteCanCastle = move.PieceType == Constants.WhiteKing && !whiteKingMoved;
-        var blackCanCastle = move.PieceType == Constants.BlackKing && !blackKingMoved;
-        if (!whiteCanCastle && !blackCanCastle)
+        if (_whiteToPlay)
+            return move.PieceType == Constants.WhiteKing && !whiteKingMoved;
+        else
+            return move.PieceType == Constants.BlackKing && !blackKingMoved;
+    }
+
+    private int GetPieceType(int type)
+    {
+        return _whiteToPlay ? type : type + 6;
+    }
+
+    private int GetRook()
+    {
+        return GetPieceType(Constants.WhiteRook);
+    }
+
+    private void ShortCastling(Move move)
+    {
+        if (!CanSideCastle(move))
             return;
 
-        var kingStartPosition = _whiteToPlay ? BoardSquares.Squares.E1.AsBit() : BoardSquares.Squares.E8.AsBit();
-        var kingCastlingMoves = _whiteToPlay ? Masks.WhiteKingTryCastleShort : Masks.BlackKingTryCastleShort;
-        if (move.OriginBit.Contains(kingStartPosition) && kingCastlingMoves.Contains(move.TargetBit))
+        if (Masks.KingStartSquare(_whiteToPlay).Contains(move.OriginBit)
+            && Masks.KingAttemptsShortCastle(_whiteToPlay).Contains(move.TargetBit))
         {
             // Valid short castle
-            var rookStartPosition = _whiteToPlay ? BoardSquares.Squares.H1.AsBit() : BoardSquares.Squares.H8.AsBit();
-            var rookEndPosition = _whiteToPlay ? BoardSquares.Squares.F1.AsBit() : BoardSquares.Squares.F8.AsBit();
-            var rookType = _whiteToPlay ? Constants.WhiteRook : Constants.BlackRook;
-            var rookMove = new Move(rookType, rookStartPosition, rookEndPosition);
+            var rookStartPosition = Masks.RookRightCorner(_whiteToPlay);
+            var rookEndPosition = Masks.RookShortCastlePosition(_whiteToPlay);
+            var rookMove = new Move(GetRook(), rookStartPosition, rookEndPosition);
             MakeMove(rookMove, swapSide: false);
         }
+    }
+
+
+    private void HandleCastling(Move move)
+    {
+        if (IsKingUnderAttack()) return;
+        ShortCastling(move);
     }
 
 
@@ -257,7 +278,11 @@ public class Board(bool debug)
 
     private bool IsValidCastling(Move move)
     {
-        if (move.PieceType != Constants.WhiteKing && move.PieceType != Constants.BlackKing)
+        if (IsKingUnderAttack()) return false;
+        var whiteCanCastle = move.PieceType == Constants.WhiteKing && !whiteKingMoved;
+        var blackCanCastle = move.PieceType == Constants.BlackKing && !blackKingMoved;
+
+        if (!whiteCanCastle && !blackCanCastle)
             return false;
 
         var emptySquares = EmptySquares;
