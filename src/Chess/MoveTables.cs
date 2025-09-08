@@ -28,14 +28,10 @@ public partial class MoveTables
     {
         _boardSquareToIndex = [];
         _indexToBoardSquare = [];
-        var sw = new Stopwatch();
-        sw.Start();
         InitializeBoardMaps();
         InitializePawnMoves();
         InitializeKingMoves();
         InitializeKnightMoves();
-        var elapsedMilliseconds = sw.ElapsedMilliseconds;
-        Console.WriteLine($"Precomputed moves in {elapsedMilliseconds}ms");
     }
 
     public static ulong RookAttacks(int square, ulong blockers)

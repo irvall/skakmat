@@ -109,4 +109,9 @@ public class BoardRenderer
         }
     }
 
+    public void DrawBigMessage(string text)
+    {
+        Raylib.DrawText(text, _windowSize.width / 8, _windowSize.height / 2, 72, Color.BLACK);
+    }
+
 }

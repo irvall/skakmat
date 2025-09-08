@@ -9,6 +9,7 @@ namespace skakmat.Engine;
 class GameEngine
 
 {
+    private readonly bool _debug = true;
     private readonly Board _board;
     private readonly BoardRenderer _renderer;
     private readonly InputHandler _inputHandler;
@@ -17,8 +18,17 @@ class GameEngine
     private readonly int _sideLength;
     private readonly Random _random;
     private PieceSelection? _selectedPiece;
-    private bool _debug = true;
-    private bool _dumpBoard = true;
+    private bool showControlledSquares = false;
+    private bool playAgainstComputer = false;
+
+    enum GameStatus
+    {
+        GameOn,
+        WhiteWon,
+        BlackWon
+    }
+
+    private GameStatus status = GameStatus.GameOn;
 
     public GameEngine()
     {
@@ -28,7 +38,7 @@ class GameEngine
         _windowSize = (windowHeight, windowHeight);
         _random = new Random(256);
 
-        _board = new Board();
+        _board = new Board(_debug);
         _renderer = new BoardRenderer(windowHeight, _sideLength);
         _inputHandler = new InputHandler(_sideLength);
     }
@@ -53,40 +63,47 @@ class GameEngine
         {
             HandleInput();
             Render();
-            if (_debug && _dumpBoard)
-            {
-                _board.DumpBoardData();
-                _dumpBoard = false;
-            }
         }
     }
 
     private void HandleInput()
     {
-        if (!_board.WhiteToPlay)
+        var validMoves = _board.GenerateMoves();
+        if (validMoves.Count == 0)
         {
-            var validMoves = _board.GenerateMoves();
+            status = _board.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            return;
+        }
+        if (playAgainstComputer && !_board.WhiteToPlay)
+        {
+            // TODO: Allow AI to play as white
             var randomMove = validMoves[_random.Next(validMoves.Count)];
             _board.MakeMove(randomMove);
             Thread.Sleep(_random.Next(200, 800));
-            _dumpBoard = true;
         }
-        var mouseGridPos = _inputHandler.GetMouseGridPosition();
-        var isMouseOnBoard = InputHandler.IsMouseOnBoard(mouseGridPos);
-        if (InputHandler.IsLeftMouseButtonPressed && isMouseOnBoard)
+        if (InputHandler.IsLeftMouseButtonPressed)
         {
-            var (index, bit) = BoardUtility.IndexAndBitUnderMouse(mouseGridPos);
+            var mouseGridPos = _inputHandler.GetMouseGridPosition();
+            var isMouseOnBoard = InputHandler.IsMouseOnBoard(mouseGridPos);
+            if (isMouseOnBoard)
+            {
+                var (index, bit) = BoardUtility.IndexAndBitUnderMouse(mouseGridPos);
 
-            if (_selectedPiece.HasValue && Board.IsValidMove(_selectedPiece.Value, bit))
-            {
-                var originBit = 1UL << _selectedPiece.Value.SquareIndex;
-                var move = new Move(_selectedPiece.Value.PieceType, originBit, bit);
-                _board.MakeMove(move);
-                _selectedPiece = null;
-            }
-            else
-            {
-                _selectedPiece = _board.TrySelectPiece(index);
+                if (_selectedPiece.HasValue && Board.IsPseudoValidMove(_selectedPiece.Value, bit))
+                {
+                    var originBit = 1UL << _selectedPiece.Value.SquareIndex;
+                    var move = new Move(_selectedPiece.Value.PieceType, originBit, bit);
+
+                    if (validMoves.ToHashSet().Contains(move))
+                    {
+                        _board.MakeMove(move);
+                        _selectedPiece = null;
+                    }
+                }
+                else
+                {
+                    _selectedPiece = _board.TrySelectPiece(index);
+                }
             }
         }
         if (InputHandler.IsLeftArrowPressed)
@@ -114,7 +131,27 @@ class GameEngine
             _renderer.HighlightSquares(lastMove.TargetBit, Color.BLUE);
         }
 
+        if (showControlledSquares)
+        {
+            var controlled = _board.ControlledSquares();
+            _renderer.HighlightSquares(controlled, Color.RED);
+        }
+
         _renderer.DrawPieces(_board);
+
+        if (status == GameStatus.WhiteWon)
+        {
+            _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
+            _renderer.DrawBigMessage("YOUR WINNER");
+        }
+
+        if (status == GameStatus.BlackWon)
+        {
+            _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
+            _renderer.DrawBigMessage("YOUR LOOSE");
+        }
+
+
         Raylib.EndDrawing();
     }
 
