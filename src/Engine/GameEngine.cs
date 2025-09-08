@@ -18,8 +18,8 @@ class GameEngine
     private readonly int _sideLength;
     private readonly Random _random;
     private PieceSelection? _selectedPiece;
-    private bool showControlledSquares = false;
-    private bool playAgainstComputer = false;
+    private readonly bool showControlledSquares = false;
+    private readonly bool playAgainstComputer = true;
 
     enum GameStatus
     {
@@ -66,6 +66,14 @@ class GameEngine
         }
     }
 
+    private Move GetComputerMove(List<Move> validMoves)
+    {
+        var randomMove = validMoves[_random.Next(validMoves.Count)];
+        // TODO: Until proper AI, simulate "thinking"
+        Thread.Sleep(_random.Next(200, 800));
+        return randomMove;
+    }
+
     private void HandleInput()
     {
         var validMoves = _board.GenerateMoves();
@@ -77,9 +85,8 @@ class GameEngine
         if (playAgainstComputer && !_board.WhiteToPlay)
         {
             // TODO: Allow AI to play as white
-            var randomMove = validMoves[_random.Next(validMoves.Count)];
-            _board.MakeMove(randomMove);
-            Thread.Sleep(_random.Next(200, 800));
+            var computerMove = GetComputerMove(validMoves);
+            _board.MakeMove(computerMove);
         }
         if (InputHandler.IsLeftMouseButtonPressed)
         {

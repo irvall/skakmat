@@ -7,7 +7,7 @@ public class Board(bool debug)
 {
 
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenWhiteKingInCheck1);
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenDefaultPosition);
     private readonly List<Move> _movesPlayed = [];
 
     internal ulong WhitePieces =>
