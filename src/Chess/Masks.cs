@@ -37,17 +37,32 @@ public class Masks
     private static ulong BlackKingTryCastleShort = 0xc0;
     public static ulong BlackKingTryCastleLong = 0x7;
 
+    public static ulong QueenSideCastlePath(bool isWhite) =>
+        isWhite ? WhiteKingLongGap : BlackKingLongGap;
+
+    public static ulong KingSideCastlePath(bool isWhite) =>
+        isWhite ? WhiteKingShortGap : BlackKingShortGap;
+
     public static ulong KingAttemptsShortCastle(bool isWhite) =>
         isWhite ? WhiteKingTryCastleShort : BlackKingTryCastleShort;
+
+    public static ulong KingAttemptsLongCastle(bool isWhite) =>
+        isWhite ? WhiteKingTryCastleLong : BlackKingTryCastleLong;
 
     public static ulong KingStartSquare(bool isWhite) =>
         isWhite ? BoardSquares.Squares.E1.AsBit() : BoardSquares.Squares.E8.AsBit();
 
     public static ulong RookRightCorner(bool isWhite) =>
         isWhite ? BoardSquares.Squares.H1.AsBit() : BoardSquares.Squares.H8.AsBit();
-    
+
+    public static ulong RookLeftCorner(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.A1.AsBit() : BoardSquares.Squares.A8.AsBit();
+
     public static ulong RookShortCastlePosition(bool isWhite) =>
         isWhite ? BoardSquares.Squares.F1.AsBit() : BoardSquares.Squares.F8.AsBit();
+
+    public static ulong RookLongCastlePosition(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.D1.AsBit() : BoardSquares.Squares.D8.AsBit();
 
 
     public struct Boxes

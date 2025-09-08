@@ -12,4 +12,9 @@ internal static class NumberExtensions
         return bitboard & ~excludedBits;
     }
 
+    public static bool ForAll(this ulong bitboard, ulong targetBits)
+    {
+        return (bitboard & targetBits) == targetBits;
+    }
+
 }
