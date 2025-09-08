@@ -236,10 +236,10 @@ public partial class MoveTables
             RaylibUtility.WriteColor(RaylibUtility.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
         }
 
-        for (var i = 0; i < 64; i++)
+        foreach (var (i, bit) in BoardUtility.EnumerateSquares())
         {
             if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
-            var theBit = (1UL << i) & bitBoard;
+            var theBit = bit & bitBoard;
             if (theBit != 0)
                 Console.Write(RaylibUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
             else

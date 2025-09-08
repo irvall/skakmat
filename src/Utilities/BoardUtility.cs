@@ -83,6 +83,15 @@ public class BoardUtility
         return bbs;
     }
 
+    public static IEnumerable<(int index, ulong bit)> EnumerateSquares()
+    {
+        for (var idx = 0; idx < 64; idx++)
+        {
+            var bit = 1UL << idx;
+            yield return (idx, bit);
+        }
+    }
+
     public static (int, ulong) IndexAndBitUnderMouse(Vector2 mousePosition)
     {
         var idx = (int)(mousePosition.X + mousePosition.Y * Constants.SquareCount);
@@ -98,9 +107,9 @@ public class BoardUtility
 
     public static int BitToIndex(ulong bit)
     {
-        for (var i = 0; i < 64; i++)
-            if (bit.Contains(1UL << i))
-                return i;
+        foreach (var (idx, squareBit) in EnumerateSquares())
+            if (bit.Contains(squareBit))
+                return idx;
         return -1;
     }
 

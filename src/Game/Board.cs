@@ -3,11 +3,11 @@ using skakmat.Utilities;
 
 namespace skakmat.Game;
 
-public class Board
+public class Board(bool debug)
 {
 
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs;
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenWhiteKingInCheck1);
     private readonly List<Move> _movesPlayed = [];
 
     internal ulong WhitePieces =>
@@ -28,29 +28,9 @@ public class Board
 
     internal ulong AllPieces => WhitePieces | BlackPieces;
 
-    private readonly MoveTables _moveTables;
+    private readonly MoveTables _moveTables = new();
 
-    private bool _debug;
-
-    [Flags]
-    enum KingStatus
-    {
-        Neutral,
-        InCheck,
-        Castleable,
-        CastledLong,
-        CastledShort
-    };
-
-    private KingStatus _whiteKingStatus = KingStatus.Neutral;
-    private KingStatus _blackKingStatus = KingStatus.Neutral;
-
-    public Board(bool debug)
-    {
-        _debug = debug;
-        _bbs = BoardUtility.BitboardFromFen(Constants.FenNasty);
-        _moveTables = new MoveTables();
-    }
+    private readonly bool _debug = debug;
 
     public int GetPieceTypeFromSquare(ulong square)
     {
@@ -84,14 +64,13 @@ public class Board
         return GetPieceTypeFromSquare(1UL << index);
     }
 
-    public IEnumerable<(int square, int pieceType, ulong bit)> GetAllPieces()
+    public IEnumerable<(int pieceType, int index, ulong bit)> GetAllPieces()
     {
-        for (var sq = 0; sq < 64; sq++)
+        foreach (var (idx, bit) in BoardUtility.EnumerateSquares())
         {
-            var bit = 1UL << sq;
             var type = GetPieceTypeFromSquare(bit);
             if (type != Constants.EmptySquare)
-                yield return (sq, type, bit);
+                yield return (type, idx, bit);
         }
     }
 
@@ -110,34 +89,35 @@ public class Board
     private ulong ControlledSquares(bool isWhite)
     {
         var control = 0UL;
-        foreach (var (sq, type, _) in GetAllPieces())
+        var allPieces = AllPieces;
+        foreach (var (type, idx, _) in GetAllPieces())
         {
             if (IsCorrectColor(type, isWhite))
             {
-                control |= GetPieceAttacks(type, sq, AllPieces);
+                control |= GetPieceAttacks(type, idx, allPieces);
             }
         }
         return control;
     }
 
-    private ulong GetPieceAttacks(int pieceType, int square, ulong allPieces) => pieceType switch
+    private ulong GetPieceAttacks(int pieceType, int index, ulong allPieces) => pieceType switch
     {
-        Constants.WhitePawn => _moveTables.WhitePawnAttacks[square],
-        Constants.BlackPawn => _moveTables.BlackPawnAttacks[square],
-        Constants.WhiteKnight => _moveTables.KnightMoves[square].Exclude(WhitePieces),
-        Constants.BlackKnight => _moveTables.KnightMoves[square].Exclude(BlackPieces),
-        Constants.WhiteBishop => MoveTables.BishopAttacks(square, allPieces).Exclude(WhitePieces),
-        Constants.BlackBishop => MoveTables.BishopAttacks(square, allPieces).Exclude(BlackPieces),
-        Constants.WhiteRook => MoveTables.RookAttacks(square, allPieces).Exclude(WhitePieces),
-        Constants.BlackRook => MoveTables.RookAttacks(square, allPieces).Exclude(BlackPieces),
+        Constants.WhitePawn => _moveTables.WhitePawnAttacks[index],
+        Constants.BlackPawn => _moveTables.BlackPawnAttacks[index],
+        Constants.WhiteKnight => _moveTables.KnightMoves[index].Exclude(WhitePieces),
+        Constants.BlackKnight => _moveTables.KnightMoves[index].Exclude(BlackPieces),
+        Constants.WhiteBishop => MoveTables.BishopAttacks(index, allPieces).Exclude(WhitePieces),
+        Constants.BlackBishop => MoveTables.BishopAttacks(index, allPieces).Exclude(BlackPieces),
+        Constants.WhiteRook => MoveTables.RookAttacks(index, allPieces).Exclude(WhitePieces),
+        Constants.BlackRook => MoveTables.RookAttacks(index, allPieces).Exclude(BlackPieces),
         Constants.WhiteQueen =>
-            GetPieceAttacks(Constants.WhiteRook, square, allPieces)
-            | GetPieceAttacks(Constants.WhiteBishop, square, allPieces),
+            GetPieceAttacks(Constants.WhiteRook, index, allPieces)
+            | GetPieceAttacks(Constants.WhiteBishop, index, allPieces),
         Constants.BlackQueen =>
-            GetPieceAttacks(Constants.BlackRook, square, allPieces)
-            | GetPieceAttacks(Constants.BlackBishop, square, allPieces),
-        Constants.WhiteKing => _moveTables.KingMoves[square].Exclude(WhitePieces),
-        Constants.BlackKing => _moveTables.KingMoves[square].Exclude(BlackPieces),
+            GetPieceAttacks(Constants.BlackRook, index, allPieces)
+            | GetPieceAttacks(Constants.BlackBishop, index, allPieces),
+        Constants.WhiteKing => _moveTables.KingMoves[index].Exclude(WhitePieces),
+        Constants.BlackKing => _moveTables.KingMoves[index].Exclude(BlackPieces),
         _ => 0UL
     };
 
@@ -236,29 +216,20 @@ public class Board
     private bool IsKingUnderAttack()
     {
         var controlledSquares = ControlledSquares(!_whiteToPlay);
-        if (_whiteToPlay && _bbs[Constants.WhiteKing].Contains(controlledSquares))
-            return true;
-        if (!_whiteToPlay && _bbs[Constants.BlackKing].Contains(controlledSquares))
-            return true;
-        return false;
+        return _whiteToPlay && _bbs[Constants.WhiteKing].Contains(controlledSquares)
+           || !_whiteToPlay && _bbs[Constants.BlackKing].Contains(controlledSquares);
     }
 
 
     public List<Move> GenerateMoves()
     {
         var validMoves = new List<Move>();
-        for (var idx = 0; idx < 64; idx++)
+        foreach (var (pieceType, idx, originBit) in GetAllPieces())
         {
-            var originBit = 1UL << idx;
-            var pieceType = GetPieceTypeFromSquare(originBit);
-            if (pieceType == Constants.EmptySquare) continue;
             if (!IsCorrectColor(pieceType, _whiteToPlay)) continue;
-
             var legalMoves = GetPseudoLegalMoves(pieceType, idx);
-            for (var j = 0; j < 64; j++)
+            foreach (var (_, targetBit) in BoardUtility.EnumerateSquares())
             {
-                var targetBit = 1UL << j;
-
                 if (legalMoves.Contains(targetBit))
                 {
                     var possibleMove = new Move(pieceType, originBit, targetBit);
@@ -269,7 +240,6 @@ public class Board
                         validMoves.Add(possibleMove);
                     }
                     UndoMove(possibleMove, possibleTargetType);
-
                 }
             }
         }

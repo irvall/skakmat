@@ -37,5 +37,6 @@ public static class Constants
     public const string FenMaxPieceDensity = "rnbqkb1r/pp1p1ppp/2p5/4P3/2B5/8/PPP1NnPP/RNBQK2R w KQkq - 0 6";
     public const string FenNasty = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq a3 5 17";
     public const string FenWhiteToSmother = "rnb3rk/pppp2pp/8/2q3Np/8/8/PPPPPPPP/RNBQKB1R w KQq - 0 1";
+    public const string FenWhiteKingInCheck1 = "b3r3/8/8/8/8/4Kn2/8/1B6 w - - 0 1";
 
 }

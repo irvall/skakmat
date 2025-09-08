@@ -55,10 +55,10 @@ public class BoardRenderer
 
     public void DrawPieces(Board board)
     {
-        foreach (var (square, pieceType, _) in board.GetAllPieces())
+        foreach (var (pieceType, index, _) in board.GetAllPieces())
         {
-            var col = square % Constants.SquareCount;
-            var row = square / Constants.SquareCount;
+            var col = index % Constants.SquareCount;
+            var row = index / Constants.SquareCount;
             DrawPiece(col, row, pieceType);
         }
     }
