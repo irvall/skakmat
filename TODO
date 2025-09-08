@@ -1,7 +1,3 @@
-# King
-
-- Castling
-
 # Pawns
 
 - En passant
@@ -23,3 +19,5 @@
 # Bugs
 
 - Fix going backwards/forwards in moves played
+- Get looping straight; no repeated computations for move generation i.e.
+- Fix castling bugs (click king and then on rooks)
