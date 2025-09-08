@@ -7,7 +7,7 @@ public class Board(bool debug)
 {
 
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenWhiteKingCanCastle);
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenBothSidesCanCastle);
     private readonly List<Move> _movesPlayed = [];
 
     internal ulong WhitePieces =>
@@ -34,6 +34,7 @@ public class Board(bool debug)
     private readonly bool _debug = debug;
 
     private bool whiteKingMoved = false;
+    private bool blackKingMoved = false;
 
     public int GetPieceTypeFromSquare(ulong square)
     {
@@ -183,16 +184,39 @@ public class Board(bool debug)
         _bbs[pawnType] ^= lastRank & _bbs[pawnType];
     }
 
+    private void HandleCastling(Move move)
+    {
+        var whiteCanCastle = move.PieceType == Constants.WhiteKing && !whiteKingMoved;
+        var blackCanCastle = move.PieceType == Constants.BlackKing && !blackKingMoved;
+        if (!whiteCanCastle && !blackCanCastle)
+            return;
 
-    public void MakeMove(Move move)
+        var kingStartPosition = _whiteToPlay ? BoardSquares.Squares.E1.AsBit() : BoardSquares.Squares.E8.AsBit();
+        var kingCastlingMoves = _whiteToPlay ? Masks.WhiteKingTryCastleShort : Masks.BlackKingTryCastleShort;
+        if (move.OriginBit.Contains(kingStartPosition) && kingCastlingMoves.Contains(move.TargetBit))
+        {
+            // Valid short castle
+            var rookStartPosition = _whiteToPlay ? BoardSquares.Squares.H1.AsBit() : BoardSquares.Squares.H8.AsBit();
+            var rookEndPosition = _whiteToPlay ? BoardSquares.Squares.F1.AsBit() : BoardSquares.Squares.F8.AsBit();
+            var rookType = _whiteToPlay ? Constants.WhiteRook : Constants.BlackRook;
+            var rookMove = new Move(rookType, rookStartPosition, rookEndPosition);
+            MakeMove(rookMove, swapSide: false);
+        }
+    }
+
+
+    public void MakeMove(Move move, bool swapSide = true)
     {
         ApplyMove(move.OriginBit, move.TargetBit, move.PieceType);
         _movesPlayed.Add(move);
         PromotePawns();
-        // if (_debug && WhiteToPlay) DumpBoardData();
+        HandleCastling(move);
         if (_whiteToPlay && move.PieceType == Constants.WhiteKing)
             whiteKingMoved = true;
-        _whiteToPlay = !_whiteToPlay;
+        if (!_whiteToPlay && move.PieceType == Constants.BlackKing)
+            blackKingMoved = true;
+        if (swapSide)
+            _whiteToPlay = !_whiteToPlay;
     }
 
     private void ApplyMove(ulong originBit, ulong targetBit, int pieceType)
@@ -237,16 +261,9 @@ public class Board(bool debug)
             return false;
 
         var emptySquares = EmptySquares;
-        var whiteKingStartPosition = BoardSquares.Squares.E1.AsBit();
-
-        if (_whiteToPlay && !whiteKingMoved)
-        {
-            var kingStandsAtStart = move.OriginBit.Contains(whiteKingStartPosition);
-            var kingTriesToCastle = Masks.WhiteKingShortGap.Contains(move.TargetBit);
-            var emptyGap = emptySquares.Contains(Masks.WhiteKingShortGap);
-            return kingStandsAtStart && kingTriesToCastle && emptyGap;
-        }
-        return false;
+        var kingTriesToCastle = _whiteToPlay ? Masks.WhiteKingShortGap.Contains(move.TargetBit) : Masks.BlackKingShortGap.Contains(move.TargetBit);
+        var emptyGap = _whiteToPlay ? emptySquares.Contains(Masks.WhiteKingShortGap) : emptySquares.Contains(Masks.BlackKingShortGap);
+        return kingTriesToCastle && emptyGap;
     }
 
     public List<Move> GenerateMovesFromIndex(int index)

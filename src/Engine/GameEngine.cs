@@ -19,7 +19,7 @@ class GameEngine
     private readonly Random _random;
     private PieceSelection? _selectedPiece;
     private readonly bool showControlledSquares = false;
-    private readonly bool playAgainstComputer = true;
+    private readonly bool playAgainstComputer = false;
 
     enum GameStatus
     {
