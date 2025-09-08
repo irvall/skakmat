@@ -64,6 +64,12 @@ public class Masks
     public static ulong RookLongCastlePosition(bool isWhite) =>
         isWhite ? BoardSquares.Squares.D1.AsBit() : BoardSquares.Squares.D8.AsBit();
 
+    public static ulong KingShortCastlePosition(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.G1.AsBit() : BoardSquares.Squares.G8.AsBit();
+
+    public static ulong KingLongCastlePosition(bool isWhite) =>
+        isWhite ? BoardSquares.Squares.C1.AsBit() : BoardSquares.Squares.C8.AsBit();
+
 
     public struct Boxes
     {
