@@ -9,12 +9,12 @@
         <RootNamespace>skakmat</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
+<ItemGroup>
         <PackageReference Include="Raylib-cs" Version="5.0.0" />
-        <None Include="../assets/sprite.png">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
 
+  <Content Include="assets\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
 
 </Project>

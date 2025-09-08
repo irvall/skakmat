@@ -24,6 +24,17 @@ public class Masks
     public static ulong CornersAndCenterAndAdjacent { get; } = 0xFF000018181800FF;
     public static ulong Edge = Rank1 | Rank8 | FileA | FileH;
 
+    public static ulong WhiteKingShortGap = 0x6000000000000000;
+    public static ulong WhiteKingLongGap = 0xe00000000000000;
+    public static ulong WhiteKingTryCastleShort = 0xc000000000000000;
+    public static ulong WhiteKingTryCastleLong = 0x700000000000000;
+
+    public static ulong BlackKingShortGap = 0x60;
+    public static ulong BlackKingLongGap = 0xe;
+    public static ulong BlackKingTryCastleShort = 0xc0;
+    public static ulong BlackKingTryCastleLong = 0x7;
+
+
     public struct Boxes
     {
 
@@ -40,6 +51,7 @@ public class Masks
         public static ulong C2H8 = 0xfcfcfcfcfcfcfc;
 
         public static ulong B3H8 = 0xfefefefefefe;
-
     }
+
+
 }

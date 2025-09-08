@@ -19,4 +19,14 @@ public static class MoveExtensions
         return $"{pieceTypeString}{BoardUtility.IndexToSquareString(toIndex)}";
     }
 
+    public static ulong ToBitboard(this List<Move> moves)
+    {
+        var bitboard = 0UL;
+        moves.ForEach(move =>
+        {
+            bitboard |= move.TargetBit;
+        });
+        return bitboard;
+    }
+
 }

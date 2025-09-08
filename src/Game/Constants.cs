@@ -38,5 +38,6 @@ public static class Constants
     public const string FenNasty = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq a3 5 17";
     public const string FenWhiteToSmother = "rnb3rk/pppp2pp/8/2q3Np/8/8/PPPPPPPP/RNBQKB1R w KQq - 0 1";
     public const string FenWhiteKingInCheck1 = "b3r3/8/8/8/8/4Kn2/8/1B6 w - - 0 1";
+    public const string FenWhiteKingCanCastle = "7k/8/8/2b5/8/8/5PPP/4K2R w K - 0 1";
 
 }

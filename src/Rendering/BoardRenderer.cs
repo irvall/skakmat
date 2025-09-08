@@ -85,7 +85,8 @@ public class BoardRenderer
             _sideLength,
             _sideLength
         );
-
+        // string id = (row * 8 + col).ToString();
+        // Raylib.DrawText(id, (int)dest.X, (int)dest.Y, 12, Color.BLACK);
         Raylib.DrawTexturePro(_spriteTexture, src, dest, Vector2.Zero, 0f, Color.WHITE);
     }
 

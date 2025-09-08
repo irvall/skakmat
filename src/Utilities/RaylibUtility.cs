@@ -48,6 +48,7 @@ public abstract class RaylibUtility
 
     public static Texture2D LoadTextureChecked(string path)
     {
+        var current = Directory.GetCurrentDirectory();
         if (!File.Exists(path))
             throw new FileNotFoundException($"Asset not found: {path}");
         return Raylib.LoadTexture(path);

@@ -36,7 +36,7 @@ class GameEngine
         _sideLength = windowHeight / Constants.SquareCount;
 
         _windowSize = (windowHeight, windowHeight);
-        _random = new Random(256);
+        _random = new Random();
 
         _board = new Board(_debug);
         _renderer = new BoardRenderer(windowHeight, _sideLength);
@@ -61,7 +61,8 @@ class GameEngine
     {
         while (!Raylib.WindowShouldClose())
         {
-            HandleInput();
+            var validMoves = _board.GenerateMoves();
+            HandleInput(validMoves);
             Render();
         }
     }
@@ -74,48 +75,52 @@ class GameEngine
         return randomMove;
     }
 
-    private void HandleInput()
+    private void HandleInput(List<Move> validMoves)
     {
-        var validMoves = _board.GenerateMoves();
         if (validMoves.Count == 0)
         {
             status = _board.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
             return;
         }
+
         if (playAgainstComputer && !_board.WhiteToPlay)
         {
             // TODO: Allow AI to play as white
             var computerMove = GetComputerMove(validMoves);
             _board.MakeMove(computerMove);
+            return;
         }
-        if (InputHandler.IsLeftMouseButtonPressed)
+
+        if (InputHandler.IsLeftArrowPressed)
         {
-            var mouseGridPos = _inputHandler.GetMouseGridPosition();
-            var isMouseOnBoard = InputHandler.IsMouseOnBoard(mouseGridPos);
-            if (isMouseOnBoard)
+            _board.UndoMove();
+            return;
+        }
+
+        if (!InputHandler.IsLeftMouseButtonPressed)
+            return;
+
+        var mouseGridPos = _inputHandler.GetMouseGridPosition();
+        if (!InputHandler.IsMouseOnBoard(mouseGridPos))
+            return;
+
+        var (index, bit) = BoardUtility.IndexAndBitUnderMouse(mouseGridPos);
+        if (_selectedPiece.HasValue)
+        {
+            var originBit = 1UL << _selectedPiece.Value.SquareIndex;
+            var move = new Move(_selectedPiece.Value.PieceType, originBit, bit);
+
+            var validMoveSet = new HashSet<Move>(validMoves);
+
+            if (validMoveSet.Contains(move))
             {
-                var (index, bit) = BoardUtility.IndexAndBitUnderMouse(mouseGridPos);
-
-                if (_selectedPiece.HasValue && Board.IsPseudoValidMove(_selectedPiece.Value, bit))
-                {
-                    var originBit = 1UL << _selectedPiece.Value.SquareIndex;
-                    var move = new Move(_selectedPiece.Value.PieceType, originBit, bit);
-
-                    if (validMoves.ToHashSet().Contains(move))
-                    {
-                        _board.MakeMove(move);
-                        _selectedPiece = null;
-                    }
-                }
-                else
-                {
-                    _selectedPiece = _board.TrySelectPiece(index);
-                }
+                _board.MakeMove(move);
+                _selectedPiece = null;
+                return;
             }
         }
-        if (InputHandler.IsLeftArrowPressed)
-            _board.UndoMove();
 
+        _selectedPiece = _board.TrySelectPiece(index);
     }
 
     private void Render()
@@ -127,7 +132,9 @@ class GameEngine
 
         if (_selectedPiece.HasValue)
         {
-            _renderer.HighlightSquares(_selectedPiece.Value.LegalMoves, Color.GREEN);
+            var movesBitboard = _selectedPiece.Value.ValidMoves.ToBitboard();
+            _renderer.HighlightSquares(movesBitboard, Color.GREEN);
+
         }
 
 
