@@ -1,9 +1,10 @@
+using Microsoft.VisualBasic;
 using skakmat.Chess;
 using skakmat.Utilities;
 
 namespace skakmat.Game;
 
-public class Board(bool debug)
+public class Board
 {
 
     private bool _whiteToPlay = true;
@@ -31,20 +32,7 @@ public class Board(bool debug)
 
     private readonly MoveTables _moveTables = new();
 
-    private readonly bool _debug = debug;
-
-    [Flags]
-    public enum CastlingRights
-    {
-        None = 0,
-        WhiteKingSide = 1,
-        WhiteQueenSide = 2,
-        BlackKingSide = 4,
-        BlackQueenSide = 8,
-        All = 15
-    }
-
-    private CastlingRights castlingRights = CastlingRights.All;
+    private Castling.Rights castlingRights = Castling.Rights.All;
 
     public int GetPieceTypeFromSquare(ulong square)
     {
@@ -194,46 +182,28 @@ public class Board(bool debug)
         return GetCurrentPlayerPieceType(Constants.WhiteRook);
     }
 
-    private int GetKingForCurrentPlayer()
+    internal int GetKingForCurrentPlayer()
     {
         return GetCurrentPlayerPieceType(Constants.WhiteKing);
     }
 
-    private void ExecuteCastle(CastleInfo castleInfo)
+    private void HandleCastling(Move move)
     {
-        MakeMove(castleInfo.RookMove, swapSide: false);
-
-        if (_whiteToPlay)
+        Castling.Type type = Castling.Type.None;
+        if (move.IsShortCastle())
+            type = Castling.Type.KingSide;
+        else if (move.IsLongCastle())
+            type = Castling.Type.QueenSide;
+        if (type != Castling.Type.None)
         {
-            castlingRights &= ~(CastlingRights.WhiteKingSide | CastlingRights.WhiteQueenSide);
-        }
-        else
-        {
-            castlingRights &= ~(CastlingRights.BlackKingSide | CastlingRights.BlackQueenSide);
+            var rookMove = CreateRookMove(type);
+            MakeMove(rookMove, false);
         }
     }
-
-
-    private CastleInfo TryCastle(Move move)
-    {
-        var castleInfo = ValidateCastling(move);
-
-        if (!castleInfo.IsValid)
-            return castleInfo;
-
-        ExecuteCastle(castleInfo);
-        return castleInfo;
-    }
-
 
     public void MakeMove(Move move, bool swapSide = true)
     {
-        var castleInfo = TryCastle(move);
-        if (castleInfo.IsValid)
-        {
-            // TODO: Temp hack: if castling, we want to make sure King ends up in the right spot
-            move = castleInfo.KingMove;
-        }
+        HandleCastling(move);
         ApplyMove(move.OriginBit, move.TargetBit, move.PieceType);
         _movesPlayed.Add(move);
         PromotePawns();
@@ -242,15 +212,15 @@ public class Board(bool debug)
             _whiteToPlay = !_whiteToPlay;
     }
 
-    private void RemoveCastlingRight(CastleType type)
+    private void RemoveCastlingRight(Castling.Type type)
     {
-        if (type == CastleType.KingSide)
+        if (type == Castling.Type.KingSide)
         {
-            castlingRights &= ~(_whiteToPlay ? CastlingRights.WhiteKingSide : CastlingRights.BlackKingSide);
+            castlingRights &= ~(_whiteToPlay ? Castling.Rights.WhiteKingSide : Castling.Rights.BlackKingSide);
         }
         else
         {
-            castlingRights &= ~(_whiteToPlay ? CastlingRights.WhiteQueenSide : CastlingRights.BlackQueenSide);
+            castlingRights &= ~(_whiteToPlay ? Castling.Rights.WhiteQueenSide : Castling.Rights.BlackQueenSide);
         }
     }
 
@@ -259,14 +229,14 @@ public class Board(bool debug)
         if (move.PieceType == GetRookForCurrentPlayer())
         {
             if (move.OriginBit.Contains(Masks.RookRightCorner(_whiteToPlay)))
-                RemoveCastlingRight(CastleType.KingSide);
+                RemoveCastlingRight(Castling.Type.KingSide);
             if (move.OriginBit.Contains(Masks.RookLeftCorner(_whiteToPlay)))
-                RemoveCastlingRight(CastleType.QueenSide);
+                RemoveCastlingRight(Castling.Type.QueenSide);
         }
         if (move.PieceType == GetKingForCurrentPlayer())
         {
-            var whiteCastlingRights = CastlingRights.WhiteKingSide | CastlingRights.WhiteQueenSide;
-            var blackCastlingRights = CastlingRights.BlackKingSide | CastlingRights.BlackQueenSide;
+            var whiteCastlingRights = Castling.Rights.WhiteKingSide | Castling.Rights.WhiteQueenSide;
+            var blackCastlingRights = Castling.Rights.BlackKingSide | Castling.Rights.BlackQueenSide;
             castlingRights &= ~(_whiteToPlay ? whiteCastlingRights : blackCastlingRights);
         }
     }
@@ -307,25 +277,18 @@ public class Board(bool debug)
            || !_whiteToPlay && _bbs[Constants.BlackKing].Contains(controlledSquares);
     }
 
-    private enum CastleType
+    private bool IsPathClear(Castling.Type castleType)
     {
-        None,
-        KingSide,
-        QueenSide
-    }
-
-    private bool IsPathClear(CastleType castleType)
-    {
-        var path = castleType == CastleType.KingSide
+        var path = castleType == Castling.Type.KingSide
             ? Masks.KingSideCastlePath(_whiteToPlay)
             : Masks.QueenSideCastlePath(_whiteToPlay);
 
         return EmptySquares.ForAll(path);
     }
 
-    private bool IsPathSafe(CastleType castleType)
+    private bool IsPathSafe(Castling.Type castleType)
     {
-        var path = castleType == CastleType.KingSide
+        var path = castleType == Castling.Type.KingSide
         ? Masks.KingSideCastlePath(_whiteToPlay)
         : Masks.QueenSideCastlePath(_whiteToPlay);
 
@@ -333,83 +296,48 @@ public class Board(bool debug)
         return !path.Contains(squaresUnderAttack);
     }
 
-    private struct CastleInfo()
-    {
-        public bool IsValid { get; set; }
-        public CastleType Type { get; set; }
-        public Move KingMove { get; set; }
-        public Move RookMove;
-
-    }
-
     private bool ShortCastleAllowed()
     {
-        return _whiteToPlay ? castlingRights.HasFlag(CastlingRights.WhiteKingSide) : castlingRights.HasFlag(CastlingRights.BlackKingSide);
+        return _whiteToPlay ? castlingRights.HasFlag(Castling.Rights.WhiteKingSide) : castlingRights.HasFlag(Castling.Rights.BlackKingSide);
     }
 
     private bool LongCastleAllowed()
     {
-        return _whiteToPlay ? castlingRights.HasFlag(CastlingRights.WhiteQueenSide) : castlingRights.HasFlag(CastlingRights.BlackQueenSide);
+        return _whiteToPlay ? castlingRights.HasFlag(Castling.Rights.WhiteQueenSide) : castlingRights.HasFlag(Castling.Rights.BlackQueenSide);
     }
 
-    private CastleInfo ValidateCastling(Move move)
+    private Move CreateRookMove(Castling.Type type)
     {
-        var info = new CastleInfo { IsValid = false, Type = CastleType.None };
-        if (move.PieceType != GetKingForCurrentPlayer()
-            || IsKingUnderAttack())
-            return info;
-
-        CastleType type;
-        if (ShortCastleAllowed() && Masks.KingAttemptsShortCastle(_whiteToPlay).Contains(move.TargetBit))
-            type = CastleType.KingSide;
-        else if (LongCastleAllowed() && Masks.KingAttemptsLongCastle(_whiteToPlay).Contains(move.TargetBit))
-            type = CastleType.QueenSide;
-        else return info;
-
-        if (!IsPathClear(type))
-            return info;
-
-        if (!IsPathSafe(type))
-            return info;
-
-        info.IsValid = true;
-        info.Type = type;
-        info.KingMove = CreateKingMove(type);
-        info.RookMove = CreateRookMove(type);
-        return info;
-    }
-
-    private Move CreateKingMove(CastleType type)
-    {
-        if (type == CastleType.KingSide)
-        {
-            var originBit = Masks.KingStartSquare(_whiteToPlay);
-            var targetBit = Masks.KingShortCastlePosition(_whiteToPlay);
-            return new Move(GetKingForCurrentPlayer(), originBit, targetBit);
-        }
-        else if (type == CastleType.QueenSide)
-        {
-            var originBit = Masks.KingStartSquare(_whiteToPlay);
-            var targetBit = Masks.KingLongCastlePosition(_whiteToPlay);
-            return new Move(GetKingForCurrentPlayer(), originBit, targetBit);
-        }
-        throw new ArgumentException("Castling type unexpected: " + type);
-    }
-    private Move CreateRookMove(CastleType type)
-    {
-        if (type == CastleType.KingSide)
+        if (type == Castling.Type.KingSide)
         {
             var originBit = Masks.RookRightCorner(_whiteToPlay);
             var targetBit = Masks.RookShortCastlePosition(_whiteToPlay);
             return new Move(GetRookForCurrentPlayer(), originBit, targetBit);
         }
-        else if (type == CastleType.QueenSide)
+        else if (type == Castling.Type.QueenSide)
         {
             var originBit = Masks.RookLeftCorner(_whiteToPlay);
             var targetBit = Masks.RookLongCastlePosition(_whiteToPlay);
             return new Move(GetRookForCurrentPlayer(), originBit, targetBit);
         }
         throw new ArgumentException("Castling type unexpected: " + type);
+    }
+
+    private bool ValidateCastling(Move move)
+    {
+        if (GetKingForCurrentPlayer() != move.PieceType) return false;
+        if (IsKingUnderAttack()) return false;
+        if (!ShortCastleAllowed() && !LongCastleAllowed()) return false;
+
+        var castlingType = Castling.GetCastlingType(_whiteToPlay, move.TargetBit);
+
+        if (!IsPathClear(castlingType))
+            return false;
+
+        if (!IsPathSafe(castlingType))
+            return false;
+
+        return true;
     }
 
     public List<Move> GenerateMovesFromIndex(int index)
@@ -421,7 +349,7 @@ public class Board(bool debug)
         foreach (var (_, targetBit) in BoardUtility.EnumerateSquares())
         {
             var possibleMove = new Move(pieceType, originBit, targetBit);
-            if (legalMoves.Contains(targetBit) || ValidateCastling(possibleMove).IsValid)
+            if (legalMoves.Contains(targetBit) || ValidateCastling(possibleMove))
             {
                 var possibleTargetType = GetPieceTypeFromSquare(targetBit);
                 ApplyMove(possibleMove);
@@ -434,7 +362,6 @@ public class Board(bool debug)
         }
         return validMoves;
     }
-
 
     public List<Move> GenerateMoves()
     {

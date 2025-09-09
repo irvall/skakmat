@@ -9,7 +9,6 @@ namespace skakmat.Engine;
 class GameEngine
 
 {
-    private readonly bool _debug = true;
     private readonly Board _board;
     private readonly BoardRenderer _renderer;
     private readonly InputHandler _inputHandler;
@@ -38,7 +37,7 @@ class GameEngine
         _windowSize = (windowHeight, windowHeight);
         _random = new Random();
 
-        _board = new Board(_debug);
+        _board = new Board();
         _renderer = new BoardRenderer(windowHeight, _sideLength);
         _inputHandler = new InputHandler(_sideLength);
     }
