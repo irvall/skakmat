@@ -99,13 +99,12 @@ class GameEngine
         if (_selectedPiece.HasValue)
         {
             var originBit = 1UL << _selectedPiece.Value.SquareIndex;
-            var move = new Move(_selectedPiece.Value.PieceType, originBit, bit);
+            var targetMove = new Move(_selectedPiece.Value.PieceType, originBit, bit);
 
-            var validMoveSet = new HashSet<Move>(validMoves);
-
-            if (validMoveSet.Contains(move))
+            if (validMoves.Any(m => m.Equals(targetMove)))
             {
-                _board.MakeMove(move);
+                var actualMove = validMoves.First(m => m.Equals(targetMove));
+                _board.MakeMove(actualMove);
                 _selectedPiece = null;
                 return;
             }

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace skakmat.Game;
-public readonly struct Move(int pieceType, ulong originBit, ulong targetBit)
+public class Move(int pieceType, ulong originBit, ulong targetBit)
 {
     public readonly int PieceType = pieceType;
     public readonly ulong OriginBit = originBit;

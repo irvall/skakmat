@@ -186,23 +186,30 @@ public class Board
         return GetCurrentPlayerPieceType(Constants.WhiteKing);
     }
 
-    private void HandleCastling(Move move)
+    private CastleMove ConvertToCastle(Move move)
     {
         Castling.Type type = Castling.Type.None;
         if (move.IsShortCastle())
             type = Castling.Type.KingSide;
         else if (move.IsLongCastle())
             type = Castling.Type.QueenSide;
-        if (type != Castling.Type.None)
+        if (type == Castling.Type.None)
         {
-            var rookMove = CreateRookMove(type);
-            MakeMove(rookMove, false);
+            throw new ArgumentException("Function should only be called with castle-type move");
         }
+        var rookMove = Castling.CreateRookMove(type, _whiteToPlay);
+        var kingMove = Castling.CreateKingMove(type, _whiteToPlay);
+        return new CastleMove(move) { KingMove = kingMove, RookMove = rookMove };
     }
 
     public void MakeMove(Move move, bool swapSide = true)
     {
-        HandleCastling(move);
+        if (move is CastleMove castleMove)
+        {
+            MakeMove(castleMove.KingMove, false);
+            MakeMove(castleMove.RookMove, true);
+            return;
+        }
         ApplyMove(move.OriginBit, move.TargetBit, move.PieceType);
         _movesPlayed.Add(move);
         PromotePawns();
@@ -305,38 +312,33 @@ public class Board
         return _whiteToPlay ? castlingRights.HasFlag(Castling.Rights.WhiteQueenSide) : castlingRights.HasFlag(Castling.Rights.BlackQueenSide);
     }
 
-    private Move CreateRookMove(Castling.Type type)
+    private Move ValidateCastling(Move move)
     {
-        if (type == Castling.Type.KingSide)
-        {
-            var originBit = Masks.RookRightCorner(_whiteToPlay);
-            var targetBit = Masks.RookShortCastlePosition(_whiteToPlay);
-            return new Move(GetRookForCurrentPlayer(), originBit, targetBit);
-        }
-        else if (type == Castling.Type.QueenSide)
-        {
-            var originBit = Masks.RookLeftCorner(_whiteToPlay);
-            var targetBit = Masks.RookLongCastlePosition(_whiteToPlay);
-            return new Move(GetRookForCurrentPlayer(), originBit, targetBit);
-        }
-        throw new ArgumentException("Castling type unexpected: " + type);
-    }
-
-    private bool ValidateCastling(Move move)
-    {
-        if (GetKingForCurrentPlayer() != move.PieceType) return false;
-        if (IsKingUnderAttack()) return false;
-        if (!ShortCastleAllowed() && !LongCastleAllowed()) return false;
+        if (GetKingForCurrentPlayer() != move.PieceType) return move;
+        if (IsKingUnderAttack()) return move;
+        if (!ShortCastleAllowed() && !LongCastleAllowed()) return move;
 
         var castlingType = Castling.GetCastlingType(_whiteToPlay, move.TargetBit);
-
+        if (castlingType == Castling.Type.None)
+            return move;
         if (!IsPathClear(castlingType))
-            return false;
+            return move;
 
         if (!IsPathSafe(castlingType))
-            return false;
+            return move;
 
-        return true;
+        return ConvertToCastle(move);
+    }
+
+    void ValidateAndAddMove(Move move, List<Move> validMoves)
+    {
+        var possibleTargetType = GetPieceTypeFromSquare(move.TargetBit);
+        ApplyMove(move);
+        if (!IsKingUnderAttack())
+        {
+            validMoves.Add(move);
+        }
+        UndoMove(move, possibleTargetType);
     }
 
     public List<Move> GenerateMovesFromIndex(int index)
@@ -348,15 +350,13 @@ public class Board
         foreach (var (_, targetBit) in BoardUtility.EnumerateSquares())
         {
             var possibleMove = new Move(pieceType, originBit, targetBit);
-            if (legalMoves.Contains(targetBit) || ValidateCastling(possibleMove))
+            if (legalMoves.Contains(targetBit))
             {
-                var possibleTargetType = GetPieceTypeFromSquare(targetBit);
-                ApplyMove(possibleMove);
-                if (!IsKingUnderAttack())
-                {
-                    validMoves.Add(possibleMove);
-                }
-                UndoMove(possibleMove, possibleTargetType);
+                ValidateAndAddMove(possibleMove, validMoves);
+            }
+            else if (ValidateCastling(possibleMove) is CastleMove castleMove)
+            {
+                ValidateAndAddMove(castleMove, validMoves);
             }
         }
         return validMoves;
