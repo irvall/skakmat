@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using skakmat.Utilites;
 using skakmat.Utilities;
 

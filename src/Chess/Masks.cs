@@ -1,5 +1,3 @@
-using skakmat.Game;
-
 namespace skakmat.Chess;
 
 public class Masks

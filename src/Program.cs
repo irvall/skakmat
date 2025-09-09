@@ -1,5 +1,4 @@
 ﻿using skakmat.Engine;
-using skakmat.Rendering;
 using skakmat.Utilites;
 
 namespace skakmat;

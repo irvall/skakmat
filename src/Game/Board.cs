@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using skakmat.Chess;
 using skakmat.Utilities;
 
