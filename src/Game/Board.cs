@@ -7,7 +7,7 @@ public class Board
 {
 
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenBothSidesCanCastle);
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenBlackForcedToTake);
     private readonly List<Move> _movesPlayed = [];
 
     internal ulong WhitePieces =>
@@ -186,7 +186,7 @@ public class Board
         return GetCurrentPlayerPieceType(Constants.WhiteKing);
     }
 
-    private CastleMove ConvertToCastle(Move move)
+    private Move ConvertToCastle(Move move)
     {
         Castling.Type type = Castling.Type.None;
         if (move.IsShortCastle())
@@ -194,9 +194,7 @@ public class Board
         else if (move.IsLongCastle())
             type = Castling.Type.QueenSide;
         if (type == Castling.Type.None)
-        {
-            throw new ArgumentException("Function should only be called with castle-type move");
-        }
+            return move;
         var rookMove = Castling.CreateRookMove(type, _whiteToPlay);
         var kingMove = Castling.CreateKingMove(type, _whiteToPlay);
         return new CastleMove(kingMove, rookMove);
