@@ -20,4 +20,4 @@
 
 - Fix going backwards/forwards in moves played
 - Get looping straight; no repeated computations for move generation i.e.
-- Fix castling bugs (click king and then on rooks)
+- Try moving right rook, then later move the queen before trying to castle long; some weird thing happens here where king temporarily has access to queen moves
