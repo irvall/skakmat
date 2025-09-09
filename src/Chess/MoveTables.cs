@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using skakmat.Utilites;
 using skakmat.Utilities;
 
 namespace skakmat.Chess;
@@ -7,7 +6,7 @@ namespace skakmat.Chess;
 public partial class MoveTables
 {
     private const int SquareNo = 8;
-    private const int RankOffset = 8;
+    public const int RankOffset = 8;
     private const int FileOffset = 1;
     private const int DiagonalOffset = 7;
     private const int AntiDiagonalOffset = 9;

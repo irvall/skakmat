@@ -132,4 +132,16 @@ public class BoardUtility
         return new Move(move.PieceType, move.TargetBit, move.OriginBit);
     }
 
+    public static bool AreHorizontalNeighbors(ulong bit1, ulong bit2)
+    {
+        int pos1 = BitOperations.TrailingZeroCount(bit1);
+        int pos2 = BitOperations.TrailingZeroCount(bit2);
+
+        // Test if same rank
+        if (pos1 / 8 != pos2 / 8) return false;
+
+        // Test if adjacent files
+        return Math.Abs(pos1 - pos2) == 1;
+    }
+
 }

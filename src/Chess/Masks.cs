@@ -69,6 +69,7 @@ public class Masks
         isWhite ? BoardSquares.Squares.C1.AsBit() : BoardSquares.Squares.C8.AsBit();
 
 
+
     public struct Boxes
     {
 

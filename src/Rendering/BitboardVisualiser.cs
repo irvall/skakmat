@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Raylib_cs;
 using skakmat.Game;
-using skakmat.Utilites;
+using skakmat.Utilities;
 using Color = Raylib_cs.Color;
 
 namespace skakmat.Rendering;

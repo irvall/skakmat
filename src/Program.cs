@@ -1,5 +1,5 @@
 ﻿using skakmat.Engine;
-using skakmat.Utilites;
+using skakmat.Utilities;
 
 namespace skakmat;
 
@@ -10,9 +10,8 @@ internal abstract class Program
     public static void Main()
     {
         RaylibUtility.IgnoreLogs();
-        var engine = new GameEngine();
+        // TODO: Add commandline options to easy toggle debug/AI
+        var engine = new GameEngine(true);
         engine.Run();
-        // var visualiser = new BitboardVisualiser();
-        // visualiser.Run();
     }
 }

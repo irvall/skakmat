@@ -1,7 +1,6 @@
 using Raylib_cs;
 using skakmat.Game;
 using skakmat.Rendering;
-using skakmat.Utilites;
 using skakmat.Utilities;
 
 namespace skakmat.Engine;
@@ -18,7 +17,7 @@ class GameEngine
     private readonly Random _random;
     private PieceSelection? _selectedPiece;
     private readonly bool showControlledSquares = false;
-    private readonly bool playAgainstComputer = true;
+    private readonly bool playAgainstComputer;
 
     enum GameStatus
     {
@@ -30,10 +29,11 @@ class GameEngine
 
     private GameStatus status = GameStatus.GameOn;
 
-    public GameEngine()
+    public GameEngine(bool playAgainstComputer)
     {
         var windowHeight = RaylibUtility.GetWindowHeightDynamically();
         _sideLength = windowHeight / Constants.SquareCount;
+        this.playAgainstComputer = playAgainstComputer;
 
         _windowSize = (windowHeight, windowHeight);
         _random = new Random();

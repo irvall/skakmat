@@ -22,14 +22,21 @@ public class Castling
         All = 15
     }
 
-    public static Type GetCastlingType(bool whiteToPlay, ulong targetBit)
+    public static Type GetCastlingType(bool whiteToPlay, ulong targetBit, Rights rights)
     {
-        Type type = Type.None;
         if (Masks.KingAttemptsShortCastle(whiteToPlay).Contains(targetBit))
-            type = Type.KingSide;
-        else if (Masks.KingAttemptsLongCastle(whiteToPlay).Contains(targetBit))
-            type = Type.QueenSide;
-        return type;
+        {
+            var requiredRight = whiteToPlay ? Rights.WhiteKingSide : Rights.BlackKingSide;
+            return rights.HasFlag(requiredRight) ? Type.KingSide : Type.None;
+        }
+
+        if (Masks.KingAttemptsLongCastle(whiteToPlay).Contains(targetBit))
+        {
+            var requiredRight = whiteToPlay ? Rights.WhiteQueenSide : Rights.BlackQueenSide;
+            return rights.HasFlag(requiredRight) ? Type.QueenSide : Type.None;
+        }
+
+        return Type.None;
     }
 
     public static Move CreateRookMove(Type type, bool whiteToPlay)
