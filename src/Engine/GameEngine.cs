@@ -62,8 +62,6 @@ class GameEngine
         while (!Raylib.WindowShouldClose())
         {
             var validMoves = _board.GenerateMoves();
-
-
             HandleInput(validMoves);
             Render();
         }

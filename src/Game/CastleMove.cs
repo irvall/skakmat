@@ -1,7 +1,6 @@
 namespace skakmat.Game;
 
-public class CastleMove(Move move) : Move(move.PieceType, move.OriginBit, move.TargetBit)
+public class CastleMove(Move kingMove, Move rookMove) : Move(kingMove.PieceType, kingMove.OriginBit, kingMove.TargetBit)
 {
-    public required Move KingMove { get; set; }
-    public required Move RookMove { get; set; }
+    public Move RookMove { get; } = rookMove;
 }

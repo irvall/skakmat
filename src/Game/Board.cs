@@ -199,16 +199,14 @@ public class Board
         }
         var rookMove = Castling.CreateRookMove(type, _whiteToPlay);
         var kingMove = Castling.CreateKingMove(type, _whiteToPlay);
-        return new CastleMove(move) { KingMove = kingMove, RookMove = rookMove };
+        return new CastleMove(kingMove, rookMove);
     }
 
     public void MakeMove(Move move, bool swapSide = true)
     {
         if (move is CastleMove castleMove)
         {
-            MakeMove(castleMove.KingMove, false);
-            MakeMove(castleMove.RookMove, true);
-            return;
+            MakeMove(castleMove.RookMove, false);
         }
         ApplyMove(move.OriginBit, move.TargetBit, move.PieceType);
         _movesPlayed.Add(move);

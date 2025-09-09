@@ -127,7 +127,6 @@ public class BoardUtility
         };
     }
 
-
     public static Move InvertMove(Move move)
     {
         return new Move(move.PieceType, move.TargetBit, move.OriginBit);
