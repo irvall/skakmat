@@ -24,7 +24,8 @@ class GameEngine
     {
         GameOn,
         WhiteWon,
-        BlackWon
+        BlackWon,
+        Stalemate
     }
 
     private GameStatus status = GameStatus.GameOn;
@@ -61,6 +62,8 @@ class GameEngine
         while (!Raylib.WindowShouldClose())
         {
             var validMoves = _board.GenerateMoves();
+
+
             HandleInput(validMoves);
             Render();
         }
@@ -76,7 +79,14 @@ class GameEngine
     {
         if (validMoves.Count == 0)
         {
-            status = _board.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            if (!_board.IsKingUnderAttack())
+            {
+                status = GameStatus.Stalemate;
+            }
+            else
+            {
+                status = _board.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            }
             return;
         }
 
@@ -127,7 +137,6 @@ class GameEngine
 
         }
 
-
         if (_board.MovesPlayed > 0)
         {
             var lastMove = _board.GetMoveAt(_board.MovesPlayed - 1);
@@ -147,6 +156,12 @@ class GameEngine
         {
             _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
             _renderer.DrawBigMessage("YOUR WINNER");
+        }
+
+        if (status == GameStatus.Stalemate)
+        {
+            _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
+            _renderer.DrawBigMessage("STALE MAT");
         }
 
         if (status == GameStatus.BlackWon)

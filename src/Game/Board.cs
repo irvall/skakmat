@@ -276,7 +276,7 @@ public class Board
         return new PieceSelection(pieceType, index, validMoves);
     }
 
-    private bool IsKingUnderAttack()
+    public bool IsKingUnderAttack()
     {
         var controlledSquares = ControlledSquares(!_whiteToPlay);
         return _whiteToPlay && _bbs[Constants.WhiteKing].Contains(controlledSquares)
