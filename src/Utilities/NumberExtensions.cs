@@ -2,17 +2,17 @@ namespace skakmat.Utilities;
 internal static class NumberExtensions
 {
 
-    public static bool Contains(this ulong bitboard, ulong targetBit)
+    internal static bool Contains(this ulong bitboard, ulong targetBit)
     {
         return (bitboard & targetBit) != 0;
     }
 
-    public static ulong Exclude(this ulong bitboard, ulong excludedBits)
+    internal static ulong Exclude(this ulong bitboard, ulong excludedBits)
     {
         return bitboard & ~excludedBits;
     }
 
-    public static bool ForAll(this ulong bitboard, ulong targetBits)
+    internal static bool ForAll(this ulong bitboard, ulong targetBits)
     {
         return (bitboard & targetBits) == targetBits;
     }

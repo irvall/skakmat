@@ -7,7 +7,7 @@ internal abstract class Program
 {
 
     [STAThread]
-    public static void Main()
+    internal static void Main()
     {
         RaylibUtility.IgnoreLogs();
         // TODO: Add commandline options to easy toggle debug/AI

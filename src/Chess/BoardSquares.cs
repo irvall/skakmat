@@ -1,7 +1,7 @@
 namespace skakmat.Chess;
-public static class BoardSquares
+internal static class BoardSquares
 {
-    public enum Squares : int
+    internal enum Squares : int
     {
         A8 = 0, B8, C8, D8, E8, F8, G8, H8,
         A7, B7, C7, D7, E7, F7, G7, H7,
@@ -13,7 +13,7 @@ public static class BoardSquares
         A1, B1, C1, D1, E1, F1, G1, H1
     }
 
-    public static ulong AsBit(this Squares square)
+    internal static ulong AsBit(this Squares square)
     {
         return 1UL << (int)square;
     }

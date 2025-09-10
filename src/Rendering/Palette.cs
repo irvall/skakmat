@@ -2,7 +2,7 @@
 
 namespace skakmat.Rendering;
 
-public abstract class Palette
+internal abstract class Palette
 {
     private static readonly Color[] DistinctColors =
     [
@@ -20,14 +20,14 @@ public abstract class Palette
 
     private static int _colorIndex;
 
-    public static Color GetNextColor()
+    internal static Color GetNextColor()
     {
         if (_colorIndex >= DistinctColors.Length)
             _colorIndex = 0;
         return DistinctColors[_colorIndex++];
     }
 
-    public static Color FromHex(string hex)
+    internal static Color FromHex(string hex)
     {
         if (hex.StartsWith('#'))
             hex = hex[1..];
@@ -39,7 +39,7 @@ public abstract class Palette
         return new Color(r, g, b, (byte)255);
     }
 
-    public static Color WhiteVersion(Color c)
+    internal static Color WhiteVersion(Color c)
     {
         // Find the maximum of the RGB channels
         byte max = Math.Max(c.R, Math.Max(c.G, c.B));

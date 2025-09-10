@@ -1,7 +1,9 @@
 using Raylib_cs;
+using skakmat.Chess;
 using skakmat.Game;
 using skakmat.Rendering;
 using skakmat.Utilities;
+using static skakmat.Engine.GameController;
 
 namespace skakmat.Engine;
 
@@ -9,27 +11,20 @@ class GameEngine
 
 {
     private readonly Board _board;
+    private readonly MoveGenerator _moveGen;
     private readonly BoardRenderer _renderer;
     private readonly InputHandler _inputHandler;
+    private readonly GameController _gameController;
 
     private readonly (int width, int height) _windowSize;
     private readonly int _sideLength;
     private readonly Random _random;
-    private PieceSelection? _selectedPiece;
     private readonly bool showControlledSquares = false;
     private readonly bool playAgainstComputer;
+    private BoardState _state;
+    private PieceSelection? _selectedPiece;
 
-    enum GameStatus
-    {
-        GameOn,
-        WhiteWon,
-        BlackWon,
-        Stalemate
-    }
-
-    private GameStatus status = GameStatus.GameOn;
-
-    public GameEngine(bool playAgainstComputer)
+    internal GameEngine(bool playAgainstComputer)
     {
         var windowHeight = RaylibUtility.GetWindowHeightDynamically();
         _sideLength = windowHeight / Constants.SquareCount;
@@ -39,11 +34,14 @@ class GameEngine
         _random = new Random();
 
         _board = new Board();
+        _state = _board.GetBoardState();
+        _moveGen = new MoveGenerator(new MoveTables(), _board);
+        _gameController = new GameController(_board, _moveGen);
         _renderer = new BoardRenderer(windowHeight, _sideLength);
         _inputHandler = new InputHandler(_sideLength);
     }
 
-    public void Run()
+    internal void Run()
     {
         InitializeWindow();
         _renderer.Initialize();
@@ -57,11 +55,21 @@ class GameEngine
         Raylib.InitWindow(windowSize, windowSize, "Skakmat");
     }
 
+    private bool shouldRegenerateMoves;
+
     private void GameLoop()
     {
+        var validMoves = _moveGen.GenerateMoves();
         while (!Raylib.WindowShouldClose())
         {
-            var validMoves = _board.GenerateMoves();
+            if (shouldRegenerateMoves)
+            {
+                _state = _board.GetBoardState();
+                validMoves = _moveGen.GenerateMoves();
+                shouldRegenerateMoves = false;
+                _gameController.UpdateGameStatus();
+                Thread.Sleep(50);
+            }
             HandleInput(validMoves);
             Render();
         }
@@ -75,24 +83,12 @@ class GameEngine
 
     private void HandleInput(List<Move> validMoves)
     {
-        if (validMoves.Count == 0)
-        {
-            if (!_board.IsKingUnderAttack())
-            {
-                status = GameStatus.Stalemate;
-            }
-            else
-            {
-                status = _board.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
-            }
-            return;
-        }
-
-        if (playAgainstComputer && !_board.WhiteToPlay)
+        if (playAgainstComputer && !_state.WhiteToPlay)
         {
             // TODO: Allow AI to play as white
             var computerMove = GetComputerMove(validMoves);
-            _board.MakeMove(computerMove);
+            _board.ExecuteMove(computerMove);
+            shouldRegenerateMoves = true;
             return;
         }
 
@@ -107,18 +103,19 @@ class GameEngine
         if (_selectedPiece.HasValue)
         {
             var originBit = 1UL << _selectedPiece.Value.SquareIndex;
-            var targetMove = new Move(_selectedPiece.Value.PieceType, originBit, bit);
+            var targetMove = new Move(_selectedPiece.Value.PieceIndex, originBit, bit);
 
             if (validMoves.Any(m => m.Equals(targetMove)))
             {
                 var actualMove = validMoves.First(m => m.Equals(targetMove));
-                _board.MakeMove(actualMove);
+                _board.ExecuteMove(actualMove);
+                shouldRegenerateMoves = true;
                 _selectedPiece = null;
                 return;
             }
         }
 
-        _selectedPiece = _board.TrySelectPiece(index);
+        _selectedPiece = _gameController.TrySelectPiece(index);
     }
 
     private void Render()
@@ -135,34 +132,34 @@ class GameEngine
 
         }
 
-        if (_board.MovesPlayed > 0)
+        if (_gameController.MovesPlayed > 0)
         {
-            var lastMove = _board.GetMoveAt(_board.MovesPlayed - 1);
-            _renderer.HighlightSquares(lastMove.OriginBit, Color.BLUE);
-            _renderer.HighlightSquares(lastMove.TargetBit, Color.BLUE);
+            var lastEntry = _gameController.LastEntry();
+            _renderer.HighlightSquares(lastEntry.Move.OriginBit, Color.BLUE);
+            _renderer.HighlightSquares(lastEntry.Move.TargetBit, Color.BLUE);
         }
 
         if (showControlledSquares)
         {
-            var controlled = _board.ControlledSquares();
+            var controlled = _moveGen.SquaresUnderControl(_state.WhiteToPlay);
             _renderer.HighlightSquares(controlled, Color.RED);
         }
 
         _renderer.DrawPieces(_board);
 
-        if (status == GameStatus.WhiteWon)
+        if (_gameController.Status == GameStatus.WhiteWon)
         {
             _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
             _renderer.DrawBigMessage("YOUR WINNER");
         }
 
-        if (status == GameStatus.Stalemate)
+        if (_gameController.Status == GameStatus.BlackWon)
         {
             _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
             _renderer.DrawBigMessage("STALE MAT");
         }
 
-        if (status == GameStatus.BlackWon)
+        if (_gameController.Status == GameStatus.Stalemate)
         {
             _renderer.HighlightSquares(~0UL, Color.SKYBLUE);
             _renderer.DrawBigMessage("YOUR LOOSE");

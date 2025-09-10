@@ -2,9 +2,9 @@ using skakmat.Chess;
 using skakmat.Utilities;
 
 namespace skakmat.Game;
-public class Castling
+internal class Castling
 {
-    public enum Type
+    internal enum Type
     {
         None,
         KingSide,
@@ -12,7 +12,7 @@ public class Castling
     }
 
     [Flags]
-    public enum Rights
+    internal enum Rights
     {
         None = 0,
         WhiteKingSide = 1,
@@ -22,26 +22,26 @@ public class Castling
         All = 15
     }
 
-    public static Type GetCastlingType(bool whiteToPlay, ulong targetBit, Rights rights)
+    internal static Type GetCastlingType(bool whiteToPlay, ulong targetBit, BoardState state)
     {
         if (Masks.KingAttemptsShortCastle(whiteToPlay).Contains(targetBit))
         {
             var requiredRight = whiteToPlay ? Rights.WhiteKingSide : Rights.BlackKingSide;
-            return rights.HasFlag(requiredRight) ? Type.KingSide : Type.None;
+            return state.CastlingRights.HasFlag(requiredRight) ? Type.KingSide : Type.None;
         }
 
         if (Masks.KingAttemptsLongCastle(whiteToPlay).Contains(targetBit))
         {
             var requiredRight = whiteToPlay ? Rights.WhiteQueenSide : Rights.BlackQueenSide;
-            return rights.HasFlag(requiredRight) ? Type.QueenSide : Type.None;
+            return state.CastlingRights.HasFlag(requiredRight) ? Type.QueenSide : Type.None;
         }
 
         return Type.None;
     }
 
-    public static Move CreateRookMove(Type type, bool whiteToPlay)
+    internal static Move CreateRookMove(Type type, bool whiteToPlay)
     {
-        var rookType = whiteToPlay ? Constants.WhiteRook : Constants.BlackRook;
+        var rookType = whiteToPlay ? Piece.WhiteRook : Piece.BlackRook;
         if (type == Type.KingSide)
         {
             var originBit = Masks.RookRightCorner(whiteToPlay);
@@ -57,9 +57,9 @@ public class Castling
         throw new ArgumentException("Castling type unexpected: " + type);
     }
 
-    public static Move CreateKingMove(Type type, bool whiteToPlay)
+    internal static Move CreateKingMove(Type type, bool whiteToPlay)
     {
-        var kingType = whiteToPlay ? Constants.WhiteKing : Constants.BlackKing;
+        var kingType = whiteToPlay ? Piece.WhiteKing : Piece.BlackKing;
         var originBit = Masks.KingStartSquare(whiteToPlay);
         if (type == Type.KingSide)
         {

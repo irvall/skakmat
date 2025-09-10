@@ -6,7 +6,7 @@ using Color = Raylib_cs.Color;
 
 namespace skakmat.Rendering;
 
-public class BitboardVisualiser
+internal class BitboardVisualiser
 {
     private readonly List<HighlightSquare> _boundingBoxes;
     private readonly int _halfSideLength;
@@ -20,7 +20,7 @@ public class BitboardVisualiser
     private Vector2? _rectEndPos;
 
 
-    public BitboardVisualiser()
+    internal BitboardVisualiser()
     {
         RaylibUtility.IgnoreLogs();
         Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
@@ -37,7 +37,7 @@ public class BitboardVisualiser
         _boundingBoxColor = Palette.GetNextColor();
     }
 
-    public void Run()
+    internal void Run()
     {
         DrawWindow();
     }
@@ -132,7 +132,7 @@ public class BitboardVisualiser
         var startSquare = VectorToSquare(lowerVector);
         var endSquare = VectorToSquare(upperVector);
         var bitboardAsHex = Convert.ToString((long)bitboard, 16);
-        return $"public static ulong {startSquare}{endSquare} = 0x{bitboardAsHex};";
+        return $"internal static ulong {startSquare}{endSquare} = 0x{bitboardAsHex};";
     }
 
     private static string VectorToSquare(Vector2 vector)
@@ -211,8 +211,8 @@ public class BitboardVisualiser
 
     private readonly struct HighlightSquare(Vector2 startPosition, Vector2 endPosition, Color color)
     {
-        public readonly Color Color = color;
-        public readonly Vector2 StartPosition = startPosition;
-        public readonly Vector2 EndPosition = endPosition;
+        internal readonly Color Color = color;
+        internal readonly Vector2 StartPosition = startPosition;
+        internal readonly Vector2 EndPosition = endPosition;
     }
 }

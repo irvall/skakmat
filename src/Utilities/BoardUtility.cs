@@ -3,10 +3,10 @@ using skakmat.Game;
 
 namespace skakmat.Utilities;
 
-public class BoardUtility
+internal class BoardUtility
 {
 
-    public static ulong[] BitboardFromFen(string fen)
+    internal static ulong[] BitboardFromFen(string fen)
     {
         // Standard: rnbqkbnr/pppppppp/Constants.SquareCount/Constants.SquareCount/Constants.SquareCount/Constants.SquareCount/PPPPPPPP/RNBQKBNR w KQkq - 0 1
         // TODO: Support 'w KQkq - 0 1' part
@@ -33,37 +33,37 @@ public class BoardUtility
                 {
                     case 'p':
                         {
-                            var idx = isWhite ? Constants.WhitePawn : Constants.BlackPawn;
+                            var idx = isWhite ? Piece.WhitePawn : Piece.BlackPawn;
                             bbs[idx] |= bit;
                             break;
                         }
                     case 'r':
                         {
-                            var idx = isWhite ? Constants.WhiteRook : Constants.BlackRook;
+                            var idx = isWhite ? Piece.WhiteRook : Piece.BlackRook;
                             bbs[idx] |= bit;
                             break;
                         }
                     case 'n':
                         {
-                            var idx = isWhite ? Constants.WhiteKnight : Constants.BlackKnight;
+                            var idx = isWhite ? Piece.WhiteKnight : Piece.BlackKnight;
                             bbs[idx] |= bit;
                             break;
                         }
                     case 'b':
                         {
-                            var idx = isWhite ? Constants.WhiteBishop : Constants.BlackBishop;
+                            var idx = isWhite ? Piece.WhiteBishop : Piece.BlackBishop;
                             bbs[idx] |= bit;
                             break;
                         }
                     case 'q':
                         {
-                            var idx = isWhite ? Constants.WhiteQueen : Constants.BlackQueen;
+                            var idx = isWhite ? Piece.WhiteQueen : Piece.BlackQueen;
                             bbs[idx] |= bit;
                             break;
                         }
                     case 'k':
                         {
-                            var idx = isWhite ? Constants.WhiteKing : Constants.BlackKing;
+                            var idx = isWhite ? Piece.WhiteKing : Piece.BlackKing;
                             bbs[idx] |= bit;
                             break;
                         }
@@ -83,7 +83,7 @@ public class BoardUtility
         return bbs;
     }
 
-    public static IEnumerable<(int index, ulong bit)> EnumerateSquares()
+    internal static IEnumerable<(int index, ulong bit)> EnumerateSquares()
     {
         for (var idx = 0; idx < 64; idx++)
         {
@@ -92,20 +92,20 @@ public class BoardUtility
         }
     }
 
-    public static (int, ulong) IndexAndBitUnderMouse(Vector2 mousePosition)
+    internal static (int, ulong) IndexAndBitUnderMouse(Vector2 mousePosition)
     {
         var idx = (int)(mousePosition.X + mousePosition.Y * Constants.SquareCount);
         return (idx, 1UL << idx);
     }
 
-    public static string IndexToSquareString(int index)
+    internal static string IndexToSquareString(int index)
     {
         var letter = (char)('a' + (index % 8));
         return letter + (8 - (index / 8)).ToString();
 
     }
 
-    public static int BitToIndex(ulong bit)
+    internal static int BitToIndex(ulong bit)
     {
         foreach (var (idx, squareBit) in EnumerateSquares())
             if (bit.Contains(squareBit))
@@ -113,26 +113,26 @@ public class BoardUtility
         return -1;
     }
 
-    public static string PieceTypeToString(int pieceType)
+    internal static string PieceIndexToString(int pieceIndex)
     {
-        return pieceType switch
+        return pieceIndex switch
         {
-            Constants.WhitePawn or Constants.BlackPawn => "",
-            Constants.WhiteRook or Constants.BlackRook => "R",
-            Constants.WhiteKnight or Constants.BlackKnight => "N",
-            Constants.WhiteBishop or Constants.BlackBishop => "B",
-            Constants.WhiteQueen or Constants.BlackQueen => "Q",
-            Constants.WhiteKing or Constants.BlackKing => "K",
+            Piece.WhitePawn or Piece.BlackPawn => "",
+            Piece.WhiteRook or Piece.BlackRook => "R",
+            Piece.WhiteKnight or Piece.BlackKnight => "N",
+            Piece.WhiteBishop or Piece.BlackBishop => "B",
+            Piece.WhiteQueen or Piece.BlackQueen => "Q",
+            Piece.WhiteKing or Piece.BlackKing => "K",
             _ => throw new NotImplementedException(),
         };
     }
 
-    public static Move InvertMove(Move move)
+    internal static Move InvertMove(Move move)
     {
-        return new Move(move.PieceType, move.TargetBit, move.OriginBit);
+        return new Move(move.PieceIndex, move.TargetBit, move.OriginBit);
     }
 
-    public static bool AreHorizontalNeighbors(ulong bit1, ulong bit2)
+    internal static bool AreHorizontalNeighbors(ulong bit1, ulong bit2)
     {
         int pos1 = BitOperations.TrailingZeroCount(bit1);
         int pos2 = BitOperations.TrailingZeroCount(bit2);

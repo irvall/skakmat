@@ -3,224 +3,75 @@ using skakmat.Utilities;
 
 namespace skakmat.Game;
 
-public class Board
+internal class Board
 {
-
+    internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPinnedMate);
-    private readonly List<Move> _movesPlayed = [];
-
-    internal ulong WhitePieces =>
-        _bbs[Constants.WhitePawn]
-        | _bbs[Constants.WhiteRook]
-        | _bbs[Constants.WhiteKnight]
-        | _bbs[Constants.WhiteBishop]
-        | _bbs[Constants.WhiteQueen]
-        | _bbs[Constants.WhiteKing];
-
-    internal ulong BlackPieces =>
-        _bbs[Constants.BlackPawn]
-        | _bbs[Constants.BlackRook]
-        | _bbs[Constants.BlackKnight]
-        | _bbs[Constants.BlackBishop]
-        | _bbs[Constants.BlackQueen]
-        | _bbs[Constants.BlackKing];
-
-    internal ulong AllPieces => WhitePieces | BlackPieces;
-    internal ulong EmptySquares => ~AllPieces;
-
-    private readonly MoveTables _moveTables = new();
-
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.Fen.DefaultPosition);
     private Castling.Rights castlingRights = Castling.Rights.All;
+    private Move? lastMovePlayed = null;
 
-    public int GetPieceTypeFromSquare(ulong square)
+    internal int GetPieceIndexAt(ulong square)
     {
-        if (_bbs[Constants.WhitePawn].Contains(square)) return Constants.WhitePawn;
-        if (_bbs[Constants.BlackPawn].Contains(square)) return Constants.BlackPawn;
-        if (_bbs[Constants.WhiteRook].Contains(square)) return Constants.WhiteRook;
-        if (_bbs[Constants.BlackRook].Contains(square)) return Constants.BlackRook;
-        if (_bbs[Constants.WhiteKnight].Contains(square)) return Constants.WhiteKnight;
-        if (_bbs[Constants.BlackKnight].Contains(square)) return Constants.BlackKnight;
-        if (_bbs[Constants.WhiteBishop].Contains(square)) return Constants.WhiteBishop;
-        if (_bbs[Constants.BlackBishop].Contains(square)) return Constants.BlackBishop;
-        if (_bbs[Constants.WhiteQueen].Contains(square)) return Constants.WhiteQueen;
-        if (_bbs[Constants.BlackQueen].Contains(square)) return Constants.BlackQueen;
-        if (_bbs[Constants.WhiteKing].Contains(square)) return Constants.WhiteKing;
-        if (_bbs[Constants.BlackKing].Contains(square)) return Constants.BlackKing;
-        return Constants.EmptySquare;
+        if (_bbs[Piece.WhitePawn].Contains(square)) return Piece.WhitePawn;
+        if (_bbs[Piece.BlackPawn].Contains(square)) return Piece.BlackPawn;
+        if (_bbs[Piece.WhiteRook].Contains(square)) return Piece.WhiteRook;
+        if (_bbs[Piece.BlackRook].Contains(square)) return Piece.BlackRook;
+        if (_bbs[Piece.WhiteKnight].Contains(square)) return Piece.WhiteKnight;
+        if (_bbs[Piece.BlackKnight].Contains(square)) return Piece.BlackKnight;
+        if (_bbs[Piece.WhiteBishop].Contains(square)) return Piece.WhiteBishop;
+        if (_bbs[Piece.BlackBishop].Contains(square)) return Piece.BlackBishop;
+        if (_bbs[Piece.WhiteQueen].Contains(square)) return Piece.WhiteQueen;
+        if (_bbs[Piece.BlackQueen].Contains(square)) return Piece.BlackQueen;
+        if (_bbs[Piece.WhiteKing].Contains(square)) return Piece.WhiteKing;
+        if (_bbs[Piece.BlackKing].Contains(square)) return Piece.BlackKing;
+        return Piece.EmptySquare;
     }
 
-    public Move GetMoveAt(int index)
+    internal int GetPieceIndexAt(int index)
     {
-        if (index < 0 || index >= _movesPlayed.Count)
-            throw new IndexOutOfRangeException("Move index invalid: " + index);
-        return _movesPlayed[index];
+        return GetPieceIndexAt(1UL << index);
     }
 
-    public bool WhiteToPlay => _whiteToPlay;
-    public int MovesPlayed => _movesPlayed.Count;
-
-    public int GetPieceTypeAtIndex(int index)
-    {
-        return GetPieceTypeFromSquare(1UL << index);
-    }
-
-    public IEnumerable<(int pieceType, int index, ulong bit)> GetAllPieces()
+    internal IEnumerable<(int pieceIndex, int index, ulong bit)> GetAllPieces()
     {
         foreach (var (idx, bit) in BoardUtility.EnumerateSquares())
         {
-            var type = GetPieceTypeFromSquare(bit);
-            if (type != Constants.EmptySquare)
+            var type = GetPieceIndexAt(bit);
+            if (type != Piece.EmptySquare)
                 yield return (type, idx, bit);
         }
-    }
-
-    private static bool IsCorrectColor(int pieceType, bool isWhite)
-    {
-        return isWhite ?
-            pieceType >= Constants.WhitePawn && pieceType <= Constants.WhiteKing
-            : pieceType >= Constants.BlackPawn && pieceType <= Constants.BlackKing;
-    }
-
-    public ulong ControlledSquares()
-    {
-        return ControlledSquares(_whiteToPlay);
-    }
-
-    private ulong ControlledSquares(bool isWhite)
-    {
-        var control = 0UL;
-        var allPieces = AllPieces;
-        foreach (var (type, idx, _) in GetAllPieces())
-        {
-            if (IsCorrectColor(type, isWhite))
-            {
-                control |= GetPieceAttacks(type, idx, allPieces);
-            }
-        }
-        return control;
-    }
-
-    private ulong GetPieceAttacks(int pieceType, int index, ulong allPieces) => pieceType switch
-    {
-        Constants.WhitePawn => _moveTables.WhitePawnAttacks[index],
-        Constants.BlackPawn => _moveTables.BlackPawnAttacks[index],
-        Constants.WhiteKnight => _moveTables.KnightMoves[index].Exclude(WhitePieces),
-        Constants.BlackKnight => _moveTables.KnightMoves[index].Exclude(BlackPieces),
-        Constants.WhiteBishop => MoveTables.BishopAttacks(index, allPieces).Exclude(WhitePieces),
-        Constants.BlackBishop => MoveTables.BishopAttacks(index, allPieces).Exclude(BlackPieces),
-        Constants.WhiteRook => MoveTables.RookAttacks(index, allPieces).Exclude(WhitePieces),
-        Constants.BlackRook => MoveTables.RookAttacks(index, allPieces).Exclude(BlackPieces),
-        Constants.WhiteQueen =>
-            GetPieceAttacks(Constants.WhiteRook, index, allPieces)
-            | GetPieceAttacks(Constants.WhiteBishop, index, allPieces),
-        Constants.BlackQueen =>
-            GetPieceAttacks(Constants.BlackRook, index, allPieces)
-            | GetPieceAttacks(Constants.BlackBishop, index, allPieces),
-        Constants.WhiteKing => _moveTables.KingMoves[index].Exclude(WhitePieces),
-        Constants.BlackKing => _moveTables.KingMoves[index].Exclude(BlackPieces),
-        _ => 0UL
-    };
-
-
-    public ulong GetLegalPawnMoves(int index, bool isWhite)
-    {
-        var moveBits = isWhite ? _moveTables.WhitePawnMoves[index] : _moveTables.BlackPawnMoves[index];
-        var attackBits = isWhite ? _moveTables.WhitePawnAttacks[index] : _moveTables.BlackPawnAttacks[index];
-        var startRow = isWhite ? Masks.Rank2 : Masks.Rank7;
-        var firstMoveBlokingRow = isWhite ? Masks.Rank3 : Masks.Rank6;
-        attackBits &= isWhite ? BlackPieces : WhitePieces;
-        if (startRow.Contains(1UL << index) && firstMoveBlokingRow.Contains(moveBits & AllPieces))
-        {
-            return attackBits;
-        }
-        return moveBits.Exclude(AllPieces) | attackBits;
-    }
-
-    public ulong GetPseudoLegalMoves(int pieceType, int index)
-    {
-        return pieceType switch
-        {
-            Constants.WhitePawn => GetLegalPawnMoves(index, true),
-            Constants.BlackPawn => GetLegalPawnMoves(index, false),
-            Constants.WhiteBishop => MoveTables.BishopAttacks(index, AllPieces).Exclude(WhitePieces),
-            Constants.BlackBishop => MoveTables.BishopAttacks(index, AllPieces).Exclude(BlackPieces),
-            Constants.WhiteKnight => _moveTables.KnightMoves[index].Exclude(WhitePieces),
-            Constants.BlackKnight => _moveTables.KnightMoves[index].Exclude(BlackPieces),
-            Constants.WhiteRook => MoveTables.RookAttacks(index, AllPieces).Exclude(WhitePieces),
-            Constants.BlackRook => MoveTables.RookAttacks(index, AllPieces).Exclude(BlackPieces),
-            Constants.WhiteQueen => GetPseudoLegalMoves(Constants.WhiteRook, index) | GetPseudoLegalMoves(Constants.WhiteBishop, index),
-            Constants.BlackQueen => GetPseudoLegalMoves(Constants.BlackRook, index) | GetPseudoLegalMoves(Constants.BlackBishop, index),
-            Constants.WhiteKing => _moveTables.KingMoves[index].Exclude(ControlledSquares(false) | WhitePieces),
-            Constants.BlackKing => _moveTables.KingMoves[index].Exclude(ControlledSquares(true) | BlackPieces),
-            _ => 0UL,
-        };
-    }
-
-    private void ApplyMove(Move move)
-    {
-        ApplyMove(move.OriginBit, move.TargetBit, move.PieceType);
     }
 
     private void PromotePawns()
     {
         var lastRank = _whiteToPlay ? Masks.Rank8 : Masks.Rank1;
-        var pawnType = GetPawnForCurrentPlayer();
-        var queenType = _whiteToPlay ? Constants.WhiteQueen : Constants.BlackQueen;
+        var pawnType = GetPieceIndex(PieceType.Pawn);
+        var queenType = _whiteToPlay ? Piece.WhiteQueen : Piece.BlackQueen;
         _bbs[queenType] |= lastRank & _bbs[pawnType];
         _bbs[pawnType] ^= lastRank & _bbs[pawnType];
     }
 
-    private int GetCurrentPlayerPieceType(int whitePieceType)
+    private void HandleSpecialMove(Move move)
     {
-        return _whiteToPlay ? whitePieceType : whitePieceType + 6;
-    }
-
-    private int GetRookForCurrentPlayer()
-    {
-        return GetCurrentPlayerPieceType(Constants.WhiteRook);
-    }
-
-    private int GetKingForCurrentPlayer()
-    {
-        return GetCurrentPlayerPieceType(Constants.WhiteKing);
-    }
-
-    private int GetPawnForCurrentPlayer()
-    {
-        return GetCurrentPlayerPieceType(Constants.WhitePawn);
-    }
-
-    private Move ConvertToCastle(Move move)
-    {
-        Castling.Type type = Castling.Type.None;
-        if (move.IsShortCastle())
-            type = Castling.Type.KingSide;
-        else if (move.IsLongCastle())
-            type = Castling.Type.QueenSide;
-        if (type == Castling.Type.None)
-            return move;
-        var rookMove = Castling.CreateRookMove(type, _whiteToPlay);
-        var kingMove = Castling.CreateKingMove(type, _whiteToPlay);
-        return new CastleMove(kingMove, rookMove);
-    }
-
-    public void MakeMove(Move move, bool swapSide = true)
-    {
-        if (move is CastleMove castleMove)
+        switch (move)
         {
-            MakeMove(castleMove.RookMove, false);
+            case CastleMove castle:
+                ApplyMove(castle.RookMove, false);
+                UpdateCastlingRights(move);
+                break;
+            case EnPassantMove ep: RemovePiece(ep.PawnToRemove.PieceIndex, ep.PawnToRemove.TargetBit); break;
         }
-        if (move is EnPassantMove enPassantMove)
-        {
-            RemovePiece(enPassantMove.PawnToRemove.PieceType, enPassantMove.PawnToRemove.TargetBit);
-        }
-        ApplyMove(move.OriginBit, move.TargetBit, move.PieceType);
-        _movesPlayed.Add(move);
+    }
+
+    internal void ApplyMove(Move move, bool swapSide = true)
+    {
+        HandleSpecialMove(move);
+        ExecuteMove(move);
         PromotePawns();
-        UpdateCastlingRights(move);
         if (swapSide)
             _whiteToPlay = !_whiteToPlay;
+        lastMovePlayed = move;
     }
 
     private void RemoveCastlingRight(Castling.Type type)
@@ -235,16 +86,21 @@ public class Board
         }
     }
 
+    private int GetPieceIndex(PieceType type)
+    {
+        return Piece.GetPieceIndex(type, _whiteToPlay);
+    }
+
     private void UpdateCastlingRights(Move move)
     {
-        if (move.PieceType == GetRookForCurrentPlayer())
+        if (move.PieceIndex == GetPieceIndex(PieceType.Rook))
         {
             if (move.OriginBit.Contains(Masks.RookRightCorner(_whiteToPlay)))
                 RemoveCastlingRight(Castling.Type.KingSide);
             if (move.OriginBit.Contains(Masks.RookLeftCorner(_whiteToPlay)))
                 RemoveCastlingRight(Castling.Type.QueenSide);
         }
-        if (move.PieceType == GetKingForCurrentPlayer())
+        if (move.PieceIndex == GetPieceIndex(PieceType.King))
         {
             var whiteCastlingRights = Castling.Rights.WhiteKingSide | Castling.Rights.WhiteQueenSide;
             var blackCastlingRights = Castling.Rights.BlackKingSide | Castling.Rights.BlackQueenSide;
@@ -252,178 +108,26 @@ public class Board
         }
     }
 
-    private void RemovePiece(int pieceTypeToRemove, ulong targetBit)
+    private void RemovePiece(int pieceIndexToRemove, ulong targetBit)
     {
-        if (pieceTypeToRemove == Constants.EmptySquare)
+        if (pieceIndexToRemove == Piece.EmptySquare)
             return;
-        _bbs[pieceTypeToRemove] ^= targetBit;
+        _bbs[pieceIndexToRemove] ^= targetBit;
     }
 
-    private void ApplyMove(ulong originBit, ulong targetBit, int pieceType)
+    internal void ExecuteMove(Move move)
     {
-        var optCapturedPiece = GetPieceTypeFromSquare(targetBit);
-        RemovePiece(optCapturedPiece, targetBit);
-        _bbs[pieceType] ^= originBit;
-        _bbs[pieceType] |= targetBit;
+        var optCapturedPiece = GetPieceIndexAt(move.TargetBit);
+        RemovePiece(optCapturedPiece, move.TargetBit);
+        _bbs[move.PieceIndex] ^= move.OriginBit;
+        _bbs[move.PieceIndex] |= move.TargetBit;
     }
 
-    private void UndoMove(Move move, int possibleTargetType)
+    internal void UndoMove(Move move, int possibleTargetType)
     {
         RemovePiece(possibleTargetType, move.TargetBit);
-        _bbs[move.PieceType] ^= move.TargetBit;
-        _bbs[move.PieceType] |= move.OriginBit;
-    }
-
-    public PieceSelection? TrySelectPiece(int index)
-    {
-        var pieceType = GetPieceTypeAtIndex(index);
-        if (pieceType == Constants.EmptySquare || !IsCorrectColor(pieceType, _whiteToPlay)) return null;
-        var validMoves = GenerateMovesFromIndex(index);
-        return new PieceSelection(pieceType, index, validMoves);
-    }
-
-    public bool IsKingUnderAttack()
-    {
-        var controlledSquares = ControlledSquares(!_whiteToPlay);
-        return _whiteToPlay && _bbs[Constants.WhiteKing].Contains(controlledSquares)
-           || !_whiteToPlay && _bbs[Constants.BlackKing].Contains(controlledSquares);
-    }
-
-    private bool IsPathClear(Castling.Type castleType)
-    {
-        var path = castleType == Castling.Type.KingSide
-            ? Masks.KingSideCastlePath(_whiteToPlay)
-            : Masks.QueenSideCastlePath(_whiteToPlay);
-
-        return EmptySquares.ForAll(path);
-    }
-
-    private bool IsPathSafe(Castling.Type castleType)
-    {
-        var path = castleType == Castling.Type.KingSide
-        ? Masks.KingSideCastlePath(_whiteToPlay)
-        : Masks.QueenSideCastlePath(_whiteToPlay);
-
-        var squaresUnderAttack = ControlledSquares(!_whiteToPlay);
-        return !path.Contains(squaresUnderAttack);
-    }
-
-    private bool ShortCastleAllowed()
-    {
-        return _whiteToPlay ? castlingRights.HasFlag(Castling.Rights.WhiteKingSide) : castlingRights.HasFlag(Castling.Rights.BlackKingSide);
-    }
-
-    private bool LongCastleAllowed()
-    {
-        return _whiteToPlay ? castlingRights.HasFlag(Castling.Rights.WhiteQueenSide) : castlingRights.HasFlag(Castling.Rights.BlackQueenSide);
-    }
-
-    private Move ValidateCastling(Move move)
-    {
-        if (GetKingForCurrentPlayer() != move.PieceType) return move;
-        if (IsKingUnderAttack()) return move;
-        if (!ShortCastleAllowed() && !LongCastleAllowed()) return move;
-
-        var castlingType = Castling.GetCastlingType(_whiteToPlay, move.TargetBit, castlingRights);
-        if (castlingType == Castling.Type.None)
-            return move;
-        if (!IsPathClear(castlingType))
-            return move;
-
-        if (!IsPathSafe(castlingType))
-            return move;
-
-        return ConvertToCastle(move);
-    }
-
-    void ValidateAndAddMove(Move move, List<Move> validMoves)
-    {
-        var possibleTargetType = GetPieceTypeFromSquare(move.TargetBit);
-        ApplyMove(move);
-        if (!IsKingUnderAttack())
-        {
-            validMoves.Add(move);
-        }
-        UndoMove(move, possibleTargetType);
-    }
-
-    public List<Move> GenerateMovesFromIndex(int index)
-    {
-        var pieceType = GetPieceTypeAtIndex(index);
-        var originBit = 1UL << index;
-        var legalMoves = GetPseudoLegalMoves(pieceType, index);
-        var validMoves = new List<Move>();
-        foreach (var (_, targetBit) in BoardUtility.EnumerateSquares())
-        {
-            var possibleMove = new Move(pieceType, originBit, targetBit);
-            if (legalMoves.Contains(targetBit))
-            {
-                ValidateAndAddMove(possibleMove, validMoves);
-            }
-            else if (ValidateCastling(possibleMove) is CastleMove castleMove)
-            {
-                ValidateAndAddMove(castleMove, validMoves);
-            }
-            else if (CanTakeEnPassant(possibleMove) is EnPassantMove enPassantMove)
-            {
-                ValidateAndAddMove(enPassantMove, validMoves);
-            }
-        }
-        return validMoves;
-    }
-
-    private Move? PreviousMove()
-    {
-        if (_movesPlayed.Count == 0)
-            return null;
-        return _movesPlayed[^1];
-    }
-
-    private static bool IsWhite(int pieceType)
-    {
-        return pieceType >= Constants.WhitePawn && pieceType < Constants.BlackPawn;
-
-    }
-
-    private static bool IsPawnDoublePush(Move move)
-    {
-        if (move.PieceType != Constants.WhitePawn
-            && move.PieceType != Constants.BlackPawn)
-            return false;
-        var startRank = IsWhite(move.PieceType) ? Masks.Rank2 : Masks.Rank7;
-        var targetRank = IsWhite(move.PieceType) ? Masks.Rank4 : Masks.Rank5;
-        return startRank.Contains(move.OriginBit) && targetRank.Contains(move.TargetBit);
-    }
-
-
-    private Move CanTakeEnPassant(Move possibleMove)
-    {
-        if (possibleMove.PieceType != GetPawnForCurrentPlayer())
-            return possibleMove;
-        var prevMove = PreviousMove();
-        if (prevMove is null)
-            return possibleMove;
-        if (!IsPawnDoublePush(prevMove))
-            return possibleMove;
-        if (!BoardUtility.AreHorizontalNeighbors(possibleMove.OriginBit, prevMove.TargetBit))
-            return possibleMove;
-        var behindBit = IsWhite(possibleMove.PieceType) ?
-            prevMove.TargetBit >> MoveTables.RankOffset :
-            prevMove.TargetBit << MoveTables.RankOffset;
-        if (behindBit != possibleMove.TargetBit)
-            return possibleMove;
-        return new EnPassantMove(possibleMove, prevMove);
-    }
-
-    public List<Move> GenerateMoves()
-    {
-        var validMoves = new List<Move>();
-        foreach (var (pieceType, idx, _) in GetAllPieces())
-        {
-            if (!IsCorrectColor(pieceType, _whiteToPlay)) continue;
-            validMoves.AddRange(GenerateMovesFromIndex(idx));
-        }
-        return validMoves;
+        _bbs[move.PieceIndex] ^= move.TargetBit;
+        _bbs[move.PieceIndex] |= move.OriginBit;
     }
 
 }

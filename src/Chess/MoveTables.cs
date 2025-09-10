@@ -1,28 +1,29 @@
 ﻿using System.Reflection;
+using skakmat.Game;
 using skakmat.Utilities;
 
 namespace skakmat.Chess;
 
-public partial class MoveTables
+internal partial class MoveTables
 {
     private const int SquareNo = 8;
-    public const int RankOffset = 8;
+    internal const int RankOffset = 8;
     private const int FileOffset = 1;
     private const int DiagonalOffset = 7;
     private const int AntiDiagonalOffset = 9;
 
     private readonly Dictionary<string, int> _boardSquareToIndex;
     private readonly Dictionary<int, string> _indexToBoardSquare;
-    public ulong[] BlackPawnAttacks = new ulong[64];
-    public ulong[] BlackPawnMoves = new ulong[64];
-    public ulong[] KingMoves = new ulong[64];
-    public ulong[] KnightMoves = new ulong[64];
+    internal ulong[] BlackPawnAttacks = new ulong[64];
+    internal ulong[] BlackPawnMoves = new ulong[64];
+    internal ulong[] KingMoves = new ulong[64];
+    internal ulong[] KnightMoves = new ulong[64];
 
-    public ulong[] WhitePawnAttacks = new ulong[64];
+    internal ulong[] WhitePawnAttacks = new ulong[64];
 
-    public ulong[] WhitePawnMoves = new ulong[64];
+    internal ulong[] WhitePawnMoves = new ulong[64];
 
-    public MoveTables()
+    internal MoveTables()
     {
         _boardSquareToIndex = [];
         _indexToBoardSquare = [];
@@ -32,7 +33,7 @@ public partial class MoveTables
         InitializeKnightMoves();
     }
 
-    public static ulong RookAttacks(int square, ulong blockers)
+    internal static ulong RookAttacks(int square, ulong blockers)
     {
         var attacks = 0UL;
         var lowerY = square % 8;
@@ -69,7 +70,7 @@ public partial class MoveTables
         return attacks;
     }
 
-    public static ulong BishopAttacks(int square, ulong blockers)
+    internal static ulong BishopAttacks(int square, ulong blockers)
     {
         var attacks = 0UL;
         var targetRank = square / 8;
@@ -106,7 +107,7 @@ public partial class MoveTables
     }
 
 
-    public void PrintBoardMasks()
+    internal void PrintBoardMasks()
     {
         var boardMasksType = typeof(Masks);
 
@@ -227,7 +228,7 @@ public partial class MoveTables
         }
     }
 
-    public void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
+    internal void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
     {
         if (optional != null && optIndex != null)
         {
@@ -250,4 +251,22 @@ public partial class MoveTables
 
         Console.WriteLine(Environment.NewLine);
     }
+
+    internal ulong GetPieceAttacks(int pieceIndex, int index, BoardState state) => pieceIndex switch
+    {
+        Piece.WhitePawn => WhitePawnAttacks[index],
+        Piece.BlackPawn => BlackPawnAttacks[index],
+        Piece.WhiteKnight => KnightMoves[index].Exclude(state.WhitePieces),
+        Piece.BlackKnight => KnightMoves[index].Exclude(state.BlackPieces),
+        Piece.WhiteBishop => BishopAttacks(index, state.AllPieces).Exclude(state.WhitePieces),
+        Piece.BlackBishop => BishopAttacks(index, state.AllPieces).Exclude(state.BlackPieces),
+        Piece.WhiteRook => RookAttacks(index, state.AllPieces).Exclude(state.WhitePieces),
+        Piece.BlackRook => RookAttacks(index, state.AllPieces).Exclude(state.BlackPieces),
+        Piece.WhiteQueen => GetPieceAttacks(Piece.WhiteRook, index, state) | GetPieceAttacks(Piece.WhiteBishop, index, state),
+        Piece.BlackQueen => GetPieceAttacks(Piece.BlackRook, index, state) | GetPieceAttacks(Piece.BlackBishop, index, state),
+        Piece.WhiteKing => KingMoves[index].Exclude(state.WhitePieces),
+        Piece.BlackKing => KingMoves[index].Exclude(state.BlackPieces),
+        _ => 0UL
+    };
+
 }

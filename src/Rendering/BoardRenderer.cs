@@ -5,14 +5,14 @@ using skakmat.Utilities;
 
 namespace skakmat.Rendering;
 
-public class BoardRenderer
+internal class BoardRenderer
 {
     private readonly int _sideLength;
     private readonly int _halfSideLength;
     private Texture2D _spriteTexture;
     private readonly (int width, int height) _windowSize;
 
-    public BoardRenderer(int windowHeight, int sideLength)
+    internal BoardRenderer(int windowHeight, int sideLength)
     {
         _sideLength = sideLength;
         _halfSideLength = _sideLength / 2;
@@ -20,12 +20,12 @@ public class BoardRenderer
         _windowSize.height = windowHeight + _sideLength;
     }
 
-    public void Initialize()
+    internal void Initialize()
     {
         _spriteTexture = RaylibUtility.LoadTextureChecked("assets/sprite.png");
     }
 
-    public void DrawBoard()
+    internal void DrawBoard()
     {
         var primaryTileColor = Palette.FromHex("C7D59F");
         var whiteTiles = Palette.WhiteVersion(primaryTileColor);
@@ -49,26 +49,25 @@ public class BoardRenderer
             var posY = _windowSize.height - _halfSideLength;
             Raylib.DrawText(c + "", (c - 'A') * _sideLength + posX, posY, _halfSideLength, Color.WHITE);
         }
-
     }
 
-    public void DrawPieces(Board board)
+    internal void DrawPieces(Board board)
     {
-        foreach (var (pieceType, index, _) in board.GetAllPieces())
+        foreach (var (pieceIndex, index, _) in board.GetAllPieces())
         {
             var col = index % Constants.SquareCount;
             var row = index / Constants.SquareCount;
-            DrawPiece(col, row, pieceType);
+            DrawPiece(col, row, pieceIndex);
         }
     }
 
-    private void DrawPiece(int col, int row, int pieceType)
+    private void DrawPiece(int col, int row, int pieceIndex)
     {
         int cellWidth = _spriteTexture.Width / 6;
         int cellHeight = _spriteTexture.Height / 2;
 
-        if (!Constants.PieceToSpriteCoords.TryGetValue(pieceType, out var tup))
-            throw new Exception("Piece type not supported " + pieceType);
+        if (!Constants.PieceToSpriteCoords.TryGetValue(pieceIndex, out var tup))
+            throw new Exception("Piece type not supported " + pieceIndex);
 
         var (pieceIndexX, pieceIndexY) = tup;
         var src = new Rectangle(
@@ -97,7 +96,7 @@ public class BoardRenderer
         Raylib.DrawRectangle(posX, posY, _sideLength, _sideLength, tileColor);
     }
 
-    public void HighlightSquares(ulong squares, Color color)
+    internal void HighlightSquares(ulong squares, Color color)
     {
         for (var idx = 63; idx >= 0; idx--)
         {
@@ -109,7 +108,7 @@ public class BoardRenderer
         }
     }
 
-    public void DrawBigMessage(string text)
+    internal void DrawBigMessage(string text)
     {
         Raylib.DrawText(text, _windowSize.width / 8, _windowSize.height / 2, 72, Color.BLACK);
     }

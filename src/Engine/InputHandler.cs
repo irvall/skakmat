@@ -3,17 +3,17 @@ using Raylib_cs;
 using skakmat.Game;
 
 namespace skakmat.Engine;
-public class InputHandler(int sideLength)
+internal class InputHandler(int sideLength)
 {
 
-    public static bool IsLeftArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT);
-    public static bool IsRightArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT);
-    public static bool IsLetterDPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_D);
+    internal static bool IsLeftArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT);
+    internal static bool IsRightArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT);
+    internal static bool IsLetterDPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_D);
 
-    public static bool IsLeftMouseButtonPressed =>
+    internal static bool IsLeftMouseButtonPressed =>
         Raylib.IsMouseButtonPressed(MouseButton.MOUSE_LEFT_BUTTON);
 
-    public static bool IsMouseOnBoard(Vector2 gridPosition)
+    internal static bool IsMouseOnBoard(Vector2 gridPosition)
     {
         return gridPosition is { X: >= 0 and < Constants.SquareCount, Y: >= 0 and < Constants.SquareCount };
     }
@@ -28,7 +28,7 @@ public class InputHandler(int sideLength)
         return new Vector2(gridX, gridY);
     }
 
-    public Vector2 GetMouseGridPosition()
+    internal Vector2 GetMouseGridPosition()
     {
         var mousePos = Raylib.GetMousePosition();
         return ScreenToGrid((int)mousePos.X, (int)mousePos.Y);

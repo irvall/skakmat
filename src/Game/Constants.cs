@@ -1,46 +1,36 @@
 namespace skakmat.Game;
-public static class Constants
+internal static class Constants
 {
-    public const int EmptySquare = -1;
-    public const int WhitePawn = 0;
-    public const int WhiteRook = 1;
-    public const int WhiteKnight = 2;
-    public const int WhiteBishop = 3;
-    public const int WhiteQueen = 4;
-    public const int WhiteKing = 5;
-    public const int BlackPawn = 6;
-    public const int BlackRook = 7;
-    public const int BlackKnight = 8;
-    public const int BlackBishop = 9;
-    public const int BlackQueen = 10;
-    public const int BlackKing = 11;
-
-    public static readonly Dictionary<int, (int, int)> PieceToSpriteCoords = new()
+    internal static readonly Dictionary<int, (int, int)> PieceToSpriteCoords = new()
     {
-        { WhitePawn, (5, 0) },
-        { WhiteKnight, (3, 0) },
-        { WhiteBishop, (2, 0) },
-        { WhiteRook, (4, 0) },
-        { WhiteQueen, (1, 0) },
-        { WhiteKing, (0, 0) },
-        { BlackPawn, (5, 1) },
-        { BlackKnight, (3, 1) },
-        { BlackBishop, (2, 1) },
-        { BlackRook, (4, 1) },
-        { BlackQueen, (1, 1) },
-        { BlackKing, (0, 1) },
+        { Piece.WhitePawn, (5, 0) },
+        { Piece.WhiteKnight, (3, 0) },
+        { Piece.WhiteBishop, (2, 0) },
+        { Piece.WhiteRook, (4, 0) },
+        { Piece.WhiteQueen, (1, 0) },
+        { Piece.WhiteKing, (0, 0) },
+        { Piece.BlackPawn, (5, 1) },
+        { Piece.BlackKnight, (3, 1) },
+        { Piece.BlackBishop, (2, 1) },
+        { Piece.BlackRook, (4, 1) },
+        { Piece.BlackQueen, (1, 1) },
+        { Piece.BlackKing, (0, 1) },
     };
-    public const int SquareCount = 8;
-    public const string FenDefaultPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    internal const int SquareCount = 8;
 
-    public const string FenRookCheck = "8/5pk1/p4pp1/2p4p/2P1P2P/1P3PP1/P2r2K1/4R3 w - - 0 40";
-    public const string FenMaxPieceDensity = "rnbqkb1r/pp1p1ppp/2p5/4P3/2B5/8/PPP1NnPP/RNBQK2R w KQkq - 0 6";
-    public const string FenNasty = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq a3 5 17";
-    public const string FenWhiteToSmother = "rnb3rk/pppp2pp/8/2q3Np/8/8/PPPPPPPP/RNBQKB1R w KQq - 0 1";
-    public const string FenWhiteKingInCheck1 = "b3r3/8/8/8/8/4Kn2/8/1B6 w - - 0 1";
-    public const string FenWhiteKingCanCastle = "7k/8/8/2b5/8/8/5PPP/4K2R w K - 0 1";
-    public const string FenBothSidesCanCastle = "rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
-    public const string FenBlackForcedToTake = "4n2k/8/8/7N/8/8/8/K5Q1 w - - 0 1";
-    public const string FenPinnedMate = "rnbqkb1r/pppppp1p/8/8/4Q1N1/8/PPPPPPPP/RNB1KB1R w KQkq - 0 1";
+    internal static class Fen
+    {
+        internal const string DefaultPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+        internal const string RookCheck = "8/5pk1/p4pp1/2p4p/2P1P2P/1P3PP1/P2r2K1/4R3 w - - 0 40";
+        internal const string MaxPieceDensity = "rnbqkb1r/pp1p1ppp/2p5/4P3/2B5/8/PPP1NnPP/RNBQK2R w KQkq - 0 6";
+        internal const string Nasty = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq a3 5 17";
+        internal const string WhiteToSmother = "rnb3rk/pppp2pp/8/2q3Np/8/8/PPPPPPPP/RNBQKB1R w KQq - 0 1";
+        internal const string WhiteKingInCheck1 = "b3r3/8/8/8/8/4Kn2/8/1B6 w - - 0 1";
+        internal const string WhiteKingCanCastle = "7k/8/8/2b5/8/8/5PPP/4K2R w K - 0 1";
+        internal const string BothSidesCanCastle = "rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
+        internal const string BlackForcedToTake = "4n2k/8/8/7N/8/8/8/K5Q1 w - - 0 1";
+        internal const string PinnedMate = "rnbqkb1r/pppppp1p/8/8/4Q1N1/8/PPPPPPPP/RNB1KB1R w KQkq - 0 1";
+    }
 
 }

@@ -3,13 +3,13 @@ using Raylib_cs;
 
 namespace skakmat.Utilities;
 
-public abstract class RaylibUtility
+internal abstract class RaylibUtility
 {
     private static void CustomLog(int logType, string text, nint args)
     {
     }
 
-    public static void IgnoreLogs()
+    internal static void IgnoreLogs()
     {
         var traceLog = new TraceLogDelegate(CustomLog);
         unsafe
@@ -19,7 +19,7 @@ public abstract class RaylibUtility
         }
     }
 
-    public static void WriteColor(string text, ConsoleColor consoleColor, bool newLine = true)
+    internal static void WriteColor(string text, ConsoleColor consoleColor, bool newLine = true)
     {
         var previousColor = Console.ForegroundColor;
         Console.ForegroundColor = consoleColor;
@@ -30,7 +30,7 @@ public abstract class RaylibUtility
         Console.ForegroundColor = previousColor;
     }
 
-    public static string BoldText(string text)
+    internal static string BoldText(string text)
     {
         return $"\u001b[1m{text}\u001b[0m";
     }
@@ -38,7 +38,7 @@ public abstract class RaylibUtility
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void TraceLogDelegate(int logType, string text, nint args);
 
-    public static int GetWindowHeightDynamically()
+    internal static int GetWindowHeightDynamically()
     {
         Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
         var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
@@ -46,7 +46,7 @@ public abstract class RaylibUtility
         return windowHeight;
     }
 
-    public static Texture2D LoadTextureChecked(string path)
+    internal static Texture2D LoadTextureChecked(string path)
     {
         if (!File.Exists(path))
             throw new FileNotFoundException($"Asset not found: {path}");
