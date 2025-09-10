@@ -6,6 +6,7 @@ namespace skakmat.Game;
 internal class Board
 {
     internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
+    public bool WhiteToPlay => _whiteToPlay;
     private bool _whiteToPlay = true;
     private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.Fen.DefaultPosition);
     private Castling.Rights castlingRights = Castling.Rights.All;
@@ -28,9 +29,9 @@ internal class Board
         return Piece.EmptySquare;
     }
 
-    internal int GetPieceIndexAt(int index)
+    internal int GetPieceIndexAt(int squareIndex)
     {
-        return GetPieceIndexAt(1UL << index);
+        return GetPieceIndexAt(1UL << squareIndex);
     }
 
     internal IEnumerable<(int pieceIndex, int index, ulong bit)> GetAllPieces()
@@ -66,11 +67,19 @@ internal class Board
 
     internal void ApplyMove(Move move, bool swapSide = true)
     {
+        System.Console.WriteLine($"[DEBUG] Before move: _whiteToPlay={{_whiteToPlay}}, move={{move}} swapSide={{swapSide}}");
         HandleSpecialMove(move);
         ExecuteMove(move);
         PromotePawns();
         if (swapSide)
+        {
             _whiteToPlay = !_whiteToPlay;
+            System.Console.WriteLine($"[DEBUG] Swapped side. Now _whiteToPlay={{_whiteToPlay}} after move={{move}}");
+        }
+        else
+        {
+            System.Console.WriteLine($"[DEBUG] Did not swap side. _whiteToPlay still {{_whiteToPlay}} after move={{move}}");
+        }
         lastMovePlayed = move;
     }
 
@@ -115,7 +124,7 @@ internal class Board
         _bbs[pieceIndexToRemove] ^= targetBit;
     }
 
-    internal void ExecuteMove(Move move)
+    public void ExecuteMove(Move move)
     {
         var optCapturedPiece = GetPieceIndexAt(move.TargetBit);
         RemovePiece(optCapturedPiece, move.TargetBit);

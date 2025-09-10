@@ -22,7 +22,9 @@ internal class BoardRenderer
 
     internal void Initialize()
     {
-        _spriteTexture = RaylibUtility.LoadTextureChecked("assets/sprite.png");
+        string baseDir = AppContext.BaseDirectory;
+        string imagePath = Path.Combine(baseDir, "assets", "spritesheets", "classic.png");
+        _spriteTexture = RaylibUtility.LoadTextureChecked(imagePath);
     }
 
     internal void DrawBoard()
@@ -51,17 +53,23 @@ internal class BoardRenderer
         }
     }
 
-    internal void DrawPieces(Board board)
+    internal void DrawPieces(BoardState state)
     {
-        foreach (var (pieceIndex, index, _) in board.GetAllPieces())
+        for (var pieceIndex = 0; pieceIndex < state.Bitboards.Length; pieceIndex++)
         {
-            var col = index % Constants.SquareCount;
-            var row = index / Constants.SquareCount;
-            DrawPiece(col, row, pieceIndex);
+            for (var i = 0; i < 64; i++)
+            {
+                var bit = 1UL << i;
+                var row = i / 8;
+                var col = i % 8;
+                if (state.Bitboards[pieceIndex].Contains(bit))
+                    DrawPiece(row, col, pieceIndex);
+            }
         }
     }
 
-    private void DrawPiece(int col, int row, int pieceIndex)
+
+    private void DrawPiece(int row, int col, int pieceIndex)
     {
         int cellWidth = _spriteTexture.Width / 6;
         int cellHeight = _spriteTexture.Height / 2;

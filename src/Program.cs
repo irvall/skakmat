@@ -11,7 +11,7 @@ internal abstract class Program
     {
         RaylibUtility.IgnoreLogs();
         // TODO: Add commandline options to easy toggle debug/AI
-        var engine = new GameEngine(true);
+        var engine = new GameEngine();
         engine.Run();
     }
 }

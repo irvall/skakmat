@@ -5,13 +5,10 @@ using skakmat.Utilities;
 namespace skakmat.Game;
 internal class MoveGenerator(MoveTables moveTables, Board board)
 {
-    private readonly MoveTables _moveTables = moveTables;
-    private readonly Board _board = board;
-
     internal ulong GetLegalPawnMoves(int index, BoardState state)
     {
-        var moveBits = state.WhiteToPlay ? _moveTables.WhitePawnMoves[index] : _moveTables.BlackPawnMoves[index];
-        var attackBits = state.WhiteToPlay ? _moveTables.WhitePawnAttacks[index] : _moveTables.BlackPawnAttacks[index];
+        var moveBits = state.WhiteToPlay ? moveTables.WhitePawnMoves[index] : moveTables.BlackPawnMoves[index];
+        var attackBits = state.WhiteToPlay ? moveTables.WhitePawnAttacks[index] : moveTables.BlackPawnAttacks[index];
         var startRow = state.WhiteToPlay ? Masks.Rank2 : Masks.Rank7;
         var firstMoveBlokingRow = state.WhiteToPlay ? Masks.Rank3 : Masks.Rank6;
 
@@ -63,13 +60,13 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
     bool IsMoveValid(Move move)
     {
         var valid = false;
-        var possibleTargetType = _board.GetPieceIndexAt(move.TargetBit);
-        _board.ApplyMove(move);
+        var possibleTargetType = board.GetPieceIndexAt(move.TargetBit);
+        board.ExecuteMove(move);
         if (!IsKingUnderAttack())
         {
             valid = true;
         }
-        _board.UndoMove(move, possibleTargetType);
+        board.UndoMove(move, possibleTargetType);
         return valid;
     }
 
@@ -90,9 +87,9 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         return (false, move);
     }
 
-    internal List<Move> GenerateMovesFromIndex(int index, BoardState state)
+    internal List<Move> GenerateMovesForSquare(int index, BoardState state)
     {
-        var pieceIndex = _board.GetPieceIndexAt(index);
+        var pieceIndex = state.GetPieceIndexAtIndex(index);
         var originBit = 1UL << index;
         var legalMoves = GetPseudoLegalMoves(pieceIndex, index, state);
         var validMoves = new List<Move>();
@@ -127,11 +124,11 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
     internal List<Move> GenerateMoves()
     {
         var validMoves = new List<Move>();
-        var state = _board.GetBoardState();
-        foreach (var (pieceIndex, idx, _) in _board.GetAllPieces())
+        var state = board.GetBoardState();
+        foreach (var (pieceIndex, idx, _) in board.GetAllPieces())
         {
             if (!Piece.IsCorrectColor(pieceIndex, state.WhiteToPlay)) continue;
-            validMoves.AddRange(GenerateMovesFromIndex(idx, state));
+            validMoves.AddRange(GenerateMovesForSquare(idx, state));
         }
         return validMoves;
     }
@@ -139,12 +136,12 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
     internal ulong SquaresUnderControl(bool isWhite)
     {
         var control = 0UL;
-        var state = _board.GetBoardState();
-        foreach (var (type, idx, _) in _board.GetAllPieces())
+        var state = board.GetBoardState();
+        foreach (var (type, idx, _) in board.GetAllPieces())
         {
             if (Piece.IsCorrectColor(type, isWhite))
             {
-                control |= _moveTables.GetPieceAttacks(type, idx, state);
+                control |= moveTables.GetPieceAttacks(type, idx, state);
             }
         }
         return control;
@@ -161,14 +158,14 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
             Piece.BlackPawn => GetLegalPawnMoves(index, state),
             Piece.WhiteBishop => MoveTables.BishopAttacks(index, state.AllPieces).Exclude(state.WhitePieces),
             Piece.BlackBishop => MoveTables.BishopAttacks(index, state.AllPieces).Exclude(state.BlackPieces),
-            Piece.WhiteKnight => _moveTables.KnightMoves[index].Exclude(state.WhitePieces),
-            Piece.BlackKnight => _moveTables.KnightMoves[index].Exclude(state.BlackPieces),
+            Piece.WhiteKnight => moveTables.KnightMoves[index].Exclude(state.WhitePieces),
+            Piece.BlackKnight => moveTables.KnightMoves[index].Exclude(state.BlackPieces),
             Piece.WhiteRook => MoveTables.RookAttacks(index, state.AllPieces).Exclude(state.WhitePieces),
             Piece.BlackRook => MoveTables.RookAttacks(index, state.AllPieces).Exclude(state.BlackPieces),
             Piece.WhiteQueen => GetPseudoLegalMoves(Piece.WhiteRook, index, state) | GetPseudoLegalMoves(Piece.WhiteBishop, index, state),
             Piece.BlackQueen => GetPseudoLegalMoves(Piece.BlackRook, index, state) | GetPseudoLegalMoves(Piece.BlackBishop, index, state),
-            Piece.WhiteKing => _moveTables.KingMoves[index].Exclude(SquaresUnderBlackControl() | state.WhitePieces),
-            Piece.BlackKing => _moveTables.KingMoves[index].Exclude(SquaresUnderWhiteControl() | state.BlackPieces),
+            Piece.WhiteKing => moveTables.KingMoves[index].Exclude(SquaresUnderBlackControl() | state.WhitePieces),
+            Piece.BlackKing => moveTables.KingMoves[index].Exclude(SquaresUnderWhiteControl() | state.BlackPieces),
             _ => 0UL,
         };
     }
@@ -187,6 +184,6 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         }
     }
 
-    internal bool IsKingUnderAttack() => IsKingUnderAttack(_board.GetBoardState());
+    internal bool IsKingUnderAttack() => IsKingUnderAttack(board.GetBoardState());
 
 }

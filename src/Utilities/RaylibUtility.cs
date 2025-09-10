@@ -48,6 +48,8 @@ internal abstract class RaylibUtility
 
     internal static Texture2D LoadTextureChecked(string path)
     {
+        var execDir = AppContext.BaseDirectory;
+        path = Path.Combine(execDir, path);
         if (!File.Exists(path))
             throw new FileNotFoundException($"Asset not found: {path}");
         return Raylib.LoadTexture(path);

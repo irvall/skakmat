@@ -92,9 +92,14 @@ internal class BoardUtility
         }
     }
 
+    internal static int IndexUnderMouse(Vector2 mousePosition)
+    {
+        return (int)(mousePosition.X + mousePosition.Y * Constants.SquareCount);
+    }
+
     internal static (int, ulong) IndexAndBitUnderMouse(Vector2 mousePosition)
     {
-        var idx = (int)(mousePosition.X + mousePosition.Y * Constants.SquareCount);
+        var idx = IndexUnderMouse(mousePosition);
         return (idx, 1UL << idx);
     }
 
