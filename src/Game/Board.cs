@@ -8,7 +8,7 @@ internal class Board
     internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
     public bool WhiteToPlay => _whiteToPlay;
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Default);
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Nasty);
     private Castling.Rights castlingRights = Castling.Rights.All;
     private Move? lastMovePlayed = null;
 

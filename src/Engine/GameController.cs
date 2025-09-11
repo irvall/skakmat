@@ -22,18 +22,19 @@ internal class GameController
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
+    private readonly SoundController soundController;
     private readonly List<HistoryEntry> moveHistory = [];
     private BoardState cachedBoardState;
     private bool boardStateShouldUpdate = true;
-    private List<Move> validMovesCache;
+    private List<Move> validMovesCache = [];
     private bool movesShouldUpdate = true;
 
     public GameController()
     {
         board = new Board();
         moveTables = new MoveTables();
-        validMovesCache = [];
         moveGenerator = new MoveGenerator(moveTables, board);
+        soundController = new SoundController();
     }
 
     internal enum GameStatus
@@ -74,6 +75,8 @@ internal class GameController
 
     internal void UpdateGameStatus()
     {
+        if (KingIsUnderAttack)
+            soundController.PlayCheckSound();
         if (movesShouldUpdate)
             UpdateValidMoves();
         if (validMovesCache.Count > 0)
@@ -123,6 +126,7 @@ internal class GameController
         boardStateShouldUpdate = true;
         UpdateGameStatus();
         SelectedPiece = null;
+        soundController.PlayMoveSound();
     }
 
     internal HistoryEntry? LastEntry()

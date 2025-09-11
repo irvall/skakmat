@@ -46,12 +46,24 @@ internal abstract class RaylibUtility
         return windowHeight;
     }
 
-    internal static Texture2D LoadTextureChecked(string path)
+    private static string SafeGetPath(string folder, string fileName)
     {
         var execDir = AppContext.BaseDirectory;
-        path = Path.Combine(execDir, path);
+        var path = Path.Combine(execDir, "assets", folder, fileName);
         if (!File.Exists(path))
             throw new FileNotFoundException($"Asset not found: {path}");
+        return path;
+    }
+
+    internal static Texture2D LoadSpritesheet(string fileName)
+    {
+        var path = SafeGetPath("spritesheets", fileName);
         return Raylib.LoadTexture(path);
+    }
+
+    internal static Sound LoadSound(string fileName)
+    {
+        var path = SafeGetPath("sounds", fileName);
+        return Raylib.LoadSound(path);
     }
 }
