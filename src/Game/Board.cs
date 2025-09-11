@@ -59,7 +59,6 @@ internal class Board
         {
             case CastleMove castle:
                 ApplyMove(castle.RookMove, false);
-                UpdateCastlingRights(move);
                 break;
             case EnPassantMove ep:
                 RemovePiece(ep.PawnToRemove.PieceIndex, ep.PawnToRemove.TargetBit);
@@ -70,6 +69,7 @@ internal class Board
     internal void ApplyMove(Move move, bool swapSide = true)
     {
         HandleSpecialMove(move);
+        UpdateCastlingRights(move);
         ExecuteMove(move);
         PromotePawns();
         if (swapSide)
