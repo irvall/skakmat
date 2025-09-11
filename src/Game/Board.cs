@@ -8,7 +8,7 @@ internal class Board
     internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
     public bool WhiteToPlay => _whiteToPlay;
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.Fen.DefaultPosition);
+    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Default);
     private Castling.Rights castlingRights = Castling.Rights.All;
     private Move? lastMovePlayed = null;
 
@@ -61,25 +61,19 @@ internal class Board
                 ApplyMove(castle.RookMove, false);
                 UpdateCastlingRights(move);
                 break;
-            case EnPassantMove ep: RemovePiece(ep.PawnToRemove.PieceIndex, ep.PawnToRemove.TargetBit); break;
+            case EnPassantMove ep:
+                RemovePiece(ep.PawnToRemove.PieceIndex, ep.PawnToRemove.TargetBit);
+                break;
         }
     }
 
     internal void ApplyMove(Move move, bool swapSide = true)
     {
-        System.Console.WriteLine($"[DEBUG] Before move: _whiteToPlay={{_whiteToPlay}}, move={{move}} swapSide={{swapSide}}");
         HandleSpecialMove(move);
         ExecuteMove(move);
         PromotePawns();
         if (swapSide)
-        {
             _whiteToPlay = !_whiteToPlay;
-            System.Console.WriteLine($"[DEBUG] Swapped side. Now _whiteToPlay={{_whiteToPlay}} after move={{move}}");
-        }
-        else
-        {
-            System.Console.WriteLine($"[DEBUG] Did not swap side. _whiteToPlay still {{_whiteToPlay}} after move={{move}}");
-        }
         lastMovePlayed = move;
     }
 

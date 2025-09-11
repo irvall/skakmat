@@ -4,12 +4,26 @@ using skakmat.Game;
 namespace skakmat.Engine;
 internal class GameController
 {
+    internal IReadOnlyList<Move> MovesPlayed => [.. moveHistory.Select(entry => entry.Move)];
+    internal BoardState BoardState
+    {
+        get
+        {
+            if (boardStateShouldUpdate)
+            {
+                cachedBoardState = board.GetBoardState();
+                boardStateShouldUpdate = false;
+            }
+            return cachedBoardState;
+        }
+    }
+    internal bool WhiteToPlay => BoardState.WhiteToPlay;
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
     private readonly List<HistoryEntry> moveHistory = [];
-    internal IReadOnlyList<Move> MovesPlayed => [.. moveHistory.Select(entry => entry.Move)];
-    internal BoardState GetBoardState() => board.GetBoardState();
+    private BoardState cachedBoardState;
+    private bool boardStateShouldUpdate = true;
     private List<Move> validMovesCache;
     private bool movesShouldUpdate = true;
 
@@ -38,7 +52,7 @@ internal class GameController
 
     internal List<Move> GetValidMoves(int squareIndex)
     {
-        return moveGenerator.GenerateMovesForSquare(squareIndex, board.GetBoardState());
+        return moveGenerator.GenerateMovesForSquare(squareIndex, BoardState);
     }
 
     internal List<Move> GetValidMoves()
@@ -66,14 +80,15 @@ internal class GameController
             return;
         }
 
-        var boardState = board.GetBoardState();
         if (moveGenerator.IsKingUnderAttack())
         {
-            Status = boardState.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            Status = BoardState.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            System.Console.WriteLine($"{Status}!!!");
         }
         else
         {
             Status = GameStatus.Stalemate;
+            System.Console.WriteLine($"Stalemate...");
         }
     }
 
@@ -103,14 +118,15 @@ internal class GameController
         board.ApplyMove(actualMove);
         moveHistory.Add(new HistoryEntry(actualMove, capturedPiece));
         movesShouldUpdate = true;
+        boardStateShouldUpdate = true;
         UpdateGameStatus();
         SelectedPiece = null;
     }
 
-    internal HistoryEntry LastEntry()
+    internal HistoryEntry? LastEntry()
     {
         if (moveHistory.Count == 0)
-            throw new InvalidOperationException("No moves in history");
+            return null;
         return moveHistory[^1];
 
     }

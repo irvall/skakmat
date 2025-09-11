@@ -12,15 +12,23 @@ internal class GameEngine
     private readonly InputHandler inputHandler;
     private readonly Random random = new();
     private readonly int sideLength;
-
     private readonly GameController controller;
+    private readonly Opponent opponent = Opponent.ComputerIsWhite;
+
+    enum Opponent
+    {
+        None,
+        ComputerIsWhite,
+        ComputerIsBlack
+    }
 
     public GameEngine()
     {
         var windowHeight = RaylibUtility.GetWindowHeightDynamically();
         sideLength = windowHeight / Constants.SquareCount;
 
-        renderer = new BoardRenderer(windowHeight, sideLength);
+        var userIsWhite = opponent != Opponent.ComputerIsWhite;
+        renderer = new BoardRenderer(windowHeight, sideLength, userIsWhite);
         inputHandler = new InputHandler(sideLength);
 
         controller = new GameController();
@@ -46,9 +54,22 @@ internal class GameEngine
     {
         while (!Raylib.WindowShouldClose())
         {
+            HandleComputerMove();
             HandleInput();
             Render();
         }
+    }
+
+    private void HandleComputerMove()
+    {
+        if (opponent == Opponent.None || controller.Status != GameController.GameStatus.Ongoing) return;
+        if (opponent == Opponent.ComputerIsWhite && !controller.WhiteToPlay)
+            return;
+        if (opponent == Opponent.ComputerIsBlack && controller.WhiteToPlay)
+            return;
+        var moves = controller.GetValidMoves();
+        var randomMove = moves[random.Next(moves.Count)];
+        controller.MakeMove(randomMove);
     }
 
     private void HandleInput()
@@ -86,7 +107,6 @@ internal class GameEngine
         Raylib.ClearBackground(new Color(4, 15, 15, 1));
 
         renderer.DrawBoard();
-        renderer.DrawPieces(controller.GetBoardState());
 
         if (controller.SelectedPiece.HasValue)
         {
@@ -94,6 +114,14 @@ internal class GameEngine
             renderer.HighlightSquares(moves.ToBitboard(), Color.GREEN);
         }
 
+        var lastEntry = controller.LastEntry();
+        if (lastEntry.HasValue)
+        {
+            var lastMove = lastEntry.Value.Move;
+            renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
+        }
+
+        renderer.DrawPieces(controller.BoardState);
         Raylib.EndDrawing();
     }
 }

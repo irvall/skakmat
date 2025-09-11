@@ -12,7 +12,8 @@ internal class BoardRenderer
     private Texture2D _spriteTexture;
     private readonly (int width, int height) _windowSize;
 
-    internal BoardRenderer(int windowHeight, int sideLength)
+    // TODO: Flip orientation based on userPlaysWhite bool
+    internal BoardRenderer(int windowHeight, int sideLength, bool userPlaysWhite)
     {
         _sideLength = sideLength;
         _halfSideLength = _sideLength / 2;
