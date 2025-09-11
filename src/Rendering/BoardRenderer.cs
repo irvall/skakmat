@@ -50,12 +50,10 @@ internal class BoardRenderer
                 int fontSize = 10;
                 int padding = 2;
 
-                // upper-right digit
                 int posX = j * _squareSize + _squareSize - fontSize + padding;
                 int posY = i * _squareSize + padding;
                 Raylib.DrawText(digit.ToString(), posX, posY, fontSize, textColor);
 
-                // lower-left letter
                 char letter = useStandardOrientation
                     ? (char)('A' + j)
                     : (char)('H' - j);
@@ -80,7 +78,6 @@ internal class BoardRenderer
                 int row = i / 8;
                 int col = i % 8;
 
-                // flip board if user is black
                 if (!useStandardOrientation)
                 {
                     row = 7 - row;
