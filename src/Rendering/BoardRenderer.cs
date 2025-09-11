@@ -7,18 +7,19 @@ namespace skakmat.Rendering;
 
 internal class BoardRenderer
 {
-    private readonly int _sideLength;
-    private readonly int _halfSideLength;
+    private readonly int _squareSize;
     private Texture2D _spriteTexture;
     private readonly (int width, int height) _windowSize;
+    private bool useStandardOrientation;
 
-    // TODO: Flip orientation based on userPlaysWhite bool
-    internal BoardRenderer(int windowHeight, int sideLength, bool userPlaysWhite)
+    // TODO: Flip orientation based on useStandardOrientation bool
+    internal BoardRenderer(int windowHeight, int squareSize, bool useStandardOrientation)
     {
-        _sideLength = sideLength;
-        _halfSideLength = _sideLength / 2;
-        _windowSize.width = windowHeight + _sideLength;
-        _windowSize.height = windowHeight + _sideLength;
+        this.useStandardOrientation = useStandardOrientation;
+
+        _squareSize = squareSize;
+        _windowSize.width = windowHeight;
+        _windowSize.height = windowHeight;
     }
 
     internal void Initialize()
@@ -32,25 +33,35 @@ internal class BoardRenderer
     {
         var primaryTileColor = Palette.FromHex("C7D59F");
         var whiteTiles = Palette.WhiteVersion(primaryTileColor);
+
         for (var i = 0; i < Constants.SquareCount; i++)
+        {
             for (var j = 0; j < Constants.SquareCount; j++)
             {
-                if (j == 0)
-                {
-                    var posX = _halfSideLength / 3;
-                    var posY = (int)(_sideLength * .85);
-                    Raylib.DrawText(Constants.SquareCount - i + "", posX, i * _sideLength + posY, _halfSideLength, Color.WHITE);
-                }
-
                 var draw = (i + j) % 2 != 0;
-                DrawTile(j, i, draw ? primaryTileColor : whiteTiles);
-            }
+                var tileColor = draw ? primaryTileColor : whiteTiles;
+                var textColor = !draw ? primaryTileColor : whiteTiles;
+                DrawTile(j, i, tileColor);
 
-        for (var c = 'A'; c <= 'H'; c++)
-        {
-            var posX = (int)(_sideLength * .85);
-            var posY = _windowSize.height - _halfSideLength;
-            Raylib.DrawText(c + "", (c - 'A') * _sideLength + posX, posY, _halfSideLength, Color.WHITE);
+                var digit = useStandardOrientation ? Constants.SquareCount - i + 1 : i + 1;
+
+                int fontSize = 10;
+                int padding = 2;
+
+                // upper-right digit
+                int posX = j * _squareSize + _squareSize - fontSize + padding;
+                int posY = i * _squareSize + padding;
+                Raylib.DrawText(digit.ToString(), posX, posY, fontSize, textColor);
+
+                // lower-left letter
+                char letter = useStandardOrientation
+                    ? (char)('A' + j)
+                    : (char)('H' - j);
+
+                int letterPosX = j * _squareSize + padding;
+                int letterPosY = (i + 1) * _squareSize - fontSize - padding;
+                Raylib.DrawText(letter.ToString(), letterPosX, letterPosY, fontSize, textColor);
+            }
         }
     }
 
@@ -61,10 +72,20 @@ internal class BoardRenderer
             for (var i = 0; i < 64; i++)
             {
                 var bit = 1UL << i;
-                var row = i / 8;
-                var col = i % 8;
-                if (state.Bitboards[pieceIndex].Contains(bit))
-                    DrawPiece(row, col, pieceIndex);
+                if (!state.Bitboards[pieceIndex].Contains(bit))
+                    continue;
+
+                int row = i / 8;
+                int col = i % 8;
+
+                // flip board if user is black
+                if (!useStandardOrientation)
+                {
+                    row = 7 - row;
+                    col = 7 - col;
+                }
+
+                DrawPiece(row, col, pieceIndex);
             }
         }
     }
@@ -87,22 +108,20 @@ internal class BoardRenderer
         );
 
         var dest = new Rectangle(
-            col * _sideLength + _halfSideLength,
-            row * _sideLength + _halfSideLength,
-            _sideLength,
-            _sideLength
+            col * _squareSize,
+            row * _squareSize,
+            _squareSize,
+            _squareSize
         );
-        // string id = (row * 8 + col).ToString();
-        // Raylib.DrawText(id, (int)dest.X, (int)dest.Y, 12, Color.BLACK);
         Raylib.DrawTexturePro(_spriteTexture, src, dest, Vector2.Zero, 0f, Color.WHITE);
     }
 
     private void DrawTile(int col, int row, Color tileColor, double alpha = 1.0)
     {
-        var posX = col * _sideLength + _halfSideLength;
-        var posY = row * _sideLength + _halfSideLength;
+        var posX = col * _squareSize;
+        var posY = row * _squareSize;
         tileColor.A = (byte)(255.0 * alpha);
-        Raylib.DrawRectangle(posX, posY, _sideLength, _sideLength, tileColor);
+        Raylib.DrawRectangle(posX, posY, _squareSize, _squareSize, tileColor);
     }
 
     internal void HighlightSquares(ulong squares, Color color)
@@ -112,14 +131,20 @@ internal class BoardRenderer
             var bit = 1UL << idx;
             if (squares.Contains(bit))
             {
-                DrawTile(idx % Constants.SquareCount, idx / Constants.SquareCount, color, 0.5f);
+                var col = idx % Constants.SquareCount;
+                var row = idx / Constants.SquareCount;
+                if (!useStandardOrientation)
+                {
+                    col = 7 - col;
+                    row = 7 - row;
+                }
+                DrawTile(col, row, color, 0.5f);
             }
         }
     }
 
-    internal void DrawBigMessage(string text)
+    internal void UpdateOrientation(bool usingStandard)
     {
-        Raylib.DrawText(text, _windowSize.width / 8, _windowSize.height / 2, 72, Color.BLACK);
+        useStandardOrientation = usingStandard;
     }
-
 }

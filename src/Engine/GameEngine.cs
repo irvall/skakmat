@@ -1,5 +1,4 @@
 using Raylib_cs;
-using skakmat.Chess;
 using skakmat.Game;
 using skakmat.Rendering;
 using skakmat.Utilities;
@@ -13,7 +12,8 @@ internal class GameEngine
     private readonly Random random = new();
     private readonly int sideLength;
     private readonly GameController controller;
-    private readonly Opponent opponent = Opponent.ComputerIsWhite;
+    private readonly Opponent opponent = Opponent.ComputerIsBlack;
+    private bool useStandardOrientation;
 
     enum Opponent
     {
@@ -27,8 +27,8 @@ internal class GameEngine
         var windowHeight = RaylibUtility.GetWindowHeightDynamically();
         sideLength = windowHeight / Constants.SquareCount;
 
-        var userIsWhite = opponent != Opponent.ComputerIsWhite;
-        renderer = new BoardRenderer(windowHeight, sideLength, userIsWhite);
+        useStandardOrientation = opponent != Opponent.ComputerIsWhite;
+        renderer = new BoardRenderer(windowHeight, sideLength, useStandardOrientation);
         inputHandler = new InputHandler(sideLength);
 
         controller = new GameController();
@@ -45,8 +45,7 @@ internal class GameEngine
     private static void InitializeWindow()
     {
         var windowHeight = RaylibUtility.GetWindowHeightDynamically();
-        var sideLength = windowHeight / 8;
-        var windowSize = windowHeight + sideLength;
+        var windowSize = windowHeight;
         Raylib.InitWindow(windowSize, windowSize, "Skakmat");
     }
 
@@ -74,12 +73,17 @@ internal class GameEngine
 
     private void HandleInput()
     {
+        if (InputHandler.IsKeyPressed(KeyboardKey.KEY_F))
+        {
+            useStandardOrientation = !useStandardOrientation;
+            renderer.UpdateOrientation(useStandardOrientation);
+        }
         if (!InputHandler.IsLeftMouseButtonPressed) return;
 
         var mousePos = inputHandler.GetMouseGridPosition();
         if (!InputHandler.IsMouseOnBoard(mousePos)) return;
 
-        int squareIndex = BoardUtility.IndexUnderMouse(mousePos);
+        int squareIndex = BoardUtility.IndexUnderMouse(mousePos, useStandardOrientation);
 
         if (controller.SelectedPiece.HasValue)
         {
@@ -119,6 +123,12 @@ internal class GameEngine
         {
             var lastMove = lastEntry.Value.Move;
             renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
+        }
+
+        if (controller.KingIsUnderAttack)
+        {
+            var theKing = controller.BoardState.GetPieceBoard(PieceType.King);
+            renderer.HighlightSquares(theKing, Color.RED);
         }
 
         renderer.DrawPieces(controller.BoardState);

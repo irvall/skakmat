@@ -18,6 +18,7 @@ internal class GameController
         }
     }
     internal bool WhiteToPlay => BoardState.WhiteToPlay;
+    internal bool KingIsUnderAttack => moveGenerator.IsKingUnderAttack();
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
@@ -69,6 +70,7 @@ internal class GameController
         var validMoves = GetValidMoves(squareIndex);
         return new PieceSelection(pieceIndex, squareIndex, validMoves);
     }
+
 
     internal void UpdateGameStatus()
     {

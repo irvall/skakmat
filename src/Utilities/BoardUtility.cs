@@ -92,9 +92,10 @@ internal class BoardUtility
         }
     }
 
-    internal static int IndexUnderMouse(Vector2 mousePosition)
+    internal static int IndexUnderMouse(Vector2 mousePosition, bool boardStandardOrientation = true)
     {
-        return (int)(mousePosition.X + mousePosition.Y * Constants.SquareCount);
+        var index = (int)(mousePosition.X + mousePosition.Y * Constants.SquareCount);
+        return boardStandardOrientation ? index : 63 - index;
     }
 
     internal static (int, ulong) IndexAndBitUnderMouse(Vector2 mousePosition)
