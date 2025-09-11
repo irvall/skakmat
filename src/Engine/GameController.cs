@@ -2,8 +2,11 @@ using skakmat.Chess;
 using skakmat.Game;
 
 namespace skakmat.Engine;
+
 internal class GameController
 {
+
+    public event Action<GameEvent>? GameEventOccurred;
     internal IReadOnlyList<Move> MovesPlayed => [.. moveHistory.Select(entry => entry.Move)];
     internal BoardState BoardState
     {
@@ -22,7 +25,6 @@ internal class GameController
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
-    private readonly SoundController soundController;
     private readonly List<HistoryEntry> moveHistory = [];
     private BoardState cachedBoardState;
     private bool boardStateShouldUpdate = true;
@@ -34,16 +36,9 @@ internal class GameController
         board = new Board();
         moveTables = new MoveTables();
         moveGenerator = new MoveGenerator(moveTables, board);
-        soundController = new SoundController();
     }
 
-    internal enum GameStatus
-    {
-        Ongoing,
-        BlackWon,
-        WhiteWon,
-        Stalemate
-    };
+
     internal GameStatus Status { get; private set; } = GameStatus.Ongoing;
     internal PieceSelection? SelectedPiece { get; private set; }
 
@@ -75,27 +70,37 @@ internal class GameController
 
     internal void UpdateGameStatus()
     {
-        if (KingIsUnderAttack)
-            soundController.PlayCheckSound();
         if (movesShouldUpdate)
             UpdateValidMoves();
-        if (validMovesCache.Count > 0)
+
+        var wasInCheck = KingIsUnderAttack;
+        var kingBoard = BoardState.Bitboards[Piece.WhiteKing] | BoardState.Bitboards[Piece.BlackKing];
+        if (BoardState.AllPieces == kingBoard)
+        {
+            Status = GameStatus.Stalemate;
+            GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Stalemate, Status = Status });
+        }
+        else if (validMovesCache.Count > 0)
         {
             Status = GameStatus.Ongoing;
+            if (wasInCheck)
+                GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Check });
             return;
         }
 
-        if (moveGenerator.IsKingUnderAttack())
+        else if (moveGenerator.IsKingUnderAttack())
         {
             Status = BoardState.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
-            System.Console.WriteLine($"{Status}!!!");
+            GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Checkmate, Status = Status });
         }
         else
         {
             Status = GameStatus.Stalemate;
-            System.Console.WriteLine($"Stalemate...");
+            GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Stalemate, Status = Status });
         }
+        System.Console.WriteLine("Game status: " + Status);
     }
+
 
     internal struct HistoryEntry(Move move, int capturedPiece)
     {
@@ -118,17 +123,28 @@ internal class GameController
     internal void MakeMove(Move move)
     {
         if (!IsValidMove(move)) return;
+
         var actualMove = validMovesCache.First(m => m.Equals(move));
         int capturedPiece = board.GetPieceIndexAt(actualMove.TargetBit);
+
         board.ApplyMove(actualMove);
         moveHistory.Add(new HistoryEntry(actualMove, capturedPiece));
         movesShouldUpdate = true;
         boardStateShouldUpdate = true;
+
+        var isKnight = move.PieceIndex == Piece.WhiteKnight || move.PieceIndex == Piece.BlackKnight;
+        var wasCapture = capturedPiece != Piece.EmptySquare;
+
+        if (isKnight)
+            GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.MovePlayed, Move = actualMove, PieceType = PieceType.Knight });
+        else if (wasCapture)
+            GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.PieceCaptured, Move = actualMove });
+        else
+            GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.MovePlayed, Move = actualMove });
+
         UpdateGameStatus();
         SelectedPiece = null;
-        soundController.PlayMoveSound();
     }
-
     internal HistoryEntry? LastEntry()
     {
         if (moveHistory.Count == 0)

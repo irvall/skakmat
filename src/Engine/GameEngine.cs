@@ -9,9 +9,10 @@ internal class GameEngine
 {
     private readonly BoardRenderer renderer;
     private readonly InputHandler inputHandler;
+    private readonly GameSoundHandler soundHandler;
     private readonly Random random = new();
     private readonly int sideLength;
-    private readonly GameController controller;
+    private readonly GameController gameController;
     private readonly Opponent opponent = Opponent.ComputerIsBlack;
     private bool useStandardOrientation;
 
@@ -31,7 +32,11 @@ internal class GameEngine
         renderer = new BoardRenderer(windowHeight, sideLength, useStandardOrientation);
         inputHandler = new InputHandler(sideLength);
 
-        controller = new GameController();
+        gameController = new GameController();
+        soundHandler = new GameSoundHandler();
+
+        gameController.GameEventOccurred += soundHandler.HandleGameEvent;
+
     }
 
     internal void Run()
@@ -54,14 +59,15 @@ internal class GameEngine
 
     private void HandleComputerMove()
     {
-        if (opponent == Opponent.None || controller.Status != GameController.GameStatus.Ongoing) return;
-        if (opponent == Opponent.ComputerIsWhite && !controller.WhiteToPlay)
+        if (opponent == Opponent.None || gameController.Status != GameStatus.Ongoing) return;
+        if (opponent == Opponent.ComputerIsWhite && !gameController.WhiteToPlay)
             return;
-        if (opponent == Opponent.ComputerIsBlack && controller.WhiteToPlay)
+        if (opponent == Opponent.ComputerIsBlack && gameController.WhiteToPlay)
             return;
-        var moves = controller.GetValidMoves();
+        var moves = gameController.GetValidMoves();
         var randomMove = moves[random.Next(moves.Count)];
-        controller.MakeMove(randomMove);
+        Thread.Sleep(random.Next(250, 1000));
+        gameController.MakeMove(randomMove);
     }
 
     private void HandleInput()
@@ -78,21 +84,21 @@ internal class GameEngine
 
         int squareIndex = BoardUtility.IndexUnderMouse(mousePos, useStandardOrientation);
 
-        if (controller.SelectedPiece.HasValue)
+        if (gameController.SelectedPiece.HasValue)
         {
-            var selection = controller.SelectedPiece.Value;
+            var selection = gameController.SelectedPiece.Value;
             var originBit = 1UL << selection.SquareIndex;
             var targetBit = 1UL << squareIndex;
             var moveAttempt = new Move(selection.PieceIndex, originBit, targetBit);
 
-            if (controller.IsValidMove(moveAttempt))
+            if (gameController.IsValidMove(moveAttempt))
             {
-                controller.MakeMove(moveAttempt);
+                gameController.MakeMove(moveAttempt);
             }
 
-            controller.ClearSelection();
+            gameController.ClearSelection();
         }
-        controller.SelectPiece(squareIndex);
+        gameController.SelectPiece(squareIndex);
     }
 
     private void Render()
@@ -102,26 +108,26 @@ internal class GameEngine
 
         renderer.DrawBoard();
 
-        if (controller.SelectedPiece.HasValue)
+        if (gameController.SelectedPiece.HasValue)
         {
-            var moves = controller.GetValidMovesForSelected();
+            var moves = gameController.GetValidMovesForSelected();
             renderer.HighlightSquares(moves.ToBitboard(), Color.GREEN);
         }
 
-        var lastEntry = controller.LastEntry();
+        var lastEntry = gameController.LastEntry();
         if (lastEntry.HasValue)
         {
             var lastMove = lastEntry.Value.Move;
             renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
         }
 
-        if (controller.KingIsUnderAttack)
+        if (gameController.KingIsUnderAttack)
         {
-            var theKing = controller.BoardState.GetPieceBoard(PieceType.King);
+            var theKing = gameController.BoardState.GetPieceBoard(PieceType.King);
             renderer.HighlightSquares(theKing, Color.RED);
         }
 
-        renderer.DrawPieces(controller.BoardState);
+        renderer.DrawPieces(gameController.BoardState);
         Raylib.EndDrawing();
     }
 }
