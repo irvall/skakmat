@@ -31,6 +31,7 @@ internal static class Constants
         internal const string BothSidesCanCastle = "rnbqk2r/pppp1ppp/5n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
         internal const string BlackForcedToTake = "4n2k/8/8/7N/8/8/8/K5Q1 w - - 0 1";
         internal const string PinnedMate = "rnbqkb1r/pppppp1p/8/8/4Q1N1/8/PPPPPPPP/RNB1KB1R w KQkq - 0 1";
+        internal const string Stalemate = "k7/8/1K6/8/1B6/8/8/8 w - - 0 1";
     }
 
 }

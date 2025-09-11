@@ -1,5 +1,5 @@
 namespace skakmat.Game;
-internal enum PieceType
+public enum PieceType
 {
     Pawn,
     Knight,
