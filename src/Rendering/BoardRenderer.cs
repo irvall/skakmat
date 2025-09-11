@@ -26,6 +26,8 @@ internal class BoardRenderer
     {
         string baseDir = AppContext.BaseDirectory;
         string imagePath = Path.Combine(baseDir, "assets", "spritesheets", "classic.png");
+        var windowHeight = RaylibUtility.GetWindowHeightDynamically();
+        Raylib.InitWindow(windowHeight, windowHeight, "skakmat");
         _spriteTexture = RaylibUtility.LoadTextureChecked(imagePath);
     }
 

@@ -36,18 +36,11 @@ internal class GameEngine
 
     internal void Run()
     {
-        InitializeWindow();
         renderer.Initialize();
         GameLoop();
         Raylib.CloseWindow();
     }
 
-    private static void InitializeWindow()
-    {
-        var windowHeight = RaylibUtility.GetWindowHeightDynamically();
-        var windowSize = windowHeight;
-        Raylib.InitWindow(windowSize, windowSize, "Skakmat");
-    }
 
     private void GameLoop()
     {
