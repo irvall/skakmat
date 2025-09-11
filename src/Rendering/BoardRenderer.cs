@@ -12,7 +12,6 @@ internal class BoardRenderer
     private readonly (int width, int height) _windowSize;
     private bool useStandardOrientation;
 
-    // TODO: Flip orientation based on useStandardOrientation bool
     internal BoardRenderer(int windowHeight, int squareSize, bool useStandardOrientation)
     {
         this.useStandardOrientation = useStandardOrientation;
