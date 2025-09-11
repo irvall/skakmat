@@ -92,10 +92,7 @@ internal class GameEngine
 
             controller.ClearSelection();
         }
-        else
-        {
-            controller.SelectPiece(squareIndex);
-        }
+        controller.SelectPiece(squareIndex);
     }
 
     private void Render()
