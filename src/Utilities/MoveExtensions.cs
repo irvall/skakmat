@@ -48,7 +48,6 @@ internal static class MoveExtensions
 
     internal static bool IsLongCastle(this Move move)
     {
-        var isWhite = move.IsWhite();
         var whiteCastle = move.PieceIndex == Piece.WhiteKing
             && move.OriginBit == Masks.KingStartSquare(isWhite: true)
             && Masks.KingAttemptsLongCastle(isWhite: true).Contains(move.TargetBit);
