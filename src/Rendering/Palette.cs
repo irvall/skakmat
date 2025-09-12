@@ -61,4 +61,11 @@ internal abstract class Palette
         return new Color(r, g, b, c.A);
     }
 
+    public static class Coolors
+    {
+        public static Color ForestGreen = FromHex("4D8B31");
+        public static Color Tea = FromHex("C7D59F");
+        public static Color RoseQuartz = FromHex("AEA4BF");
+    }
+
 }

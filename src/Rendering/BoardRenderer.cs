@@ -30,7 +30,7 @@ internal class BoardRenderer
 
     internal void DrawBoard()
     {
-        var primaryTileColor = Palette.FromHex("C7D59F");
+        var primaryTileColor = Palette.Coolors.RoseQuartz;
         var whiteTiles = Palette.WhiteVersion(primaryTileColor);
 
         for (var i = 0; i < Constants.SquareCount; i++)
@@ -42,7 +42,7 @@ internal class BoardRenderer
                 var textColor = !draw ? primaryTileColor : whiteTiles;
                 DrawTile(j, i, tileColor);
 
-                var digit = useStandardOrientation ? Constants.SquareCount - i + 1 : i + 1;
+                var digit = useStandardOrientation ? Constants.SquareCount - i : i + 1;
 
                 int fontSize = 10;
                 int padding = 2;
