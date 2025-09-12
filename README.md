@@ -8,7 +8,7 @@ skakmat (Danish for "checkmate") is a lightweight chess engine designed for lear
 
 ## Features
 
-<img width="712" height="740" alt="Screenshot 2025-09-11 at 18 49 07" src="https://github.com/user-attachments/assets/f6a826b8-9b63-4a70-a5a0-02c81afaf01f" />
+<img width="712" height="740" alt="Screenshot 2025-09-11 at 23 54 24" src="https://github.com/user-attachments/assets/a1b2cce0-b718-42cd-9ebb-55a35bbee0c5" />
 
 - **Chess Engine**: Complete chess rule implementation with move validation
     - [x] Board representation using bitboards
@@ -19,6 +19,7 @@ skakmat (Danish for "checkmate") is a lightweight chess engine designed for lear
 - **Graphical Interface**: Interactive board using Raylib for smooth rendering
 - **Lightweight**: Minimal dependencies, easy to build and run
 - **Educational**: Clean, readable code structure perfect for learning chess programming
+- **Epic Sounds**: Chess sounds are normally so vague and flat; skakmat revolutionizes how sound and game can interplay
 
 ## Getting Started
 
