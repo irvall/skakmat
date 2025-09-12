@@ -8,7 +8,7 @@ internal class Board
     internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
     public bool WhiteToPlay => _whiteToPlay;
     private bool _whiteToPlay = true;
-    private readonly ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.PinnedMate);
+    private ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Default);
     private Castling.Rights castlingRights = Castling.Rights.All;
     private Move? lastMovePlayed = null;
 
@@ -64,6 +64,14 @@ internal class Board
                 RemovePiece(ep.PawnToRemove.PieceIndex, ep.PawnToRemove.TargetBit);
                 break;
         }
+    }
+
+    internal void SetBoardState(BoardState state)
+    {
+        _bbs = state.Bitboards;
+        castlingRights = state.CastlingRights;
+        _whiteToPlay = state.WhiteToPlay;
+        lastMovePlayed = state.LastMovePlayed;
     }
 
     internal void ApplyMove(Move move, bool swapSide = true)
@@ -124,6 +132,13 @@ internal class Board
         RemovePiece(optCapturedPiece, move.TargetBit);
         _bbs[move.PieceIndex] ^= move.OriginBit;
         _bbs[move.PieceIndex] |= move.TargetBit;
+    }
+
+    public void PutPiece(int pieceIndex, ulong targetBit)
+    {
+        if (pieceIndex == Piece.EmptySquare)
+            return;
+        _bbs[pieceIndex] ^= targetBit;
     }
 
     internal void UndoMove(Move move, int possibleTargetType)

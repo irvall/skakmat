@@ -36,7 +36,6 @@ internal class GameEngine
         soundHandler = new GameSoundHandler();
 
         gameController.GameEventOccurred += soundHandler.HandleGameEvent;
-
     }
 
     internal void Run()
@@ -77,6 +76,15 @@ internal class GameEngine
             useStandardOrientation = !useStandardOrientation;
             renderer.UpdateOrientation(useStandardOrientation);
         }
+        if (InputHandler.IsLeftArrowPressed)
+        {
+            gameController.StepBack();
+        }
+        if (InputHandler.IsRightArrowPressed)
+        {
+            gameController.StepForward();
+        }
+
         if (!InputHandler.IsLeftMouseButtonPressed) return;
 
         var mousePos = inputHandler.GetMouseGridPosition();
@@ -105,8 +113,8 @@ internal class GameEngine
     {
         Raylib.BeginDrawing();
         Raylib.ClearBackground(new Color(4, 15, 15, 1));
-
         renderer.DrawBoard();
+        var recentState = gameController.RecentState() ?? gameController.BoardState;
 
         if (gameController.SelectedPiece.HasValue)
         {
@@ -114,12 +122,9 @@ internal class GameEngine
             renderer.HighlightSquares(moves.ToBitboard(), Color.GREEN);
         }
 
-        var lastEntry = gameController.LastEntry();
-        if (lastEntry.HasValue)
-        {
-            var lastMove = lastEntry.Value.Move;
+        var lastMove = recentState.LastMovePlayed;
+        if (lastMove is not null)
             renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
-        }
 
         if (gameController.KingIsUnderAttack)
         {
@@ -127,7 +132,7 @@ internal class GameEngine
             renderer.HighlightSquares(theKing, Color.RED);
         }
 
-        renderer.DrawPieces(gameController.BoardState);
+        renderer.DrawPieces(recentState);
         Raylib.EndDrawing();
     }
 }

@@ -4,7 +4,7 @@ using skakmat.Utilities;
 namespace skakmat.Game;
 internal readonly struct BoardState(ulong[] bitboards, bool whiteToPlay, Castling.Rights castlingRights, Move? lastMovePlayed)
 {
-    internal readonly ulong[] Bitboards = bitboards;
+    internal readonly ulong[] Bitboards = (ulong[])bitboards.Clone();
     internal readonly Castling.Rights CastlingRights = castlingRights;
     internal readonly Move? LastMovePlayed = lastMovePlayed;
     internal readonly bool WhiteToPlay => whiteToPlay;

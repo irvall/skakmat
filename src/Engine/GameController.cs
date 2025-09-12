@@ -7,7 +7,7 @@ internal class GameController
 {
 
     public event Action<GameEvent>? GameEventOccurred;
-    internal IReadOnlyList<Move> MovesPlayed => [.. moveHistory.Select(entry => entry.Move)];
+    internal IReadOnlyList<BoardState> States => [.. boardStates];
     internal BoardState BoardState
     {
         get
@@ -25,11 +25,12 @@ internal class GameController
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
-    private readonly List<HistoryEntry> moveHistory = [];
+    private readonly List<BoardState> boardStates = [];
     private BoardState cachedBoardState;
     private bool boardStateShouldUpdate = true;
     private List<Move> validMovesCache = [];
     private bool movesShouldUpdate = true;
+    private int stateIndex = -1;
 
     public GameController()
     {
@@ -128,7 +129,7 @@ internal class GameController
         int capturedPiece = board.GetPieceIndexAt(actualMove.TargetBit);
 
         board.ApplyMove(actualMove);
-        moveHistory.Add(new HistoryEntry(actualMove, capturedPiece));
+        boardStates.Add(board.GetBoardState());
         movesShouldUpdate = true;
         boardStateShouldUpdate = true;
 
@@ -143,27 +144,21 @@ internal class GameController
             GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.MovePlayed, Move = actualMove });
 
         UpdateGameStatus();
+        stateIndex++;
         SelectedPiece = null;
     }
-    internal HistoryEntry? LastEntry()
+    internal BoardState? RecentState()
     {
-        if (moveHistory.Count == 0)
+        if (States.Count == 0 || stateIndex < 0 || stateIndex >= States.Count)
             return null;
-        return moveHistory[^1];
+        return States[stateIndex];
 
-    }
-
-    internal void UndoLastMove()
-    {
-        if (moveHistory.Count == 0) return;
-
-        var lastEntry = moveHistory[^1];
-        moveHistory.RemoveAt(moveHistory.Count - 1);
-        board.UndoMove(lastEntry.Move, lastEntry.CapturedPiece);
     }
 
     internal bool IsValidMove(Move move)
     {
+        if (stateIndex != (boardStates.Count - 1))
+            return false;
         if (movesShouldUpdate)
             UpdateValidMoves();
 
@@ -173,5 +168,30 @@ internal class GameController
     internal void ClearSelection()
     {
         SelectedPiece = null;
+    }
+
+    internal void StepBack()
+    {
+        var prevState = RecentState();
+        if (!prevState.HasValue) return;
+        var state = prevState.Value;
+        board.SetBoardState(state);
+        stateIndex--;
+    }
+
+    internal void StepForward()
+    {
+        if (stateIndex < (States.Count - 1))
+        {
+            stateIndex++;
+        }
+        else
+        {
+            return;
+        }
+        var prevState = RecentState();
+        if (!prevState.HasValue) return;
+        var state = prevState.Value;
+        board.SetBoardState(state);
     }
 }
