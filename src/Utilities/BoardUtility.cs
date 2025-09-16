@@ -166,6 +166,28 @@ internal class BoardUtility
         Console.WriteLine();
     }
 
+    internal static void PrintMoveHistory(List<Move> moves)
+    {
+        Console.Clear();
+        Console.WriteLine("Move History:");
+        for (var i = 0; i < moves.Count; i += 2)
+        {
+            if (i + 1 >= moves.Count) break;
+            var isCurrentMove = i == moves.Count - 2;
+            if (isCurrentMove) Console.ForegroundColor = ConsoleColor.Yellow;
+            else Console.ResetColor();
+            Console.WriteLine($"{(i / 2) + 1}. {moves[i].ToSanNotation()} {moves[i + 1].ToSanNotation()}");
+        }
+        var isCurrentLastMove = moves.Count % 2 != 0;
+        if (isCurrentLastMove) Console.ForegroundColor = ConsoleColor.Yellow;
+        else Console.ResetColor();
+        if (moves.Count % 2 != 0)
+        {
+            Console.WriteLine($"{(moves.Count / 2) + 1}. {moves[^1].ToSanNotation()}");
+        }
+        Console.ResetColor();
+    }
+
 
 
 }

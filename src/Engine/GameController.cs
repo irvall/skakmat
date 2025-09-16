@@ -9,7 +9,7 @@ internal class GameController
 
     public event Action<GameEvent>? GameEventOccurred;
     internal IReadOnlyList<BoardState> States => [.. boardStates];
-    internal IReadOnlyList<Move> MovesPlayed => [.. boardStates.Skip(1).Select(s => s.LastMovePlayed!)];
+    internal IReadOnlyList<Move> Moves => [.. boardStates.Skip(1).Select(s => s.LastMovePlayed!)];
     internal BoardState BoardState
     {
         get
@@ -119,20 +119,7 @@ internal class GameController
         return SelectedPiece.Value.ValidMoves;
     }
 
-    internal void PrintMoveHistory()
-    {
-        Console.Clear();
-        Console.WriteLine("Move History:");
-        for (var i = 0; i < MovesPlayed.Count; i += 2)
-        {
-            if (i + 1 >= MovesPlayed.Count) break;
-            Console.WriteLine($"{(i / 2) + 1}. {MovesPlayed[i].ToSanNotation()} {MovesPlayed[i + 1].ToSanNotation()}");
-        }
-        if (MovesPlayed.Count % 2 != 0)
-        {
-            Console.WriteLine($"{(MovesPlayed.Count / 2) + 1}. {MovesPlayed[^1].ToSanNotation()}");
-        }
-    }
+
 
     internal void MakeMove(Move move)
     {
@@ -144,7 +131,7 @@ internal class GameController
         boardStateShouldUpdate = true;
         board.ApplyMove(actualMove);
         boardStates.Add(BoardState);
-        PrintMoveHistory();
+        BoardUtility.PrintMoveHistory([.. Moves]);
 
         var isKnight = move.PieceIndex == Piece.WhiteKnight || move.PieceIndex == Piece.BlackKnight;
         var wasCapture = capturedPiece != Piece.EmptySquare;
