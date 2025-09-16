@@ -7,10 +7,26 @@ internal class Board
 {
     internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
     public bool WhiteToPlay => _whiteToPlay;
-    private bool _whiteToPlay = true;
-    private ulong[] _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Default);
-    private Castling.Rights castlingRights = Castling.Rights.All;
-    private Move? lastMovePlayed = null;
+    private bool _whiteToPlay;
+    private ulong[] _bbs;
+    private Castling.Rights castlingRights;
+    private Move? lastMovePlayed;
+
+    public Board()
+    {
+        _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Default);
+        _whiteToPlay = true;
+        castlingRights = Castling.Rights.All;
+        lastMovePlayed = null;
+    }
+
+    public Board(BoardState state)
+    {
+        _bbs = (ulong[])state.Bitboards.Clone();
+        _whiteToPlay = state.WhiteToPlay;
+        castlingRights = state.CastlingRights;
+        lastMovePlayed = state.LastMovePlayed;
+    }
 
     internal int GetPieceIndexAt(ulong square)
     {
