@@ -66,14 +66,6 @@ internal class Board
         }
     }
 
-    internal void SetBoardState(BoardState state)
-    {
-        _bbs = state.Bitboards;
-        castlingRights = state.CastlingRights;
-        _whiteToPlay = state.WhiteToPlay;
-        lastMovePlayed = state.LastMovePlayed;
-    }
-
     internal void ApplyMove(Move move, bool swapSide = true)
     {
         HandleSpecialMove(move);

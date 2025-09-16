@@ -13,7 +13,7 @@ internal class GameEngine
     private readonly Random random = new();
     private readonly int sideLength;
     private readonly GameController gameController;
-    private readonly Opponent opponent = Opponent.ComputerIsBlack;
+    private readonly Opponent opponent = Opponent.ComputerIsWhite;
     private bool useStandardOrientation;
 
     enum Opponent
@@ -85,7 +85,7 @@ internal class GameEngine
             gameController.StepForward();
         }
 
-        if (!InputHandler.IsLeftMouseButtonPressed) return;
+        if (!InputHandler.IsLeftMouseButtonPressed || !gameController.AtMostRecentState()) return;
 
         var mousePos = inputHandler.GetMouseGridPosition();
         if (!InputHandler.IsMouseOnBoard(mousePos)) return;
@@ -114,7 +114,7 @@ internal class GameEngine
         Raylib.BeginDrawing();
         Raylib.ClearBackground(new Color(4, 15, 15, 1));
         renderer.DrawBoard();
-        var recentState = gameController.RecentState() ?? gameController.BoardState;
+        var boardState = gameController.GetCurrentState();
 
         if (gameController.SelectedPiece.HasValue)
         {
@@ -122,7 +122,7 @@ internal class GameEngine
             renderer.HighlightSquares(moves.ToBitboard(), Color.GREEN);
         }
 
-        var lastMove = recentState.LastMovePlayed;
+        var lastMove = boardState.LastMovePlayed;
         if (lastMove is not null)
             renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
 
@@ -132,7 +132,7 @@ internal class GameEngine
             renderer.HighlightSquares(theKing, Color.RED);
         }
 
-        renderer.DrawPieces(recentState);
+        renderer.DrawPieces(boardState);
         Raylib.EndDrawing();
     }
 }

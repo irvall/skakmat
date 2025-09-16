@@ -1,5 +1,6 @@
 using skakmat.Chess;
 using skakmat.Game;
+using skakmat.Utilities;
 
 namespace skakmat.Engine;
 
@@ -8,6 +9,7 @@ internal class GameController
 
     public event Action<GameEvent>? GameEventOccurred;
     internal IReadOnlyList<BoardState> States => [.. boardStates];
+    internal IReadOnlyList<Move> MovesPlayed => [.. boardStates.Skip(1).Select(s => s.LastMovePlayed!)];
     internal BoardState BoardState
     {
         get
@@ -30,13 +32,14 @@ internal class GameController
     private bool boardStateShouldUpdate = true;
     private List<Move> validMovesCache = [];
     private bool movesShouldUpdate = true;
-    private int stateIndex = -1;
+    public int stateIndex = 0;
 
     public GameController()
     {
         board = new Board();
         moveTables = new MoveTables();
         moveGenerator = new MoveGenerator(moveTables, board);
+        boardStates.Add(BoardState);
     }
 
 
@@ -69,7 +72,7 @@ internal class GameController
     }
 
 
-    internal void UpdateGameStatus()
+    private void UpdateGameStatus()
     {
         if (movesShouldUpdate)
             UpdateValidMoves();
@@ -93,21 +96,16 @@ internal class GameController
         {
             Status = BoardState.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
             GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Checkmate, Status = Status });
+            System.Console.WriteLine(BoardState.WhiteToPlay ? "0 - 1 Black wins by checkmate" : "1 - 0 White wins by checkmate");
         }
         else
         {
             Status = GameStatus.Stalemate;
             GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Stalemate, Status = Status });
+            System.Console.WriteLine("0.5 - 0.5 Draw by stalemate");
         }
-        System.Console.WriteLine("Game status: " + Status);
     }
 
-
-    internal struct HistoryEntry(Move move, int capturedPiece)
-    {
-        internal Move Move = move;
-        internal int CapturedPiece = capturedPiece;
-    }
 
     private void UpdateValidMoves()
     {
@@ -121,17 +119,32 @@ internal class GameController
         return SelectedPiece.Value.ValidMoves;
     }
 
+    internal void PrintMoveHistory()
+    {
+        Console.Clear();
+        Console.WriteLine("Move History:");
+        for (var i = 0; i < MovesPlayed.Count; i += 2)
+        {
+            if (i + 1 >= MovesPlayed.Count) break;
+            Console.WriteLine($"{(i / 2) + 1}. {MovesPlayed[i].ToSanNotation()} {MovesPlayed[i + 1].ToSanNotation()}");
+        }
+        if (MovesPlayed.Count % 2 != 0)
+        {
+            Console.WriteLine($"{(MovesPlayed.Count / 2) + 1}. {MovesPlayed[^1].ToSanNotation()}");
+        }
+    }
+
     internal void MakeMove(Move move)
     {
         if (!IsValidMove(move)) return;
 
         var actualMove = validMovesCache.First(m => m.Equals(move));
         int capturedPiece = board.GetPieceIndexAt(actualMove.TargetBit);
-
-        board.ApplyMove(actualMove);
-        boardStates.Add(board.GetBoardState());
         movesShouldUpdate = true;
         boardStateShouldUpdate = true;
+        board.ApplyMove(actualMove);
+        boardStates.Add(BoardState);
+        PrintMoveHistory();
 
         var isKnight = move.PieceIndex == Piece.WhiteKnight || move.PieceIndex == Piece.BlackKnight;
         var wasCapture = capturedPiece != Piece.EmptySquare;
@@ -143,22 +156,20 @@ internal class GameController
         else
             GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.MovePlayed, Move = actualMove });
 
+        stateIndex = boardStates.Count - 1;
         UpdateGameStatus();
-        stateIndex++;
         SelectedPiece = null;
     }
-    internal BoardState? RecentState()
+    internal BoardState GetCurrentState()
     {
-        if (States.Count == 0 || stateIndex < 0 || stateIndex >= States.Count)
-            return null;
         return States[stateIndex];
-
     }
 
     internal bool IsValidMove(Move move)
     {
-        if (stateIndex != (boardStates.Count - 1))
+        if (!AtMostRecentState())
             return false;
+
         if (movesShouldUpdate)
             UpdateValidMoves();
 
@@ -172,26 +183,19 @@ internal class GameController
 
     internal void StepBack()
     {
-        var prevState = RecentState();
-        if (!prevState.HasValue) return;
-        var state = prevState.Value;
-        board.SetBoardState(state);
+        if (stateIndex == 0) return;
         stateIndex--;
     }
 
     internal void StepForward()
     {
-        if (stateIndex < (States.Count - 1))
-        {
-            stateIndex++;
-        }
-        else
-        {
+        if (AtMostRecentState())
             return;
-        }
-        var prevState = RecentState();
-        if (!prevState.HasValue) return;
-        var state = prevState.Value;
-        board.SetBoardState(state);
+        stateIndex++;
+    }
+
+    internal bool AtMostRecentState()
+    {
+        return stateIndex == (States.Count - 1);
     }
 }
