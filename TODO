@@ -1,3 +1,7 @@
+# Evaluation
+
+- Construct game tree
+
 # Game
 
 - Add "Copy to FEN" button
@@ -11,8 +15,3 @@
 - Extend FEN parser
 - Zobrist hashing
 - Magic bitboards for sliding pieces
-
-# Bugs
-
-- Fix going backwards/forwards in moves played
-- Get looping straight; no repeated computations for move generation i.e.
