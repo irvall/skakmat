@@ -23,7 +23,7 @@ internal class GameController
         }
     }
     internal bool WhiteToPlay => BoardState.WhiteToPlay;
-    internal bool KingIsUnderAttack => moveGenerator.IsKingUnderAttack();
+    internal bool KingIsUnderAttack => moveGenerator.IsKingUnderAttack(GetCurrentState());
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
@@ -118,8 +118,6 @@ internal class GameController
         if (!SelectedPiece.HasValue) return [];
         return SelectedPiece.Value.ValidMoves;
     }
-
-
 
     internal void MakeMove(Move move)
     {

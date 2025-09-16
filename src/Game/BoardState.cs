@@ -60,4 +60,14 @@ internal readonly struct BoardState(ulong[] bitboards, bool whiteToPlay, Castlin
         var pieceIndex = GetPieceIndex(type);
         return Bitboards[pieceIndex];
     }
+
+    internal IEnumerable<(int pieceIndex, int index, ulong bit)> GetAllPieces()
+    {
+        foreach (var (idx, bit) in BoardUtility.EnumerateSquares())
+        {
+            var type = GetPieceIndexAtBit(bit);
+            if (type != Piece.EmptySquare)
+                yield return (type, idx, bit);
+        }
+    }
 }

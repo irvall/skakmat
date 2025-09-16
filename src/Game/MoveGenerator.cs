@@ -36,7 +36,7 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         ? Masks.KingSideCastlePath(state.WhiteToPlay)
         : Masks.QueenSideCastlePath(state.WhiteToPlay);
 
-        var enemyControl = SquaresUnderControl(!state.WhiteToPlay);
+        var enemyControl = SquaresUnderControl(state, !state.WhiteToPlay);
         return !path.Contains(enemyControl);
     }
 
@@ -133,11 +133,10 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         return validMoves;
     }
 
-    internal ulong SquaresUnderControl(bool isWhite)
+    internal ulong SquaresUnderControl(BoardState state, bool isWhite)
     {
         var control = 0UL;
-        var state = board.GetBoardState();
-        foreach (var (type, idx, _) in board.GetAllPieces())
+        foreach (var (type, idx, _) in state.GetAllPieces())
         {
             if (Piece.IsCorrectColor(type, isWhite))
             {
@@ -147,8 +146,8 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         return control;
     }
 
-    private ulong SquaresUnderWhiteControl() => SquaresUnderControl(true);
-    private ulong SquaresUnderBlackControl() => SquaresUnderControl(false);
+    private ulong SquaresUnderWhiteControl() => SquaresUnderControl(board.GetBoardState(), true);
+    private ulong SquaresUnderBlackControl() => SquaresUnderControl(board.GetBoardState(), false);
 
     internal ulong GetPseudoLegalMoves(int pieceIndex, int index, BoardState state)
     {
@@ -172,7 +171,7 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
 
     internal bool IsKingUnderAttack(BoardState state)
     {
-        var enemyControl = SquaresUnderControl(!state.WhiteToPlay);
+        var enemyControl = SquaresUnderControl(state, !state.WhiteToPlay);
 
         if (state.WhiteToPlay)
         {

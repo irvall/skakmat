@@ -128,7 +128,7 @@ internal class GameEngine
 
         if (gameController.KingIsUnderAttack)
         {
-            var theKing = gameController.BoardState.GetPieceBoard(PieceType.King);
+            var theKing = boardState.GetPieceBoard(PieceType.King);
             renderer.HighlightSquares(theKing, Color.RED);
         }
 
