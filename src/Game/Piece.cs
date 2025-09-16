@@ -33,6 +33,18 @@ class Piece
         _ => throw new NotImplementedException(),
     };
 
+    internal static PieceType GetTypeFromIndex(int pieceIndex) => pieceIndex switch
+    {
+        WhitePawn or BlackPawn => PieceType.Pawn,
+        WhiteRook or BlackRook => PieceType.Rook,
+        WhiteKnight or BlackKnight => PieceType.Knight,
+        WhiteBishop or BlackBishop => PieceType.Bishop,
+        WhiteQueen or BlackQueen => PieceType.Queen,
+        WhiteKing or BlackKing => PieceType.King,
+        EmptySquare => throw new ArgumentException("Empty square has no piece type"),
+        _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
+    };
+
     internal static bool IsCorrectColor(int pieceIndex, bool isWhite)
     {
         return isWhite ?

@@ -188,6 +188,23 @@ internal class BoardUtility
         Console.ResetColor();
     }
 
+    // TODO: Add cleaner API
+    // Returns dictionary mapping pieceIndex to #
+    // i.e. {0, 5} -> 5 white pawns
+    public static Dictionary<int, int> GetNumberOfPieces(BoardState state)
+    {
+        var frequency = new Dictionary<int, int>();
+        for (var i = 0; i < 64; i++)
+        {
+            var idx = state.GetPieceIndexAtIndex(i);
+            if (frequency.ContainsKey(idx))
+                frequency[idx] += 1;
+            else
+                frequency[idx] = 1;
+        }
+        return frequency;
+    }
+
 
 
 }
