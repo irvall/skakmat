@@ -150,4 +150,22 @@ internal class BoardUtility
         return Math.Abs(pos1 - pos2) == 1;
     }
 
+    internal static void PrintPrettyBoard(BoardState boardState)
+    {
+        Console.WriteLine();
+        for (var i = 0; i < 64; i++)
+        {
+            var pieceIdx = boardState.GetPieceIndexAtIndex(i);
+            Console.Write(Piece.PieceIndexUnicode(pieceIdx));
+
+            if ((i + 1) % 8 == 0)
+                Console.WriteLine();
+            else
+                Console.Write('|');
+        }
+        Console.WriteLine();
+    }
+
+
+
 }

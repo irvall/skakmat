@@ -40,4 +40,42 @@ class Piece
             : pieceIndex is >= BlackPawn and <= BlackKing;
     }
 
+    internal static char PieceIndexAscii(int pieceIndex) => pieceIndex switch
+    {
+        WhitePawn => 'P',
+        BlackPawn => 'p',
+        WhiteRook => 'R',
+        BlackRook => 'r',
+        WhiteKnight => 'N',
+        BlackKnight => 'n',
+        WhiteBishop => 'B',
+        BlackBishop => 'b',
+        WhiteQueen => 'Q',
+        BlackQueen => 'q',
+        WhiteKing => 'K',
+        BlackKing => 'k',
+        EmptySquare => '.',
+        _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
+    };
+
+    internal static char PieceIndexUnicode(int pieceIndex) => pieceIndex switch
+    {
+        WhitePawn => '♟',
+        BlackPawn => '♙',
+        WhiteRook => '♜',
+        BlackRook => '♖',
+        WhiteKnight => '♞',
+        BlackKnight => '♘',
+        WhiteBishop => '♝',
+        BlackBishop => '♗',
+        WhiteQueen => '♛',
+        BlackQueen => '♕',
+        WhiteKing => '♚',
+        BlackKing => '♔',
+        EmptySquare => '.',
+        _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
+    };
+
+
+
 }
