@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using skakmat.Chess;
-using skakmat.Utilities;
+using skakmat.Extensions;
 
 namespace skakmat.Game;
 internal class Move(int pieceIndex, ulong originBit, ulong targetBit)

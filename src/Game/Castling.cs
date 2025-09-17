@@ -1,5 +1,5 @@
 using skakmat.Chess;
-using skakmat.Utilities;
+using skakmat.Extensions;
 
 namespace skakmat.Game;
 internal class Castling
@@ -22,18 +22,18 @@ internal class Castling
         All = 15
     }
 
-    internal static Type GetCastlingType(bool whiteToPlay, ulong targetBit, BoardState state)
+    internal static Type GetCastlingType(bool whiteToPlay, ulong targetBit, Position position)
     {
         if (Masks.KingAttemptsShortCastle(whiteToPlay).Contains(targetBit))
         {
             var requiredRight = whiteToPlay ? Rights.WhiteKingSide : Rights.BlackKingSide;
-            return state.CastlingRights.HasFlag(requiredRight) ? Type.KingSide : Type.None;
+            return position.CastlingRights.HasFlag(requiredRight) ? Type.KingSide : Type.None;
         }
 
         if (Masks.KingAttemptsLongCastle(whiteToPlay).Contains(targetBit))
         {
             var requiredRight = whiteToPlay ? Rights.WhiteQueenSide : Rights.BlackQueenSide;
-            return state.CastlingRights.HasFlag(requiredRight) ? Type.QueenSide : Type.None;
+            return position.CastlingRights.HasFlag(requiredRight) ? Type.QueenSide : Type.None;
         }
 
         return Type.None;

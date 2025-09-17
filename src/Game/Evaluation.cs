@@ -1,4 +1,4 @@
-using skakmat.Utilities;
+using skakmat.Helpers;
 namespace skakmat.Game;
 public class Evaluation
 {
@@ -13,11 +13,11 @@ public class Evaluation
         { PieceType.Pawn, 1 }
     };
 
-    internal static float EvaluatePosition(BoardState state)
+    internal static float EvaluatePosition(Position position)
     {
         var whiteSide = 0.0f;
         var blackSide = 0.0f;
-        var pieceCounts = BoardUtility.GetNumberOfPieces(state);
+        var pieceCounts = BoardHelper.GetNumberOfPieces(position);
         foreach (var (idx, count) in pieceCounts.ToList())
         {
             if (idx == Piece.EmptySquare) continue;

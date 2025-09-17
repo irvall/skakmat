@@ -1,7 +1,8 @@
 using Raylib_cs;
 using skakmat.Game;
 using skakmat.Rendering;
-using skakmat.Utilities;
+using skakmat.Helpers;
+using skakmat.Extensions;
 
 namespace skakmat.Engine;
 
@@ -25,7 +26,7 @@ internal class GameEngine
 
     public GameEngine()
     {
-        var windowHeight = RaylibUtility.GetWindowHeightDynamically();
+        var windowHeight = RaylibHelper.GetWindowHeightDynamically();
         sideLength = windowHeight / Constants.SquareCount;
 
         useStandardOrientation = opponent != Opponent.ComputerIsWhite;
@@ -85,12 +86,12 @@ internal class GameEngine
             gameController.StepForward();
         }
 
-        if (!InputHandler.IsLeftMouseButtonPressed || !gameController.AtMostRecentState()) return;
+        if (!InputHandler.IsLeftMouseButtonPressed || !gameController.AtMostRecentPosition()) return;
 
         var mousePos = inputHandler.GetMouseGridPosition();
         if (!InputHandler.IsMouseOnBoard(mousePos)) return;
 
-        int squareIndex = BoardUtility.IndexUnderMouse(mousePos, useStandardOrientation);
+        int squareIndex = BoardHelper.IndexUnderMouse(mousePos, useStandardOrientation);
 
         if (gameController.SelectedPiece.HasValue)
         {
@@ -114,7 +115,7 @@ internal class GameEngine
         Raylib.BeginDrawing();
         Raylib.ClearBackground(new Color(4, 15, 15, 1));
         renderer.DrawBoard();
-        var boardState = gameController.GetCurrentState();
+        var position = gameController.GetCurrentPosition();
 
         if (gameController.SelectedPiece.HasValue)
         {
@@ -122,17 +123,17 @@ internal class GameEngine
             renderer.HighlightSquares(moves.ToBitboard(), Color.GREEN);
         }
 
-        var lastMove = boardState.LastMovePlayed;
+        var lastMove = position.LastMovePlayed;
         if (lastMove is not null)
             renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
 
         if (gameController.KingIsUnderAttack)
         {
-            var theKing = boardState.GetPieceBoard(PieceType.King);
+            var theKing = position.GetPieceBoard(PieceType.King);
             renderer.HighlightSquares(theKing, Color.RED);
         }
 
-        renderer.DrawPieces(boardState);
+        renderer.DrawPieces(position);
         Raylib.EndDrawing();
     }
 }

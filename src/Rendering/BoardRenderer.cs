@@ -1,7 +1,8 @@
 using System.Numerics;
 using Raylib_cs;
+using skakmat.Extensions;
 using skakmat.Game;
-using skakmat.Utilities;
+using skakmat.Helpers;
 
 namespace skakmat.Rendering;
 
@@ -23,9 +24,9 @@ internal class BoardRenderer
 
     internal void Initialize()
     {
-        var windowHeight = RaylibUtility.GetWindowHeightDynamically();
+        var windowHeight = RaylibHelper.GetWindowHeightDynamically();
         Raylib.InitWindow(windowHeight, windowHeight, "skakmat");
-        _spriteTexture = RaylibUtility.LoadSpritesheet("classic.png");
+        _spriteTexture = RaylibHelper.LoadSpritesheet("classic.png");
     }
 
     internal void DrawBoard()
@@ -62,14 +63,14 @@ internal class BoardRenderer
         }
     }
 
-    internal void DrawPieces(BoardState state)
+    internal void DrawPieces(Position position)
     {
-        for (var pieceIndex = 0; pieceIndex < state.Bitboards.Length; pieceIndex++)
+        for (var pieceIndex = 0; pieceIndex < position.Bitboards.Length; pieceIndex++)
         {
             for (var i = 0; i < 64; i++)
             {
                 var bit = 1UL << i;
-                if (!state.Bitboards[pieceIndex].Contains(bit))
+                if (!position.Bitboards[pieceIndex].Contains(bit))
                     continue;
 
                 int row = i / 8;

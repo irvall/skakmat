@@ -27,12 +27,12 @@ internal class Masks
     internal static ulong WhiteKingShortGap = 0x6000000000000000;
     internal static ulong WhiteKingLongGap = 0xe00000000000000;
     private const ulong WhiteKingTryCastleShort = 0xc000000000000000;
-    private static ulong WhiteKingTryCastleLong = 0x700000000000000;
+    private static readonly ulong WhiteKingTryCastleLong = 0x700000000000000;
 
 
     internal const ulong BlackKingShortGap = 0x60;
     internal static ulong BlackKingLongGap = 0xe;
-    private static ulong BlackKingTryCastleShort = 0xc0;
+    private static readonly ulong BlackKingTryCastleShort = 0xc0;
     internal static ulong BlackKingTryCastleLong = 0x7;
 
     internal static ulong QueenSideCastlePath(bool isWhite) =>

@@ -1,31 +1,32 @@
 using skakmat.Chess;
-using skakmat.Utilities;
+using skakmat.Extensions;
+using skakmat.Helpers;
 
 namespace skakmat.Game;
 
 internal class Board
 {
-    internal BoardState GetBoardState() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
+    internal Position CreatePosition() => new(_bbs, _whiteToPlay, castlingRights, lastMovePlayed);
     public bool WhiteToPlay => _whiteToPlay;
     private bool _whiteToPlay;
-    private ulong[] _bbs;
+    private readonly ulong[] _bbs;
     private Castling.Rights castlingRights;
     private Move? lastMovePlayed;
 
     public Board()
     {
-        _bbs = BoardUtility.BitboardFromFen(Constants.FenPositions.Default);
+        _bbs = BoardHelper.BitboardFromFen(Constants.FenPositions.Default);
         _whiteToPlay = true;
         castlingRights = Castling.Rights.All;
         lastMovePlayed = null;
     }
 
-    public Board(BoardState state)
+    public Board(Position position)
     {
-        _bbs = (ulong[])state.Bitboards.Clone();
-        _whiteToPlay = state.WhiteToPlay;
-        castlingRights = state.CastlingRights;
-        lastMovePlayed = state.LastMovePlayed;
+        _bbs = (ulong[])position.Bitboards.Clone();
+        _whiteToPlay = position.WhiteToPlay;
+        castlingRights = position.CastlingRights;
+        lastMovePlayed = position.LastMovePlayed;
     }
 
     internal int GetPieceIndexAt(ulong square)
@@ -52,7 +53,7 @@ internal class Board
 
     internal IEnumerable<(int pieceIndex, int index, ulong bit)> GetAllPieces()
     {
-        foreach (var (idx, bit) in BoardUtility.EnumerateSquares())
+        foreach (var (idx, bit) in BoardHelper.EnumerateSquares())
         {
             var type = GetPieceIndexAt(bit);
             if (type != Piece.EmptySquare)
@@ -82,7 +83,7 @@ internal class Board
         }
     }
 
-    internal void ApplyMove(Move move, bool swapSide = true)
+    internal Position ApplyMove(Move move, bool swapSide = true)
     {
         HandleSpecialMove(move);
         UpdateCastlingRights(move);
@@ -91,6 +92,7 @@ internal class Board
         if (swapSide)
             _whiteToPlay = !_whiteToPlay;
         lastMovePlayed = move;
+        return CreatePosition();
     }
 
     private void RemoveCastlingRight(Castling.Type type)
@@ -140,13 +142,6 @@ internal class Board
         RemovePiece(optCapturedPiece, move.TargetBit);
         _bbs[move.PieceIndex] ^= move.OriginBit;
         _bbs[move.PieceIndex] |= move.TargetBit;
-    }
-
-    public void PutPiece(int pieceIndex, ulong targetBit)
-    {
-        if (pieceIndex == Piece.EmptySquare)
-            return;
-        _bbs[pieceIndex] ^= targetBit;
     }
 
     internal void UndoMove(Move move, int possibleTargetType)

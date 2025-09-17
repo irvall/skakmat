@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Raylib_cs;
 using skakmat.Game;
-using skakmat.Utilities;
+using skakmat.Helpers;
 using Color = Raylib_cs.Color;
 
 namespace skakmat.Rendering;
@@ -22,7 +22,7 @@ internal class BitboardVisualiser
 
     internal BitboardVisualiser()
     {
-        RaylibUtility.IgnoreLogs();
+        RaylibHelper.IgnoreLogs();
         Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
         var windowHeight = (int)(Raylib.GetScreenHeight() / 1.5);
         Raylib.CloseWindow();

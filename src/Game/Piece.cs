@@ -20,7 +20,7 @@ class Piece
         return pieceIndex >= WhitePawn && pieceIndex < BlackPawn;
     }
 
-    internal static int GetPieceIndex(PieceType type, BoardState state) => GetPieceIndex(type, state.WhiteToPlay);
+    internal static int GetPieceIndex(PieceType type, Position position) => GetPieceIndex(type, position.WhiteToPlay);
 
     internal static int GetPieceIndex(PieceType type, bool isWhite) => type switch
     {

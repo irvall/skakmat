@@ -1,5 +1,5 @@
 using Raylib_cs;
-using skakmat.Utilities;
+using skakmat.Helpers;
 
 class SoundController
 {
@@ -19,12 +19,12 @@ class SoundController
     private void Initialize()
     {
         Raylib.InitAudioDevice();
-        moveSound = RaylibUtility.LoadSound("move.wav");
-        checkSound = RaylibUtility.LoadSound("check.wav");
-        horseSound = RaylibUtility.LoadSound("horse.wav");
-        checkmateSound = RaylibUtility.LoadSound("wilhelm.wav");
-        captureSound = RaylibUtility.LoadSound("capture.wav");
-        stalemateSound = RaylibUtility.LoadSound("stalemate.wav");
+        moveSound = RaylibHelper.LoadSound("move.wav");
+        checkSound = RaylibHelper.LoadSound("check.wav");
+        horseSound = RaylibHelper.LoadSound("horse.wav");
+        checkmateSound = RaylibHelper.LoadSound("wilhelm.wav");
+        captureSound = RaylibHelper.LoadSound("capture.wav");
+        stalemateSound = RaylibHelper.LoadSound("stalemate.wav");
     }
 
     internal void PlayCheckSound()

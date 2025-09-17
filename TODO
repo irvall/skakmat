@@ -1,7 +1,5 @@
 # Design
 
-- Sort out Board and BoardState: too much alike
-
 # Evaluation
 
 - Construct game tree

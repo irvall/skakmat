@@ -1,15 +1,15 @@
 using System.Numerics;
+using skakmat.Extensions;
 using skakmat.Game;
 
-namespace skakmat.Utilities;
+namespace skakmat.Helpers;
 
-internal class BoardUtility
+internal class BoardHelper
 {
 
     internal static ulong[] BitboardFromFen(string fen)
     {
-        // Standard: rnbqkbnr/pppppppp/Constants.SquareCount/Constants.SquareCount/Constants.SquareCount/Constants.SquareCount/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-        // TODO: Support 'w KQkq - 0 1' part
+        // TODO: Support to play/castling ('w KQkq - 0 1') part
         var bbs = new ulong[12];
         var parts = fen.Split(' ');
         var position = parts[0];
@@ -150,12 +150,12 @@ internal class BoardUtility
         return Math.Abs(pos1 - pos2) == 1;
     }
 
-    internal static void PrintPrettyBoard(BoardState boardState)
+    internal static void PrintPrettyBoard(Position position)
     {
         Console.WriteLine();
         for (var i = 0; i < 64; i++)
         {
-            var pieceIdx = boardState.GetPieceIndexAtIndex(i);
+            var pieceIdx = position.GetPieceIndexAt(i);
             Console.Write(Piece.PieceIndexUnicode(pieceIdx));
 
             if ((i + 1) % 8 == 0)
@@ -191,12 +191,12 @@ internal class BoardUtility
     // TODO: Add cleaner API
     // Returns dictionary mapping pieceIndex to #
     // i.e. {0, 5} -> 5 white pawns
-    public static Dictionary<int, int> GetNumberOfPieces(BoardState state)
+    public static Dictionary<int, int> GetNumberOfPieces(Position position)
     {
         var frequency = new Dictionary<int, int>();
         for (var i = 0; i < 64; i++)
         {
-            var idx = state.GetPieceIndexAtIndex(i);
+            var idx = position.GetPieceIndexAt(i);
             if (frequency.ContainsKey(idx))
                 frequency[idx] += 1;
             else

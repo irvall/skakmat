@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Raylib_cs;
 
-namespace skakmat.Utilities;
+namespace skakmat.Helpers;
 
-internal abstract class RaylibUtility
+internal abstract class RaylibHelper
 {
     private static void CustomLog(int logType, string text, nint args)
     {

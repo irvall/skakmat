@@ -1,5 +1,5 @@
-namespace skakmat.Utilities;
-internal static class NumberExtensions
+namespace skakmat.Extensions;
+internal static class BitExtensions
 {
 
     internal static bool Contains(this ulong bitboard, ulong targetBit)

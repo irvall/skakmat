@@ -1,23 +1,24 @@
 using skakmat.Chess;
 using skakmat.Game;
+using skakmat.Helpers;
 
-namespace skakmat.Utilities;
+namespace skakmat.Extensions;
 internal static class MoveExtensions
 {
 
     internal static string ToLanNotation(this Move move)
     {
-        var fromIndex = BoardUtility.BitToIndex(move.OriginBit);
-        var toIndex = BoardUtility.BitToIndex(move.TargetBit);
-        var pieceIndexString = BoardUtility.PieceIndexToString(move.PieceIndex);
-        return $"{pieceIndexString}{BoardUtility.IndexToSquareString(fromIndex)}{BoardUtility.IndexToSquareString(toIndex)}";
+        var fromIndex = BoardHelper.BitToIndex(move.OriginBit);
+        var toIndex = BoardHelper.BitToIndex(move.TargetBit);
+        var pieceIndexString = BoardHelper.PieceIndexToString(move.PieceIndex);
+        return $"{pieceIndexString}{BoardHelper.IndexToSquareString(fromIndex)}{BoardHelper.IndexToSquareString(toIndex)}";
     }
 
     internal static string ToSanNotation(this Move move)
     {
-        var toIndex = BoardUtility.BitToIndex(move.TargetBit);
-        var pieceIndexString = BoardUtility.PieceIndexToString(move.PieceIndex);
-        return $"{pieceIndexString}{BoardUtility.IndexToSquareString(toIndex)}";
+        var toIndex = BoardHelper.BitToIndex(move.TargetBit);
+        var pieceIndexString = BoardHelper.PieceIndexToString(move.PieceIndex);
+        return $"{pieceIndexString}{BoardHelper.IndexToSquareString(toIndex)}";
     }
 
     internal static ulong ToBitboard(this List<Move> moves)

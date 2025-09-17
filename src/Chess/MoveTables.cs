@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
+using skakmat.Extensions;
 using skakmat.Game;
-using skakmat.Utilities;
+using skakmat.Helpers;
 
 namespace skakmat.Chess;
 
@@ -115,7 +116,7 @@ internal partial class MoveTables
         {
             var propertyName = property.Name;
             var propertyValue = (ulong?)property.GetValue(null);
-            Console.WriteLine($"{RaylibUtility.BoldText(propertyName)}\n");
+            Console.WriteLine($"{RaylibHelper.BoldText(propertyName)}\n");
             PrintBoard(propertyValue ?? 0UL);
             Console.WriteLine("///\n");
         }
@@ -232,40 +233,40 @@ internal partial class MoveTables
     {
         if (optional != null && optIndex != null)
         {
-            RaylibUtility.WriteColor(RaylibUtility.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
+            RaylibHelper.WriteColor(RaylibHelper.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
         }
 
-        foreach (var (i, bit) in BoardUtility.EnumerateSquares())
+        foreach (var (i, bit) in BoardHelper.EnumerateSquares())
         {
             if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
             var theBit = bit & bitBoard;
             if (theBit != 0)
-                Console.Write(RaylibUtility.BoldText(_indexToBoardSquare[i].PadLeft(3)));
+                Console.Write(RaylibHelper.BoldText(_indexToBoardSquare[i].PadLeft(3)));
             else
             {
                 if (optIndex != null && i == optIndex)
-                    RaylibUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
-                else RaylibUtility.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+                    RaylibHelper.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
+                else RaylibHelper.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
             }
         }
 
         Console.WriteLine(Environment.NewLine);
     }
 
-    internal ulong GetPieceAttacks(int pieceIndex, int index, BoardState state) => pieceIndex switch
+    internal ulong GetPieceAttacks(int pieceIndex, int index, Position position) => pieceIndex switch
     {
         Piece.WhitePawn => WhitePawnAttacks[index],
         Piece.BlackPawn => BlackPawnAttacks[index],
-        Piece.WhiteKnight => KnightMoves[index].Exclude(state.WhitePieces),
-        Piece.BlackKnight => KnightMoves[index].Exclude(state.BlackPieces),
-        Piece.WhiteBishop => BishopAttacks(index, state.AllPieces).Exclude(state.WhitePieces),
-        Piece.BlackBishop => BishopAttacks(index, state.AllPieces).Exclude(state.BlackPieces),
-        Piece.WhiteRook => RookAttacks(index, state.AllPieces).Exclude(state.WhitePieces),
-        Piece.BlackRook => RookAttacks(index, state.AllPieces).Exclude(state.BlackPieces),
-        Piece.WhiteQueen => GetPieceAttacks(Piece.WhiteRook, index, state) | GetPieceAttacks(Piece.WhiteBishop, index, state),
-        Piece.BlackQueen => GetPieceAttacks(Piece.BlackRook, index, state) | GetPieceAttacks(Piece.BlackBishop, index, state),
-        Piece.WhiteKing => KingMoves[index].Exclude(state.WhitePieces),
-        Piece.BlackKing => KingMoves[index].Exclude(state.BlackPieces),
+        Piece.WhiteKnight => KnightMoves[index].Exclude(position.WhitePieces),
+        Piece.BlackKnight => KnightMoves[index].Exclude(position.BlackPieces),
+        Piece.WhiteBishop => BishopAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
+        Piece.BlackBishop => BishopAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
+        Piece.WhiteRook => RookAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
+        Piece.BlackRook => RookAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
+        Piece.WhiteQueen => GetPieceAttacks(Piece.WhiteRook, index, position) | GetPieceAttacks(Piece.WhiteBishop, index, position),
+        Piece.BlackQueen => GetPieceAttacks(Piece.BlackRook, index, position) | GetPieceAttacks(Piece.BlackBishop, index, position),
+        Piece.WhiteKing => KingMoves[index].Exclude(position.WhitePieces),
+        Piece.BlackKing => KingMoves[index].Exclude(position.BlackPieces),
         _ => 0UL
     };
 
