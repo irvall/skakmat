@@ -66,6 +66,12 @@ internal abstract class Palette
         public static Color ForestGreen = FromHex("4D8B31");
         public static Color Tea = FromHex("C7D59F");
         public static Color RoseQuartz = FromHex("AEA4BF");
+        public static Color BattleShipGray = FromHex("909580");
+        public static Color NaplesYellow = FromHex("FADF63");
+        public static Color Verdigris = FromHex("48A9A6");
+        public static Color IndianRed = FromHex("C1666B");
+        public static Color TiffanyBlue = FromHex("84DCC6");
+        public static Color UltraViolet = FromHex("4B4E6D");
     }
 
 }

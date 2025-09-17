@@ -31,7 +31,7 @@ internal class BoardRenderer
 
     internal void DrawBoard()
     {
-        var primaryTileColor = Palette.Coolors.RoseQuartz;
+        var primaryTileColor = Palette.Coolors.TiffanyBlue;
         var whiteTiles = Palette.WhiteVersion(primaryTileColor);
 
         for (var i = 0; i < Constants.SquareCount; i++)
