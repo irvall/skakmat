@@ -4,7 +4,7 @@ namespace skakmat.Rendering;
 
 internal abstract class Palette
 {
-    private static readonly Color[] DistinctColors =
+    private static readonly Color[] distinctColors =
     [
         new(255, 0, 0, 128), // Red
         new(0, 255, 0, 128), // Green
@@ -22,9 +22,9 @@ internal abstract class Palette
 
     internal static Color GetNextColor()
     {
-        if (colorIndex >= DistinctColors.Length)
+        if (colorIndex >= distinctColors.Length)
             colorIndex = 0;
-        return DistinctColors[colorIndex++];
+        return distinctColors[colorIndex++];
     }
 
     internal static Color FromHex(string hex)
