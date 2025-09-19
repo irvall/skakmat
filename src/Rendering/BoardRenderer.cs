@@ -8,25 +8,25 @@ namespace skakmat.Rendering;
 
 internal class BoardRenderer
 {
-    private readonly int _squareSize;
-    private Texture2D _spriteTexture;
-    private readonly (int width, int height) _windowSize;
+    private readonly int squareSize;
+    private Texture2D spriteTexture;
+    private readonly (int width, int height) windowSize;
     private bool useStandardOrientation;
 
     internal BoardRenderer(int windowHeight, int squareSize, bool useStandardOrientation)
     {
         this.useStandardOrientation = useStandardOrientation;
 
-        _squareSize = squareSize;
-        _windowSize.width = windowHeight;
-        _windowSize.height = windowHeight;
+        this.squareSize = squareSize;
+        windowSize.width = windowHeight;
+        windowSize.height = windowHeight;
     }
 
     internal void Initialize()
     {
         var windowHeight = RaylibHelper.GetWindowHeightDynamically();
         Raylib.InitWindow(windowHeight, windowHeight, "skakmat");
-        _spriteTexture = RaylibHelper.LoadSpritesheet("classic.png");
+        spriteTexture = RaylibHelper.LoadSpritesheet("classic.png");
     }
 
     internal void DrawBoard()
@@ -48,16 +48,16 @@ internal class BoardRenderer
                 int fontSize = 10;
                 int padding = 2;
 
-                int posX = j * _squareSize + _squareSize - fontSize + padding;
-                int posY = i * _squareSize + padding;
+                int posX = j * squareSize + squareSize - fontSize + padding;
+                int posY = i * squareSize + padding;
                 Raylib.DrawText(digit.ToString(), posX, posY, fontSize, textColor);
 
                 char letter = useStandardOrientation
                     ? (char)('A' + j)
                     : (char)('H' - j);
 
-                int letterPosX = j * _squareSize + padding;
-                int letterPosY = (i + 1) * _squareSize - fontSize - padding;
+                int letterPosX = j * squareSize + padding;
+                int letterPosY = (i + 1) * squareSize - fontSize - padding;
                 Raylib.DrawText(letter.ToString(), letterPosX, letterPosY, fontSize, textColor);
             }
         }
@@ -90,8 +90,8 @@ internal class BoardRenderer
 
     private void DrawPiece(int row, int col, int pieceIndex)
     {
-        int cellWidth = _spriteTexture.Width / 6;
-        int cellHeight = _spriteTexture.Height / 2;
+        int cellWidth = spriteTexture.Width / 6;
+        int cellHeight = spriteTexture.Height / 2;
 
         if (!Constants.PieceToSpriteCoords.TryGetValue(pieceIndex, out var tup))
             throw new Exception("Piece type not supported " + pieceIndex);
@@ -105,20 +105,20 @@ internal class BoardRenderer
         );
 
         var dest = new Rectangle(
-            col * _squareSize,
-            row * _squareSize,
-            _squareSize,
-            _squareSize
+            col * squareSize,
+            row * squareSize,
+            squareSize,
+            squareSize
         );
-        Raylib.DrawTexturePro(_spriteTexture, src, dest, Vector2.Zero, 0f, Color.WHITE);
+        Raylib.DrawTexturePro(spriteTexture, src, dest, Vector2.Zero, 0f, Color.WHITE);
     }
 
     private void DrawTile(int col, int row, Color tileColor, double alpha = 1.0)
     {
-        var posX = col * _squareSize;
-        var posY = row * _squareSize;
+        var posX = col * squareSize;
+        var posY = row * squareSize;
         tileColor.A = (byte)(255.0 * alpha);
-        Raylib.DrawRectangle(posX, posY, _squareSize, _squareSize, tileColor);
+        Raylib.DrawRectangle(posX, posY, squareSize, squareSize, tileColor);
     }
 
     internal void HighlightSquares(ulong squares, Color color)

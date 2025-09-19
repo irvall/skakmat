@@ -18,12 +18,12 @@ internal class InputHandler(int sideLength)
         return gridPosition is { X: >= 0 and < Constants.SquareCount, Y: >= 0 and < Constants.SquareCount };
     }
 
-    private readonly int _sideLength = sideLength;
+    private readonly int sideLength = sideLength;
 
     private Vector2 ScreenToGrid(int screenX, int screenY)
     {
-        var gridX = screenX / _sideLength;
-        var gridY = screenY / _sideLength;
+        var gridX = screenX / sideLength;
+        var gridY = screenY / sideLength;
         return new Vector2(gridX, gridY);
     }
 

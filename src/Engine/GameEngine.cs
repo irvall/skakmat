@@ -115,8 +115,8 @@ internal class GameEngine
         Raylib.BeginDrawing();
         Raylib.ClearBackground(new Color(4, 15, 15, 1));
         renderer.DrawBoard();
-        var position = gameController.GetCurrentPosition();
 
+        var position = gameController.CurrentPosition;
         if (gameController.SelectedPiece.HasValue)
         {
             var moves = gameController.GetValidMovesForSelected();

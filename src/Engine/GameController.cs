@@ -10,36 +10,25 @@ internal class GameController
     public event Action<GameEvent>? GameEventOccurred;
     internal IReadOnlyList<Position> Positions => [.. boardPositions];
     internal IReadOnlyList<Move> Moves => [.. boardPositions.Skip(1).Select(s => s.LastMovePlayed!)];
-    internal Position Position
-    {
-        get
-        {
-            if (updateCurrentPosition)
-            {
-                cachedPosition = board.CreatePosition();
-                updateCurrentPosition = false;
-            }
-            return cachedPosition;
-        }
-    }
-    internal bool WhiteToPlay => Position.WhiteToPlay;
-    internal bool KingIsUnderAttack => moveGenerator.IsKingUnderAttack(GetCurrentPosition());
+    internal Position RecentPosition => boardPositions[^1];
+    internal Position CurrentPosition => Positions[positionIndex];
+    internal bool WhiteToPlay => RecentPosition.WhiteToPlay;
+    internal bool KingIsUnderAttack => moveGenerator.IsKingUnderAttack(CurrentPosition);
     private readonly Board board;
     private readonly MoveTables moveTables;
     private readonly MoveGenerator moveGenerator;
-    private readonly List<Position> boardPositions = [];
-    private Position cachedPosition;
-    private bool updateCurrentPosition = true;
+    private readonly List<Position> boardPositions;
     private List<Move> validMovesCache = [];
     private bool movesShouldUpdate = true;
-    public int positionIndex = 0;
+    private int positionIndex = 0;
 
     public GameController()
     {
         board = new Board();
         moveTables = new MoveTables();
         moveGenerator = new MoveGenerator(moveTables, board);
-        boardPositions.Add(Position);
+        var initialPosition = board.CreatePosition();
+        boardPositions = [initialPosition];
     }
 
 
@@ -53,7 +42,7 @@ internal class GameController
 
     internal List<Move> GetValidMoves(int squareIndex)
     {
-        return moveGenerator.GenerateMovesForSquare(squareIndex, Position);
+        return moveGenerator.GenerateMovesForSquare(squareIndex, RecentPosition);
     }
 
     internal List<Move> GetValidMoves()
@@ -64,7 +53,7 @@ internal class GameController
     internal PieceSelection? TrySelectPiece(int squareIndex)
     {
         var pieceIndex = board.GetPieceIndexAt(squareIndex);
-        if (pieceIndex == Piece.EmptySquare || !Piece.IsCorrectColor(pieceIndex, board.WhiteToPlay))
+        if (pieceIndex == Piece.EmptySquare || !Piece.IsCorrectColor(pieceIndex, RecentPosition.WhiteToPlay))
             return null;
 
         var validMoves = GetValidMoves(squareIndex);
@@ -78,8 +67,8 @@ internal class GameController
             UpdateValidMoves();
 
         var wasInCheck = KingIsUnderAttack;
-        var kingBoard = Position.Bitboards[Piece.WhiteKing] | Position.Bitboards[Piece.BlackKing];
-        if (Position.AllPieces == kingBoard)
+        var kingBoard = RecentPosition.Bitboards[Piece.WhiteKing] | RecentPosition.Bitboards[Piece.BlackKing];
+        if (RecentPosition.AllPieces == kingBoard)
         {
             Status = GameStatus.Stalemate;
             GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Stalemate, Status = Status });
@@ -94,9 +83,9 @@ internal class GameController
 
         else if (moveGenerator.IsKingUnderAttack())
         {
-            Status = Position.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
+            Status = RecentPosition.WhiteToPlay ? GameStatus.BlackWon : GameStatus.WhiteWon;
             GameEventOccurred?.Invoke(new GameEvent { Type = GameEventType.Checkmate, Status = Status });
-            System.Console.WriteLine(Position.WhiteToPlay ? "0 - 1 Black wins by checkmate" : "1 - 0 White wins by checkmate");
+            System.Console.WriteLine(RecentPosition.WhiteToPlay ? "0 - 1 Black wins by checkmate" : "1 - 0 White wins by checkmate");
         }
         else
         {
@@ -126,9 +115,8 @@ internal class GameController
         var actualMove = validMovesCache.First(m => m.Equals(move));
         int capturedPiece = board.GetPieceIndexAt(actualMove.TargetBit);
         movesShouldUpdate = true;
-        updateCurrentPosition = true;
-        board.ApplyMove(actualMove);
-        boardPositions.Add(Position);
+        var updatedPosition = board.ApplyMove(actualMove);
+        boardPositions.Add(updatedPosition);
         BoardHelper.PrintMoveHistory([.. Moves]);
 
         var isKnight = move.PieceIndex == Piece.WhiteKnight || move.PieceIndex == Piece.BlackKnight;
@@ -144,10 +132,6 @@ internal class GameController
         positionIndex = boardPositions.Count - 1;
         UpdateGameStatus();
         SelectedPiece = null;
-    }
-    internal Position GetCurrentPosition()
-    {
-        return Positions[positionIndex];
     }
 
     internal bool IsValidMove(Move move)

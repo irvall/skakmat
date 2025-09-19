@@ -18,13 +18,13 @@ internal abstract class Palette
         new(0, 0, 0, 128) // Black
     ];
 
-    private static int _colorIndex;
+    private static int colorIndex;
 
     internal static Color GetNextColor()
     {
-        if (_colorIndex >= DistinctColors.Length)
-            _colorIndex = 0;
-        return DistinctColors[_colorIndex++];
+        if (colorIndex >= DistinctColors.Length)
+            colorIndex = 0;
+        return DistinctColors[colorIndex++];
     }
 
     internal static Color FromHex(string hex)

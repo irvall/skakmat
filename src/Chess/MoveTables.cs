@@ -13,8 +13,8 @@ internal partial class MoveTables
     private const int DiagonalOffset = 7;
     private const int AntiDiagonalOffset = 9;
 
-    private readonly Dictionary<string, int> _boardSquareToIndex;
-    private readonly Dictionary<int, string> _indexToBoardSquare;
+    private readonly Dictionary<string, int> boardSquareToIndex;
+    private readonly Dictionary<int, string> indexToBoardSquare;
     internal ulong[] BlackPawnAttacks = new ulong[64];
     internal ulong[] BlackPawnMoves = new ulong[64];
     internal ulong[] KingMoves = new ulong[64];
@@ -26,8 +26,8 @@ internal partial class MoveTables
 
     internal MoveTables()
     {
-        _boardSquareToIndex = [];
-        _indexToBoardSquare = [];
+        boardSquareToIndex = [];
+        indexToBoardSquare = [];
         InitializeBoardMaps();
         InitializePawnMoves();
         InitializeKingMoves();
@@ -129,17 +129,17 @@ internal partial class MoveTables
             for (var c = 'a'; c <= 'h'; c++)
             {
                 var boardSquare = $"{c}{i}";
-                _boardSquareToIndex.Add(boardSquare, index++);
+                boardSquareToIndex.Add(boardSquare, index++);
             }
 
-        foreach (var kvp in _boardSquareToIndex)
-            _indexToBoardSquare[kvp.Value] = kvp.Key;
+        foreach (var kvp in boardSquareToIndex)
+            indexToBoardSquare[kvp.Value] = kvp.Key;
     }
 
     private void InitializeKingMoves()
     {
         KingMoves = new ulong[64];
-        foreach (var idx in _boardSquareToIndex.Values)
+        foreach (var idx in boardSquareToIndex.Values)
         {
             var bit = 1UL << idx;
             if (!Masks.Rank8.Contains(bit))
@@ -164,7 +164,7 @@ internal partial class MoveTables
     private void InitializeKnightMoves()
     {
         KnightMoves = new ulong[64];
-        foreach (var idx in _boardSquareToIndex.Values)
+        foreach (var idx in boardSquareToIndex.Values)
         {
             var bit = 1UL << idx;
             if (Masks.Boxes.A1G6.Contains(bit))
@@ -194,7 +194,7 @@ internal partial class MoveTables
         WhitePawnAttacks = new ulong[64];
         BlackPawnAttacks = new ulong[64];
 
-        foreach (var idx in _boardSquareToIndex.Values)
+        foreach (var idx in boardSquareToIndex.Values)
         {
             var bit = 1UL << idx;
 
@@ -233,7 +233,7 @@ internal partial class MoveTables
     {
         if (optional != null && optIndex != null)
         {
-            RaylibHelper.WriteColor(RaylibHelper.BoldText(optional + " " + _indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
+            RaylibHelper.WriteColor(RaylibHelper.BoldText(optional + " " + indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
         }
 
         foreach (var (i, bit) in BoardHelper.EnumerateSquares())
@@ -241,12 +241,12 @@ internal partial class MoveTables
             if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
             var theBit = bit & bitBoard;
             if (theBit != 0)
-                Console.Write(RaylibHelper.BoldText(_indexToBoardSquare[i].PadLeft(3)));
+                Console.Write(RaylibHelper.BoldText(indexToBoardSquare[i].PadLeft(3)));
             else
             {
                 if (optIndex != null && i == optIndex)
-                    RaylibHelper.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
-                else RaylibHelper.WriteColor(_indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
+                    RaylibHelper.WriteColor(indexToBoardSquare[i].PadLeft(3), ConsoleColor.Red, false);
+                else RaylibHelper.WriteColor(indexToBoardSquare[i].PadLeft(3), ConsoleColor.DarkGray, false);
             }
         }
 
