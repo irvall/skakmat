@@ -6,12 +6,12 @@ namespace skakmat.Engine;
 internal class InputHandler(int sideLength)
 {
 
-    internal static bool IsLeftArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT);
-    internal static bool IsRightArrowPressed => Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT);
+    internal static bool IsLeftArrowPressed => Raylib.IsKeyPressed(KeyboardKey.Left);
+    internal static bool IsRightArrowPressed => Raylib.IsKeyPressed(KeyboardKey.Right);
     internal static bool IsKeyPressed(KeyboardKey key) => Raylib.IsKeyPressed(key);
 
     internal static bool IsLeftMouseButtonPressed =>
-        Raylib.IsMouseButtonPressed(MouseButton.MOUSE_LEFT_BUTTON);
+        Raylib.IsMouseButtonPressed(MouseButton.Left);
 
     internal static bool IsMouseOnBoard(Vector2 gridPosition)
     {

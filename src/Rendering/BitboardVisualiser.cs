@@ -102,18 +102,18 @@ internal class BitboardVisualiser
                 {
                     var posX = halfSideLength / 3;
                     var posY = (int)(sideLength * .85);
-                    Raylib.DrawText(8 - i + "", posX, i * sideLength + posY, halfSideLength, Color.WHITE);
+                    Raylib.DrawText(8 - i + "", posX, i * sideLength + posY, halfSideLength, Color.White);
                 }
 
                 var draw = (i + j) % 2 != 0;
-                DrawTile(j, i, draw ? Color.BROWN : Color.RAYWHITE);
+                DrawTile(j, i, draw ? Color.Brown: Color.RayWhite);
             }
 
         for (var c = 'A'; c <= 'H'; c++)
         {
             var posX = (int)(sideLength * .85);
             var posY = windowSize.height - halfSideLength;
-            Raylib.DrawText(c + "", (c - 'A') * sideLength + posX, posY, halfSideLength, Color.WHITE);
+            Raylib.DrawText(c + "", (c - 'A') * sideLength + posX, posY, halfSideLength, Color.White);
         }
 
 
@@ -147,7 +147,7 @@ internal class BitboardVisualiser
         var mouseScreenPos = Raylib.GetMousePosition();
         var mouseGridPos = ScreenToGrid((int)mouseScreenPos.X, (int)mouseScreenPos.Y);
         var isMouseOnBoard = mouseGridPos is { X: >= 0 and < Constants.SquareCount, Y: >= 0 and < Constants.SquareCount };
-        if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
+        if (Raylib.IsMouseButtonDown(MouseButton.Left))
         {
             if (isMouseOnBoard)
             {
@@ -157,7 +157,7 @@ internal class BitboardVisualiser
                 rectEndPos = mouseGridPos;
             }
         }
-        else if (Raylib.IsMouseButtonUp(MouseButton.MOUSE_BUTTON_LEFT) && isDragging)
+        else if (Raylib.IsMouseButtonUp(MouseButton.Left) && isDragging)
         {
             if (rectBeginPos != null && rectEndPos != null)
             {
@@ -176,7 +176,7 @@ internal class BitboardVisualiser
             isDragging = false;
         }
 
-        if (Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_RIGHT)) boundingBoxes.Clear();
+        if (Raylib.IsMouseButtonPressed(MouseButton.Right)) boundingBoxes.Clear();
 
         if (rectBeginPos != null && rectEndPos != null)
             DrawRect(rectBeginPos.Value, rectEndPos.Value, boundingBoxColor);

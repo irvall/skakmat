@@ -110,7 +110,7 @@ internal class BoardRenderer
             squareSize,
             squareSize
         );
-        Raylib.DrawTexturePro(spriteTexture, src, dest, Vector2.Zero, 0f, Color.WHITE);
+        Raylib.DrawTexturePro(spriteTexture, src, dest, Vector2.Zero, 0f, Color.White);
     }
 
     private void DrawTile(int col, int row, Color tileColor, double alpha = 1.0)

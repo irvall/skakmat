@@ -72,7 +72,7 @@ internal class GameEngine
 
     private void HandleInput()
     {
-        if (InputHandler.IsKeyPressed(KeyboardKey.KEY_F))
+        if (InputHandler.IsKeyPressed(KeyboardKey.F))
         {
             useStandardOrientation = !useStandardOrientation;
             renderer.UpdateOrientation(useStandardOrientation);
@@ -120,17 +120,17 @@ internal class GameEngine
         if (gameController.SelectedPiece.HasValue)
         {
             var moves = gameController.GetValidMovesForSelected();
-            renderer.HighlightSquares(moves.ToBitboard(), Color.GREEN);
+            renderer.HighlightSquares(moves.ToBitboard(), Color.Green);
         }
 
         var lastMove = position.LastMovePlayed;
         if (lastMove is not null)
-            renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.BLUE);
+            renderer.HighlightSquares(lastMove.OriginBit | lastMove.TargetBit, Color.Blue);
 
         if (gameController.KingIsUnderAttack)
         {
             var theKing = position.GetPieceBoard(PieceType.King);
-            renderer.HighlightSquares(theKing, Color.RED);
+            renderer.HighlightSquares(theKing, Color.Red);
         }
 
         renderer.DrawPieces(position);
