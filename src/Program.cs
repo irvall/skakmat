@@ -5,7 +5,6 @@ namespace skakmat;
 
 internal abstract class Program
 {
-
     [STAThread]
     internal static void Main()
     {

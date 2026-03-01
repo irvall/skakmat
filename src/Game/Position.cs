@@ -1,8 +1,10 @@
-
-
 namespace skakmat.Game;
 
-internal readonly struct Position(ulong[] bitboards, bool whiteToPlay, Castling.Rights castlingRights, Move? lastMovePlayed)
+internal readonly struct Position(
+    ulong[] bitboards,
+    bool whiteToPlay,
+    Castling.Rights castlingRights,
+    Move? lastMovePlayed)
 {
     internal readonly ulong[] Bitboards = (ulong[])bitboards.Clone();
     internal readonly Castling.Rights CastlingRights = castlingRights;
@@ -28,7 +30,13 @@ internal readonly struct Position(ulong[] bitboards, bool whiteToPlay, Castling.
     internal ulong AllPieces => WhitePieces | BlackPieces;
     internal ulong EmptySquares => ~AllPieces;
 
-    internal ulong GetFriendlyPieces() => WhiteToPlay ? WhitePieces : BlackPieces;
-    internal ulong GetEnemyPieces() => WhiteToPlay ? BlackPieces : WhitePieces;
+    internal ulong GetFriendlyPieces()
+    {
+        return WhiteToPlay ? WhitePieces : BlackPieces;
+    }
 
+    internal ulong GetEnemyPieces()
+    {
+        return WhiteToPlay ? BlackPieces : WhitePieces;
+    }
 }

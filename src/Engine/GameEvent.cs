@@ -1,6 +1,7 @@
 using skakmat.Game;
 
 namespace skakmat.Engine;
+
 public readonly struct GameEvent
 {
     internal GameEventType Type { get; init; }

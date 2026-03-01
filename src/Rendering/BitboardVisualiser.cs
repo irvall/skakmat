@@ -48,6 +48,7 @@ internal class BitboardVisualiser
         return squares.Aggregate(0UL,
             (bitboard, nextSquare) => bitboard | BoundingBoxToBitboard(nextSquare));
     }
+
     private static ulong BoundingBoxToBitboard(HighlightSquare bb)
     {
         var bitboard = 0UL;
@@ -56,10 +57,10 @@ internal class BitboardVisualiser
         for (var x = (int)bb.StartPosition.X;
              isXGreater ? x <= bb.EndPosition.X : x >= bb.EndPosition.X;
              x += isXGreater ? 1 : -1)
-            for (var y = (int)bb.StartPosition.Y;
-                 isYGreater ? y <= bb.EndPosition.Y : y >= bb.EndPosition.Y;
-                 y += isYGreater ? 1 : -1)
-                bitboard |= 1UL << GridIndex(x, y);
+        for (var y = (int)bb.StartPosition.Y;
+             isYGreater ? y <= bb.EndPosition.Y : y >= bb.EndPosition.Y;
+             y += isYGreater ? 1 : -1)
+            bitboard |= 1UL << GridIndex(x, y);
 
         return bitboard;
     }
@@ -96,18 +97,18 @@ internal class BitboardVisualiser
     private void DrawBoard()
     {
         for (var i = 0; i < Constants.SquareCount; i++)
-            for (var j = 0; j < Constants.SquareCount; j++)
+        for (var j = 0; j < Constants.SquareCount; j++)
+        {
+            if (j == 0)
             {
-                if (j == 0)
-                {
-                    var posX = halfSideLength / 3;
-                    var posY = (int)(sideLength * .85);
-                    Raylib.DrawText(8 - i + "", posX, i * sideLength + posY, halfSideLength, Color.White);
-                }
-
-                var draw = (i + j) % 2 != 0;
-                DrawTile(j, i, draw ? Color.Brown: Color.RayWhite);
+                var posX = halfSideLength / 3;
+                var posY = (int)(sideLength * .85);
+                Raylib.DrawText(8 - i + "", posX, i * sideLength + posY, halfSideLength, Color.White);
             }
+
+            var draw = (i + j) % 2 != 0;
+            DrawTile(j, i, draw ? Color.Brown : Color.RayWhite);
+        }
 
         for (var c = 'A'; c <= 'H'; c++)
         {
@@ -146,7 +147,8 @@ internal class BitboardVisualiser
     {
         var mouseScreenPos = Raylib.GetMousePosition();
         var mouseGridPos = ScreenToGrid((int)mouseScreenPos.X, (int)mouseScreenPos.Y);
-        var isMouseOnBoard = mouseGridPos is { X: >= 0 and < Constants.SquareCount, Y: >= 0 and < Constants.SquareCount };
+        var isMouseOnBoard = mouseGridPos is
+            { X: >= 0 and < Constants.SquareCount, Y: >= 0 and < Constants.SquareCount };
         if (Raylib.IsMouseButtonDown(MouseButton.Left))
         {
             if (isMouseOnBoard)
@@ -203,10 +205,10 @@ internal class BitboardVisualiser
         for (var x = (int)rectBeginPos.X;
              isXGreater ? x <= rectEndPos.X : x >= rectEndPos.X;
              x += isXGreater ? 1 : -1)
-            for (var y = (int)rectBeginPos.Y;
-                 isYGreater ? y <= rectEndPos.Y : y >= rectEndPos.Y;
-                 y += isYGreater ? 1 : -1)
-                DrawTile(x, y, tileColor);
+        for (var y = (int)rectBeginPos.Y;
+             isYGreater ? y <= rectEndPos.Y : y >= rectEndPos.Y;
+             y += isYGreater ? 1 : -1)
+            DrawTile(x, y, tileColor);
     }
 
     private readonly struct HighlightSquare(Vector2 startPosition, Vector2 endPosition, Color color)

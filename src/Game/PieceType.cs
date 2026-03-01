@@ -1,4 +1,5 @@
 namespace skakmat.Game;
+
 public enum PieceType
 {
     Pawn,
@@ -7,4 +8,4 @@ public enum PieceType
     Rook,
     Queen,
     King
-};
+}

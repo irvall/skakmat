@@ -6,7 +6,6 @@ namespace skakmat.Helpers;
 
 internal class BoardHelper
 {
-
     internal static ulong[] BitboardFromFen(string fen)
     {
         // TODO: Support to play/castling ('w KQkq - 0 1') part
@@ -14,10 +13,7 @@ internal class BoardHelper
         var parts = fen.Split(' ');
         var position = parts[0];
         var slashCount = position.Count(ch => ch == '/');
-        if (slashCount != 7)
-        {
-            throw new FormatException("Expected 7 '/' in a FEN string: " + fen);
-        }
+        if (slashCount != 7) throw new FormatException("Expected 7 '/' in a FEN string: " + fen);
         var rows = position.Split('/');
         for (var row = 0; row < Constants.SquareCount; row++)
         {
@@ -26,60 +22,57 @@ internal class BoardHelper
             var i = 0;
             while (ri < currentRow.Length)
             {
-                var bit = 1UL << i << row * Constants.SquareCount;
+                var bit = 1UL << i << (row * Constants.SquareCount);
                 var ch = currentRow[ri];
                 var isWhite = char.IsUpper(ch);
                 switch (char.ToLower(ch))
                 {
                     case 'p':
-                        {
-                            var idx = isWhite ? Piece.WhitePawn : Piece.BlackPawn;
-                            bbs[idx] |= bit;
-                            break;
-                        }
+                    {
+                        var idx = isWhite ? Piece.WhitePawn : Piece.BlackPawn;
+                        bbs[idx] |= bit;
+                        break;
+                    }
                     case 'r':
-                        {
-                            var idx = isWhite ? Piece.WhiteRook : Piece.BlackRook;
-                            bbs[idx] |= bit;
-                            break;
-                        }
+                    {
+                        var idx = isWhite ? Piece.WhiteRook : Piece.BlackRook;
+                        bbs[idx] |= bit;
+                        break;
+                    }
                     case 'n':
-                        {
-                            var idx = isWhite ? Piece.WhiteKnight : Piece.BlackKnight;
-                            bbs[idx] |= bit;
-                            break;
-                        }
+                    {
+                        var idx = isWhite ? Piece.WhiteKnight : Piece.BlackKnight;
+                        bbs[idx] |= bit;
+                        break;
+                    }
                     case 'b':
-                        {
-                            var idx = isWhite ? Piece.WhiteBishop : Piece.BlackBishop;
-                            bbs[idx] |= bit;
-                            break;
-                        }
+                    {
+                        var idx = isWhite ? Piece.WhiteBishop : Piece.BlackBishop;
+                        bbs[idx] |= bit;
+                        break;
+                    }
                     case 'q':
-                        {
-                            var idx = isWhite ? Piece.WhiteQueen : Piece.BlackQueen;
-                            bbs[idx] |= bit;
-                            break;
-                        }
+                    {
+                        var idx = isWhite ? Piece.WhiteQueen : Piece.BlackQueen;
+                        bbs[idx] |= bit;
+                        break;
+                    }
                     case 'k':
-                        {
-                            var idx = isWhite ? Piece.WhiteKing : Piece.BlackKing;
-                            bbs[idx] |= bit;
-                            break;
-                        }
+                    {
+                        var idx = isWhite ? Piece.WhiteKing : Piece.BlackKing;
+                        bbs[idx] |= bit;
+                        break;
+                    }
                 }
+
                 if (char.IsNumber(ch))
-                {
                     i += (int)char.GetNumericValue(ch);
-                }
                 else
-                {
                     i++;
-                }
                 ri++;
             }
-
         }
+
         return bbs;
     }
 
@@ -106,9 +99,8 @@ internal class BoardHelper
 
     internal static string IndexToSquareString(int index)
     {
-        var letter = (char)('a' + (index % 8));
-        return letter + (8 - (index / 8)).ToString();
-
+        var letter = (char)('a' + index % 8);
+        return letter + (8 - index / 8).ToString();
     }
 
     internal static int BitToIndex(ulong bit)
@@ -129,7 +121,7 @@ internal class BoardHelper
             Piece.WhiteBishop or Piece.BlackBishop => "B",
             Piece.WhiteQueen or Piece.BlackQueen => "Q",
             Piece.WhiteKing or Piece.BlackKing => "K",
-            _ => throw new NotImplementedException(),
+            _ => throw new NotImplementedException()
         };
     }
 
@@ -140,8 +132,8 @@ internal class BoardHelper
 
     internal static bool AreHorizontalNeighbors(ulong bit1, ulong bit2)
     {
-        int pos1 = BitOperations.TrailingZeroCount(bit1);
-        int pos2 = BitOperations.TrailingZeroCount(bit2);
+        var pos1 = BitOperations.TrailingZeroCount(bit1);
+        var pos2 = BitOperations.TrailingZeroCount(bit2);
 
         // Test if same rank
         if (pos1 / 8 != pos2 / 8) return false;
@@ -163,6 +155,7 @@ internal class BoardHelper
             else
                 Console.Write('|');
         }
+
         Console.WriteLine();
     }
 
@@ -176,15 +169,13 @@ internal class BoardHelper
             var isCurrentMove = i == moves.Count - 2;
             if (isCurrentMove) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ResetColor();
-            Console.WriteLine($"{(i / 2) + 1}. {moves[i].ToSanNotation()} {moves[i + 1].ToSanNotation()}");
+            Console.WriteLine($"{i / 2 + 1}. {moves[i].ToSanNotation()} {moves[i + 1].ToSanNotation()}");
         }
+
         var isCurrentLastMove = moves.Count % 2 != 0;
         if (isCurrentLastMove) Console.ForegroundColor = ConsoleColor.Yellow;
         else Console.ResetColor();
-        if (moves.Count % 2 != 0)
-        {
-            Console.WriteLine($"{(moves.Count / 2) + 1}. {moves[^1].ToSanNotation()}");
-        }
+        if (moves.Count % 2 != 0) Console.WriteLine($"{moves.Count / 2 + 1}. {moves[^1].ToSanNotation()}");
         Console.ResetColor();
     }
 
@@ -202,9 +193,7 @@ internal class BoardHelper
             else
                 frequency[idx] = 1;
         }
+
         return frequency;
     }
-
-
-
 }

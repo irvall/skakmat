@@ -2,6 +2,18 @@ namespace skakmat.Chess;
 
 internal class Masks
 {
+    private const ulong WhiteKingTryCastleShort = 0xc000000000000000;
+
+
+    internal const ulong BlackKingShortGap = 0x60;
+    internal static ulong Edge = Rank1 | Rank8 | FileA | FileH;
+
+    internal static ulong WhiteKingShortGap = 0x6000000000000000;
+    internal static ulong WhiteKingLongGap = 0xe00000000000000;
+    private static readonly ulong WhiteKingTryCastleLong = 0x700000000000000;
+    internal static ulong BlackKingLongGap = 0xe;
+    private static readonly ulong BlackKingTryCastleShort = 0xc0;
+    internal static ulong BlackKingTryCastleLong = 0x7;
     internal static ulong FileA { get; } = 0x0101010101010101;
     internal static ulong FileB { get; } = 0x0202020202020202;
     internal static ulong FileC { get; } = 0x0404040404040404;
@@ -22,57 +34,65 @@ internal class Masks
     internal static ulong Corners { get; } = 0x8100000000000081;
     internal static ulong CornersAndCenter { get; } = 0x8100001818000081;
     internal static ulong CornersAndCenterAndAdjacent { get; } = 0xFF000018181800FF;
-    internal static ulong Edge = Rank1 | Rank8 | FileA | FileH;
 
-    internal static ulong WhiteKingShortGap = 0x6000000000000000;
-    internal static ulong WhiteKingLongGap = 0xe00000000000000;
-    private const ulong WhiteKingTryCastleShort = 0xc000000000000000;
-    private static readonly ulong WhiteKingTryCastleLong = 0x700000000000000;
+    internal static ulong QueenSideCastlePath(bool isWhite)
+    {
+        return isWhite ? WhiteKingLongGap : BlackKingLongGap;
+    }
 
+    internal static ulong KingSideCastlePath(bool isWhite)
+    {
+        return isWhite ? WhiteKingShortGap : BlackKingShortGap;
+    }
 
-    internal const ulong BlackKingShortGap = 0x60;
-    internal static ulong BlackKingLongGap = 0xe;
-    private static readonly ulong BlackKingTryCastleShort = 0xc0;
-    internal static ulong BlackKingTryCastleLong = 0x7;
+    internal static ulong KingAttemptsShortCastle(bool isWhite)
+    {
+        return isWhite ? WhiteKingTryCastleShort : BlackKingTryCastleShort;
+    }
 
-    internal static ulong QueenSideCastlePath(bool isWhite) =>
-        isWhite ? WhiteKingLongGap : BlackKingLongGap;
+    internal static ulong KingAttemptsLongCastle(bool isWhite)
+    {
+        return isWhite ? WhiteKingTryCastleLong : BlackKingTryCastleLong;
+    }
 
-    internal static ulong KingSideCastlePath(bool isWhite) =>
-        isWhite ? WhiteKingShortGap : BlackKingShortGap;
+    internal static ulong KingStartSquare(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.E1.AsBit() : BoardSquares.Squares.E8.AsBit();
+    }
 
-    internal static ulong KingAttemptsShortCastle(bool isWhite) =>
-        isWhite ? WhiteKingTryCastleShort : BlackKingTryCastleShort;
+    internal static ulong RookRightCorner(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.H1.AsBit() : BoardSquares.Squares.H8.AsBit();
+    }
 
-    internal static ulong KingAttemptsLongCastle(bool isWhite) =>
-        isWhite ? WhiteKingTryCastleLong : BlackKingTryCastleLong;
+    internal static ulong RookLeftCorner(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.A1.AsBit() : BoardSquares.Squares.A8.AsBit();
+    }
 
-    internal static ulong KingStartSquare(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.E1.AsBit() : BoardSquares.Squares.E8.AsBit();
+    internal static ulong RookShortCastlePosition(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.F1.AsBit() : BoardSquares.Squares.F8.AsBit();
+    }
 
-    internal static ulong RookRightCorner(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.H1.AsBit() : BoardSquares.Squares.H8.AsBit();
+    internal static ulong RookLongCastlePosition(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.D1.AsBit() : BoardSquares.Squares.D8.AsBit();
+    }
 
-    internal static ulong RookLeftCorner(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.A1.AsBit() : BoardSquares.Squares.A8.AsBit();
+    internal static ulong KingShortCastlePosition(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.G1.AsBit() : BoardSquares.Squares.G8.AsBit();
+    }
 
-    internal static ulong RookShortCastlePosition(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.F1.AsBit() : BoardSquares.Squares.F8.AsBit();
-
-    internal static ulong RookLongCastlePosition(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.D1.AsBit() : BoardSquares.Squares.D8.AsBit();
-
-    internal static ulong KingShortCastlePosition(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.G1.AsBit() : BoardSquares.Squares.G8.AsBit();
-
-    internal static ulong KingLongCastlePosition(bool isWhite) =>
-        isWhite ? BoardSquares.Squares.C1.AsBit() : BoardSquares.Squares.C8.AsBit();
-
+    internal static ulong KingLongCastlePosition(bool isWhite)
+    {
+        return isWhite ? BoardSquares.Squares.C1.AsBit() : BoardSquares.Squares.C8.AsBit();
+    }
 
 
     internal struct Boxes
     {
-
         internal static ulong A1G7 { get; } = 0x7f7f7f7f7f7f7f00;
         internal static ulong A2G8 { get; } = 0x7f7f7f7f7f7f7f;
         internal static ulong B1H7 { get; } = 0xfefefefefefefe00;
@@ -87,6 +107,4 @@ internal class Masks
 
         internal static ulong B3H8 = 0xfefefefefefe;
     }
-
-
 }

@@ -1,5 +1,3 @@
-
-
 using skakmat.Game;
 using skakmat.Helpers;
 
@@ -7,7 +5,6 @@ namespace skakmat.Extensions;
 
 internal static class PositionExtensions
 {
-
     internal static int GetPieceIndexAt(this Position position, ulong square)
     {
         if (position.Bitboards[Piece.WhitePawn].Contains(square)) return Piece.WhitePawn;
@@ -50,6 +47,4 @@ internal static class PositionExtensions
                 yield return (type, idx, bit);
         }
     }
-
-
 }

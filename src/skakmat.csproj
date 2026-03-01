@@ -9,14 +9,14 @@
         <RootNamespace>skakmat</RootNamespace>
     </PropertyGroup>
 
-  <ItemGroup>
-     <PackageReference Include="Raylib-cs" Version="7.0.2" />
-    <PackageReference Include="System.CommandLine" Version="3.0.0-preview.1.26104.118" />
-      <Content Include="../assets/**/*">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Link>assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      </Content>
+    <ItemGroup>
+        <PackageReference Include="Raylib-cs" Version="7.0.2"/>
+        <PackageReference Include="System.CommandLine" Version="3.0.0-preview.1.26104.118"/>
+        <Content Include="../assets/**/*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
+        </Content>
 
-  </ItemGroup>
+    </ItemGroup>
 
 </Project>

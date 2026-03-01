@@ -1,6 +1,9 @@
 namespace skakmat.Game;
+
 internal static class Constants
 {
+    internal const int SquareCount = 8;
+
     internal static readonly Dictionary<int, (int, int)> PieceToSpriteCoords = new()
     {
         { Piece.WhitePawn, (5, 0) },
@@ -14,9 +17,8 @@ internal static class Constants
         { Piece.BlackBishop, (2, 1) },
         { Piece.BlackRook, (4, 1) },
         { Piece.BlackQueen, (1, 1) },
-        { Piece.BlackKing, (0, 1) },
+        { Piece.BlackKing, (0, 1) }
     };
-    internal const int SquareCount = 8;
 
     internal static class FenPositions
     {
@@ -33,5 +35,4 @@ internal static class Constants
         internal const string PinnedMate = "rnbqkb1r/pppppp1p/8/8/4Q1N1/8/PPPPPPPP/RNB1KB1R w KQkq - 0 1";
         internal const string Stalemate = "k7/8/1K6/8/1B6/8/8/8 w - - 0 1";
     }
-
 }

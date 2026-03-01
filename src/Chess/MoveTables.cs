@@ -5,7 +5,7 @@ using skakmat.Helpers;
 
 namespace skakmat.Chess;
 
-internal partial class MoveTables
+internal class MoveTables
 {
     internal const int RankOffset = 8;
     private const int fileOffset = 1;
@@ -37,30 +37,31 @@ internal partial class MoveTables
     {
         var attacks = 0UL;
         var lowerY = square % 8;
-        var upperY = square + (64 - ((square / 8 + 1) * 8));
+        var upperY = square + (64 - (square / 8 + 1) * 8);
         var lowerX = square - lowerY;
         var upperX = lowerX + 8;
-        for (int s = square + fileOffset; s < upperX; s += fileOffset)
-        {
-            var bit = 1UL << s;
-            attacks |= bit;
-            if (blockers.Contains(bit)) break;
-        }
-        for (int s = square - fileOffset; s >= lowerX; s -= fileOffset)
+        for (var s = square + fileOffset; s < upperX; s += fileOffset)
         {
             var bit = 1UL << s;
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
 
-        for (int s = square + RankOffset; s <= upperY; s += RankOffset)
+        for (var s = square - fileOffset; s >= lowerX; s -= fileOffset)
         {
             var bit = 1UL << s;
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
 
-        for (int s = square - RankOffset; s >= lowerY; s -= RankOffset)
+        for (var s = square + RankOffset; s <= upperY; s += RankOffset)
+        {
+            var bit = 1UL << s;
+            attacks |= bit;
+            if (blockers.Contains(bit)) break;
+        }
+
+        for (var s = square - RankOffset; s >= lowerY; s -= RankOffset)
         {
             var bit = 1UL << s;
             attacks |= bit;
@@ -78,25 +79,36 @@ internal partial class MoveTables
 
         int currentRank, currentFile;
 
-        for (currentRank = targetRank + 1, currentFile = targetFile + 1; currentRank < Constants.SquareCount && currentFile < Constants.SquareCount; currentRank++, currentFile++)
+        for (currentRank = targetRank + 1, currentFile = targetFile + 1;
+             currentRank < Constants.SquareCount && currentFile < Constants.SquareCount;
+             currentRank++, currentFile++)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
-        for (currentRank = targetRank + 1, currentFile = targetFile - 1; currentRank < Constants.SquareCount && currentFile >= 0; currentRank++, currentFile--)
+
+        for (currentRank = targetRank + 1, currentFile = targetFile - 1;
+             currentRank < Constants.SquareCount && currentFile >= 0;
+             currentRank++, currentFile--)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
-        for (currentRank = targetRank - 1, currentFile = targetFile + 1; currentRank >= 0 && currentFile < Constants.SquareCount; currentRank--, currentFile++)
+
+        for (currentRank = targetRank - 1, currentFile = targetFile + 1;
+             currentRank >= 0 && currentFile < Constants.SquareCount;
+             currentRank--, currentFile++)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
-        for (currentRank = targetRank - 1, currentFile = targetFile - 1; currentRank >= 0 && currentFile >= 0; currentRank--, currentFile--)
+
+        for (currentRank = targetRank - 1, currentFile = targetFile - 1;
+             currentRank >= 0 && currentFile >= 0;
+             currentRank--, currentFile--)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
@@ -111,7 +123,8 @@ internal partial class MoveTables
     {
         var boardMasksType = typeof(Masks);
 
-        foreach (var property in boardMasksType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic))
+        foreach (var property in boardMasksType.GetProperties(BindingFlags.Public | BindingFlags.Static |
+                                                              BindingFlags.GetProperty | BindingFlags.NonPublic))
         {
             var propertyName = property.Name;
             var propertyValue = (ulong?)property.GetValue(null);
@@ -125,11 +138,11 @@ internal partial class MoveTables
     {
         var index = 0;
         for (var i = 8; i >= 1; i--)
-            for (var c = 'a'; c <= 'h'; c++)
-            {
-                var boardSquare = $"{c}{i}";
-                boardSquareToIndex.Add(boardSquare, index++);
-            }
+        for (var c = 'a'; c <= 'h'; c++)
+        {
+            var boardSquare = $"{c}{i}";
+            boardSquareToIndex.Add(boardSquare, index++);
+        }
 
         foreach (var kvp in boardSquareToIndex)
             indexToBoardSquare[kvp.Value] = kvp.Key;
@@ -182,7 +195,6 @@ internal partial class MoveTables
                 KnightMoves[idx] |= bit << (RankOffset * 2 - fileOffset);
             if (Masks.Boxes.A3G8.Contains(bit))
                 KnightMoves[idx] |= bit << (RankOffset * 2 + fileOffset);
-
         }
     }
 
@@ -231,16 +243,17 @@ internal partial class MoveTables
     internal void PrintBoard(ulong bitBoard, string? optional = null, int? optIndex = null)
     {
         if (optional != null && optIndex != null)
-        {
-            RaylibHelper.WriteColor(RaylibHelper.BoldText(optional + " " + indexToBoardSquare[optIndex.Value]), ConsoleColor.Green);
-        }
+            RaylibHelper.WriteColor(RaylibHelper.BoldText(optional + " " + indexToBoardSquare[optIndex.Value]),
+                ConsoleColor.Green);
 
         foreach (var (i, bit) in BoardHelper.EnumerateSquares())
         {
             if (i % 8 == 0) Console.Write($"{(i > 0 ? Environment.NewLine : string.Empty)}");
             var theBit = bit & bitBoard;
             if (theBit != 0)
+            {
                 Console.Write(RaylibHelper.BoldText(indexToBoardSquare[i].PadLeft(3)));
+            }
             else
             {
                 if (optIndex != null && i == optIndex)
@@ -252,21 +265,25 @@ internal partial class MoveTables
         Console.WriteLine(Environment.NewLine);
     }
 
-    internal ulong GetPieceAttacks(int pieceIndex, int index, Position position) => pieceIndex switch
+    internal ulong GetPieceAttacks(int pieceIndex, int index, Position position)
     {
-        Piece.WhitePawn => WhitePawnAttacks[index],
-        Piece.BlackPawn => BlackPawnAttacks[index],
-        Piece.WhiteKnight => KnightMoves[index].Exclude(position.WhitePieces),
-        Piece.BlackKnight => KnightMoves[index].Exclude(position.BlackPieces),
-        Piece.WhiteBishop => BishopAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
-        Piece.BlackBishop => BishopAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
-        Piece.WhiteRook => RookAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
-        Piece.BlackRook => RookAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
-        Piece.WhiteQueen => GetPieceAttacks(Piece.WhiteRook, index, position) | GetPieceAttacks(Piece.WhiteBishop, index, position),
-        Piece.BlackQueen => GetPieceAttacks(Piece.BlackRook, index, position) | GetPieceAttacks(Piece.BlackBishop, index, position),
-        Piece.WhiteKing => KingMoves[index].Exclude(position.WhitePieces),
-        Piece.BlackKing => KingMoves[index].Exclude(position.BlackPieces),
-        _ => 0UL
-    };
-
+        return pieceIndex switch
+        {
+            Piece.WhitePawn => WhitePawnAttacks[index],
+            Piece.BlackPawn => BlackPawnAttacks[index],
+            Piece.WhiteKnight => KnightMoves[index].Exclude(position.WhitePieces),
+            Piece.BlackKnight => KnightMoves[index].Exclude(position.BlackPieces),
+            Piece.WhiteBishop => BishopAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
+            Piece.BlackBishop => BishopAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
+            Piece.WhiteRook => RookAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
+            Piece.BlackRook => RookAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
+            Piece.WhiteQueen => GetPieceAttacks(Piece.WhiteRook, index, position) |
+                                GetPieceAttacks(Piece.WhiteBishop, index, position),
+            Piece.BlackQueen => GetPieceAttacks(Piece.BlackRook, index, position) |
+                                GetPieceAttacks(Piece.BlackBishop, index, position),
+            Piece.WhiteKing => KingMoves[index].Exclude(position.WhitePieces),
+            Piece.BlackKing => KingMoves[index].Exclude(position.BlackPieces),
+            _ => 0UL
+        };
+    }
 }

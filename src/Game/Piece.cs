@@ -1,5 +1,6 @@
 namespace skakmat.Game;
-class Piece
+
+internal class Piece
 {
     internal const int EmptySquare = -1;
     internal const int WhitePawn = 0;
@@ -20,74 +21,86 @@ class Piece
         return pieceIndex >= WhitePawn && pieceIndex < BlackPawn;
     }
 
-    internal static int GetPieceIndex(PieceType type, Position position) => GetPieceIndex(type, position.WhiteToPlay);
-
-    internal static int GetPieceIndex(PieceType type, bool isWhite) => type switch
+    internal static int GetPieceIndex(PieceType type, Position position)
     {
-        PieceType.Pawn => isWhite ? WhitePawn : BlackPawn,
-        PieceType.Rook => isWhite ? WhiteRook : BlackRook,
-        PieceType.Knight => isWhite ? WhiteKnight : BlackKnight,
-        PieceType.Bishop => isWhite ? WhiteBishop : BlackBishop,
-        PieceType.Queen => isWhite ? WhiteQueen : BlackQueen,
-        PieceType.King => isWhite ? WhiteKing : BlackKing,
-        _ => throw new NotImplementedException(),
-    };
+        return GetPieceIndex(type, position.WhiteToPlay);
+    }
 
-    internal static PieceType GetTypeFromIndex(int pieceIndex) => pieceIndex switch
+    internal static int GetPieceIndex(PieceType type, bool isWhite)
     {
-        WhitePawn or BlackPawn => PieceType.Pawn,
-        WhiteRook or BlackRook => PieceType.Rook,
-        WhiteKnight or BlackKnight => PieceType.Knight,
-        WhiteBishop or BlackBishop => PieceType.Bishop,
-        WhiteQueen or BlackQueen => PieceType.Queen,
-        WhiteKing or BlackKing => PieceType.King,
-        EmptySquare => throw new ArgumentException("Empty square has no piece type"),
-        _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
-    };
+        return type switch
+        {
+            PieceType.Pawn => isWhite ? WhitePawn : BlackPawn,
+            PieceType.Rook => isWhite ? WhiteRook : BlackRook,
+            PieceType.Knight => isWhite ? WhiteKnight : BlackKnight,
+            PieceType.Bishop => isWhite ? WhiteBishop : BlackBishop,
+            PieceType.Queen => isWhite ? WhiteQueen : BlackQueen,
+            PieceType.King => isWhite ? WhiteKing : BlackKing,
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    internal static PieceType GetTypeFromIndex(int pieceIndex)
+    {
+        return pieceIndex switch
+        {
+            WhitePawn or BlackPawn => PieceType.Pawn,
+            WhiteRook or BlackRook => PieceType.Rook,
+            WhiteKnight or BlackKnight => PieceType.Knight,
+            WhiteBishop or BlackBishop => PieceType.Bishop,
+            WhiteQueen or BlackQueen => PieceType.Queen,
+            WhiteKing or BlackKing => PieceType.King,
+            EmptySquare => throw new ArgumentException("Empty square has no piece type"),
+            _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
+        };
+    }
 
     internal static bool IsCorrectColor(int pieceIndex, bool isWhite)
     {
-        return isWhite ?
-            pieceIndex is >= WhitePawn and <= WhiteKing
+        return isWhite
+            ? pieceIndex is >= WhitePawn and <= WhiteKing
             : pieceIndex is >= BlackPawn and <= BlackKing;
     }
 
-    internal static char PieceIndexAscii(int pieceIndex) => pieceIndex switch
+    internal static char PieceIndexAscii(int pieceIndex)
     {
-        WhitePawn => 'P',
-        BlackPawn => 'p',
-        WhiteRook => 'R',
-        BlackRook => 'r',
-        WhiteKnight => 'N',
-        BlackKnight => 'n',
-        WhiteBishop => 'B',
-        BlackBishop => 'b',
-        WhiteQueen => 'Q',
-        BlackQueen => 'q',
-        WhiteKing => 'K',
-        BlackKing => 'k',
-        EmptySquare => '.',
-        _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
-    };
+        return pieceIndex switch
+        {
+            WhitePawn => 'P',
+            BlackPawn => 'p',
+            WhiteRook => 'R',
+            BlackRook => 'r',
+            WhiteKnight => 'N',
+            BlackKnight => 'n',
+            WhiteBishop => 'B',
+            BlackBishop => 'b',
+            WhiteQueen => 'Q',
+            BlackQueen => 'q',
+            WhiteKing => 'K',
+            BlackKing => 'k',
+            EmptySquare => '.',
+            _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
+        };
+    }
 
-    internal static char PieceIndexUnicode(int pieceIndex) => pieceIndex switch
+    internal static char PieceIndexUnicode(int pieceIndex)
     {
-        WhitePawn => '♟',
-        BlackPawn => '♙',
-        WhiteRook => '♜',
-        BlackRook => '♖',
-        WhiteKnight => '♞',
-        BlackKnight => '♘',
-        WhiteBishop => '♝',
-        BlackBishop => '♗',
-        WhiteQueen => '♛',
-        BlackQueen => '♕',
-        WhiteKing => '♚',
-        BlackKing => '♔',
-        EmptySquare => '.',
-        _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
-    };
-
-
-
+        return pieceIndex switch
+        {
+            WhitePawn => '♟',
+            BlackPawn => '♙',
+            WhiteRook => '♜',
+            BlackRook => '♖',
+            WhiteKnight => '♞',
+            BlackKnight => '♘',
+            WhiteBishop => '♝',
+            BlackBishop => '♗',
+            WhiteQueen => '♛',
+            BlackQueen => '♕',
+            WhiteKing => '♚',
+            BlackKing => '♔',
+            EmptySquare => '.',
+            _ => throw new ArgumentException("Unknown pieceIndex: " + pieceIndex)
+        };
+    }
 }

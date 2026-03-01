@@ -35,9 +35,6 @@ internal abstract class RaylibHelper
         return $"\u001b[1m{text}\u001b[0m";
     }
 
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void TraceLogDelegate(int logType, string text, nint args);
-
     internal static int GetWindowHeightDynamically()
     {
         Raylib.InitWindow(0, 0, "Temporary 0x0 window to get screen size");
@@ -66,4 +63,7 @@ internal abstract class RaylibHelper
         var path = SafeGetPath("sounds", fileName);
         return Raylib.LoadSound(path);
     }
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void TraceLogDelegate(int logType, string text, nint args);
 }

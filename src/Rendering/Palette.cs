@@ -1,4 +1,5 @@
-﻿using Color = Raylib_cs.Color;
+﻿using System.Globalization;
+using Color = Raylib_cs.Color;
 
 namespace skakmat.Rendering;
 
@@ -32,9 +33,9 @@ internal abstract class Palette
         if (hex.StartsWith('#'))
             hex = hex[1..];
 
-        byte r = byte.Parse(hex[..2], System.Globalization.NumberStyles.HexNumber);
-        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
-        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        var r = byte.Parse(hex[..2], NumberStyles.HexNumber);
+        var g = byte.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
+        var b = byte.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
 
         return new Color(r, g, b, (byte)255);
     }
@@ -42,21 +43,19 @@ internal abstract class Palette
     internal static Color WhiteVersion(Color c)
     {
         // Find the maximum of the RGB channels
-        byte max = Math.Max(c.R, Math.Max(c.G, c.B));
+        var max = Math.Max(c.R, Math.Max(c.G, c.B));
 
         if (max == 0)
-        {
             // Avoid divide-by-zero: if it's black, return white
             return new Color((byte)255, (byte)255, (byte)255, c.A);
-        }
 
         // Scale factor to push the max channel up to 255
-        float scale = 255f / max;
+        var scale = 255f / max;
 
         // Scale each channel evenly
-        byte r = (byte)Math.Min(255, (int)(c.R * scale));
-        byte g = (byte)Math.Min(255, (int)(c.G * scale));
-        byte b = (byte)Math.Min(255, (int)(c.B * scale));
+        var r = (byte)Math.Min(255, (int)(c.R * scale));
+        var g = (byte)Math.Min(255, (int)(c.G * scale));
+        var b = (byte)Math.Min(255, (int)(c.B * scale));
 
         return new Color(r, g, b, c.A);
     }
@@ -73,5 +72,4 @@ internal abstract class Palette
         public static Color TiffanyBlue = FromHex("84DCC6");
         public static Color UltraViolet = FromHex("4B4E6D");
     }
-
 }

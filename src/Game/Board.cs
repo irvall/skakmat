@@ -6,11 +6,11 @@ namespace skakmat.Game;
 
 internal class Board
 {
-    internal Position CreatePosition() => new(bbs, whiteToPlay, castlingRights, lastMovePlayed);
-    private bool whiteToPlay;
     private readonly ulong[] bbs;
     private Castling.Rights castlingRights;
     private Move? lastMovePlayed;
+
+    private bool whiteToPlay;
 
     public Board()
     {
@@ -26,6 +26,11 @@ internal class Board
         whiteToPlay = position.WhiteToPlay;
         castlingRights = position.CastlingRights;
         lastMovePlayed = position.LastMovePlayed;
+    }
+
+    internal Position CreatePosition()
+    {
+        return new Position(bbs, whiteToPlay, castlingRights, lastMovePlayed);
     }
 
     internal int GetPieceIndexAt(ulong square)
@@ -97,13 +102,9 @@ internal class Board
     private void RemoveCastlingRight(Castling.Type type)
     {
         if (type == Castling.Type.KingSide)
-        {
             castlingRights &= ~(whiteToPlay ? Castling.Rights.WhiteKingSide : Castling.Rights.BlackKingSide);
-        }
         else
-        {
             castlingRights &= ~(whiteToPlay ? Castling.Rights.WhiteQueenSide : Castling.Rights.BlackQueenSide);
-        }
     }
 
     private int GetPieceIndex(PieceType type)
@@ -120,6 +121,7 @@ internal class Board
             if (move.OriginBit.Contains(Masks.RookLeftCorner(whiteToPlay)))
                 RemoveCastlingRight(Castling.Type.QueenSide);
         }
+
         if (move.PieceIndex == GetPieceIndex(PieceType.King))
         {
             var whiteCastlingRights = Castling.Rights.WhiteKingSide | Castling.Rights.WhiteQueenSide;
@@ -149,5 +151,4 @@ internal class Board
         bbs[move.PieceIndex] ^= move.TargetBit;
         bbs[move.PieceIndex] |= move.OriginBit;
     }
-
 }

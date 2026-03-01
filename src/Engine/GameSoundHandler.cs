@@ -1,5 +1,8 @@
+using skakmat.Game;
+
 namespace skakmat.Engine;
-public class GameSoundHandler()
+
+public class GameSoundHandler
 {
     private readonly SoundController soundController = new();
 
@@ -8,7 +11,7 @@ public class GameSoundHandler()
         switch (gameEvent.Type)
         {
             case GameEventType.MovePlayed:
-                if (gameEvent.PieceType == Game.PieceType.Knight)
+                if (gameEvent.PieceType == PieceType.Knight)
                     soundController.PlayHorseSound();
                 else soundController.PlayMoveSound();
                 break;
