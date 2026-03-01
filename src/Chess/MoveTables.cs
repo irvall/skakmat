@@ -78,19 +78,19 @@ internal partial class MoveTables
 
         int currentRank, currentFile;
 
-        for (currentRank = targetRank + 1, currentFile = targetFile + 1; currentRank < squareNo && currentFile < squareNo; currentRank++, currentFile++)
+        for (currentRank = targetRank + 1, currentFile = targetFile + 1; currentRank < square && currentFile < square; currentRank++, currentFile++)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
-        for (currentRank = targetRank + 1, currentFile = targetFile - 1; currentRank < squareNo && currentFile >= 0; currentRank++, currentFile--)
+        for (currentRank = targetRank + 1, currentFile = targetFile - 1; currentRank < square && currentFile >= 0; currentRank++, currentFile--)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
-        for (currentRank = targetRank - 1, currentFile = targetFile + 1; currentRank >= 0 && currentFile < squareNo; currentRank--, currentFile++)
+        for (currentRank = targetRank - 1, currentFile = targetFile + 1; currentRank >= 0 && currentFile < square; currentRank--, currentFile++)
         {
             var bit = 1UL << (currentRank * 8 + currentFile);
             attacks |= bit;
