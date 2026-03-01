@@ -9,8 +9,8 @@ namespace skakmat.Rendering;
 internal class BoardRenderer
 {
     private readonly int squareSize;
-    private Texture2D spriteTexture;
     private readonly (int width, int height) windowSize;
+    private Texture2D spriteTexture;
     private bool useStandardOrientation;
 
     internal BoardRenderer(int windowHeight, int squareSize, bool useStandardOrientation)
@@ -35,63 +35,59 @@ internal class BoardRenderer
         var whiteTiles = Palette.WhiteVersion(primaryTileColor);
 
         for (var i = 0; i < Constants.SquareCount; i++)
+        for (var j = 0; j < Constants.SquareCount; j++)
         {
-            for (var j = 0; j < Constants.SquareCount; j++)
-            {
-                var draw = (i + j) % 2 != 0;
-                var tileColor = draw ? primaryTileColor : whiteTiles;
-                var textColor = !draw ? primaryTileColor : whiteTiles;
-                DrawTile(j, i, tileColor);
+            var draw = (i + j) % 2 != 0;
+            var tileColor = draw ? primaryTileColor : whiteTiles;
+            var textColor = !draw ? primaryTileColor : whiteTiles;
+            DrawTile(j, i, tileColor);
 
-                var digit = useStandardOrientation ? Constants.SquareCount - i : i + 1;
+            var digit = useStandardOrientation ? Constants.SquareCount - i : i + 1;
 
-                int fontSize = 10;
-                int padding = 2;
+            var fontSize = 10;
+            var padding = 2;
 
-                int posX = j * squareSize + squareSize - fontSize + padding;
-                int posY = i * squareSize + padding;
-                Raylib.DrawText(digit.ToString(), posX, posY, fontSize, textColor);
+            var posX = j * squareSize + squareSize - fontSize + padding;
+            var posY = i * squareSize + padding;
+            Raylib.DrawText(digit.ToString(), posX, posY, fontSize, textColor);
 
-                char letter = useStandardOrientation
-                    ? (char)('A' + j)
-                    : (char)('H' - j);
+            var letter = useStandardOrientation
+                ? (char)('A' + j)
+                : (char)('H' - j);
 
-                int letterPosX = j * squareSize + padding;
-                int letterPosY = (i + 1) * squareSize - fontSize - padding;
-                Raylib.DrawText(letter.ToString(), letterPosX, letterPosY, fontSize, textColor);
-            }
+            var letterPosX = j * squareSize + padding;
+            var letterPosY = (i + 1) * squareSize - fontSize - padding;
+            Raylib.DrawText(letter.ToString(), letterPosX, letterPosY, fontSize, textColor);
         }
     }
 
     internal void DrawPieces(Position position)
     {
         for (var pieceIndex = 0; pieceIndex < position.Bitboards.Length; pieceIndex++)
+        for (var i = 0; i < 64; i++)
         {
-            for (var i = 0; i < 64; i++)
+            var bit = 1UL << i;
+            if (!position.Bitboards[pieceIndex].Contains(bit))
+                continue;
+
+            var row = i / 8;
+            var col = i % 8;
+
+            if (!useStandardOrientation)
             {
-                var bit = 1UL << i;
-                if (!position.Bitboards[pieceIndex].Contains(bit))
-                    continue;
-
-                int row = i / 8;
-                int col = i % 8;
-
-                if (!useStandardOrientation)
-                {
-                    row = 7 - row;
-                    col = 7 - col;
-                }
-
-                DrawPiece(row, col, pieceIndex);
+                row = 7 - row;
+                col = 7 - col;
             }
+
+            DrawPiece(row, col, pieceIndex);
         }
     }
 
 
     private void DrawPiece(int row, int col, int pieceIndex)
     {
-        int cellWidth = spriteTexture.Width / 6;
-        int cellHeight = spriteTexture.Height / 2;
+        var cellWidth = spriteTexture.Width / 6;
+        var cellHeight = spriteTexture.Height / 2;
 
         if (!Constants.PieceToSpriteCoords.TryGetValue(pieceIndex, out var tup))
             throw new Exception("Piece type not supported " + pieceIndex);
@@ -135,6 +131,7 @@ internal class BoardRenderer
                     col = 7 - col;
                     row = 7 - row;
                 }
+
                 DrawTile(col, row, color, 0.5f);
             }
         }

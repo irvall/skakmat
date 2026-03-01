@@ -1,7 +1,7 @@
 namespace skakmat.Extensions;
+
 internal static class BitExtensions
 {
-
     internal static bool Contains(this ulong bitboard, ulong targetBit)
     {
         return (bitboard & targetBit) != 0;
@@ -16,5 +16,4 @@ internal static class BitExtensions
     {
         return (bitboard & targetBits) == targetBits;
     }
-
 }

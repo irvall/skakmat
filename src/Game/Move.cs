@@ -3,15 +3,17 @@ using skakmat.Chess;
 using skakmat.Extensions;
 
 namespace skakmat.Game;
+
 internal class Move(int pieceIndex, ulong originBit, ulong targetBit)
 {
-    internal readonly int PieceIndex = pieceIndex;
     internal readonly ulong OriginBit = originBit;
+    internal readonly int PieceIndex = pieceIndex;
     internal readonly ulong TargetBit = targetBit;
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        return obj is Move moveObj && PieceIndex == moveObj.PieceIndex && OriginBit == moveObj.OriginBit && TargetBit == moveObj.TargetBit;
+        return obj is Move moveObj && PieceIndex == moveObj.PieceIndex && OriginBit == moveObj.OriginBit &&
+               TargetBit == moveObj.TargetBit;
     }
 
     public override int GetHashCode()
@@ -41,7 +43,7 @@ internal class Move(int pieceIndex, ulong originBit, ulong targetBit)
 
     internal Move TryCreateCastleMove(bool whiteToPlay)
     {
-        Castling.Type type = Castling.Type.None;
+        var type = Castling.Type.None;
         if (this.IsShortCastle())
             type = Castling.Type.KingSide;
         else if (this.IsLongCastle())
@@ -52,5 +54,4 @@ internal class Move(int pieceIndex, ulong originBit, ulong targetBit)
         var kingMove = Castling.CreateKingMove(type, whiteToPlay);
         return new CastleMove(kingMove, rookMove);
     }
-
 }

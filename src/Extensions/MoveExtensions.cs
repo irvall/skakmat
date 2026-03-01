@@ -3,15 +3,16 @@ using skakmat.Game;
 using skakmat.Helpers;
 
 namespace skakmat.Extensions;
+
 internal static class MoveExtensions
 {
-
     internal static string ToLanNotation(this Move move)
     {
         var fromIndex = BoardHelper.BitToIndex(move.OriginBit);
         var toIndex = BoardHelper.BitToIndex(move.TargetBit);
         var pieceIndexString = BoardHelper.PieceIndexToString(move.PieceIndex);
-        return $"{pieceIndexString}{BoardHelper.IndexToSquareString(fromIndex)}{BoardHelper.IndexToSquareString(toIndex)}";
+        return
+            $"{pieceIndexString}{BoardHelper.IndexToSquareString(fromIndex)}{BoardHelper.IndexToSquareString(toIndex)}";
     }
 
     internal static string ToSanNotation(this Move move)
@@ -24,21 +25,18 @@ internal static class MoveExtensions
     internal static ulong ToBitboard(this List<Move> moves)
     {
         var bitboard = 0UL;
-        moves.ForEach(move =>
-        {
-            bitboard |= move.TargetBit;
-        });
+        moves.ForEach(move => { bitboard |= move.TargetBit; });
         return bitboard;
     }
 
     internal static bool IsShortCastle(this Move move)
     {
         var whiteCastle = move.PieceIndex == Piece.WhiteKing
-            && move.OriginBit == Masks.KingStartSquare(isWhite: true)
-            && Masks.KingAttemptsShortCastle(isWhite: true).Contains(move.TargetBit);
+                          && move.OriginBit == Masks.KingStartSquare(true)
+                          && Masks.KingAttemptsShortCastle(true).Contains(move.TargetBit);
         var blackCastle = move.PieceIndex == Piece.BlackKing
-            && move.OriginBit == Masks.KingStartSquare(isWhite: false)
-            && Masks.KingAttemptsShortCastle(isWhite: false).Contains(move.TargetBit);
+                          && move.OriginBit == Masks.KingStartSquare(false)
+                          && Masks.KingAttemptsShortCastle(false).Contains(move.TargetBit);
         return whiteCastle || blackCastle;
     }
 
@@ -50,12 +48,11 @@ internal static class MoveExtensions
     internal static bool IsLongCastle(this Move move)
     {
         var whiteCastle = move.PieceIndex == Piece.WhiteKing
-            && move.OriginBit == Masks.KingStartSquare(isWhite: true)
-            && Masks.KingAttemptsLongCastle(isWhite: true).Contains(move.TargetBit);
+                          && move.OriginBit == Masks.KingStartSquare(true)
+                          && Masks.KingAttemptsLongCastle(true).Contains(move.TargetBit);
         var blackCastle = move.PieceIndex == Piece.BlackKing
-            && move.OriginBit == Masks.KingStartSquare(isWhite: false)
-            && Masks.KingAttemptsLongCastle(isWhite: false).Contains(move.TargetBit);
+                          && move.OriginBit == Masks.KingStartSquare(false)
+                          && Masks.KingAttemptsLongCastle(false).Contains(move.TargetBit);
         return whiteCastle || blackCastle;
     }
-
 }

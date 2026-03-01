@@ -1,14 +1,14 @@
 using Raylib_cs;
 using skakmat.Helpers;
 
-class SoundController
+internal class SoundController
 {
-
-    private Sound moveSound;
+    private Sound captureSound;
+    private Sound checkmateSound;
     private Sound checkSound;
     private Sound horseSound;
-    private Sound checkmateSound;
-    private Sound captureSound;
+
+    private Sound moveSound;
     private Sound stalemateSound;
 
     public SoundController()

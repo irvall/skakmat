@@ -1,8 +1,9 @@
 using skakmat.Helpers;
+
 namespace skakmat.Game;
+
 public class Evaluation
 {
-
     private static readonly Dictionary<PieceType, float> Weights = new()
     {
         { PieceType.King, 200 },
@@ -28,7 +29,7 @@ public class Evaluation
             else
                 blackSide += count * weight;
         }
+
         return whiteSide - blackSide;
     }
-
 }

@@ -1,28 +1,21 @@
 using Raylib_cs;
-using skakmat.Game;
-using skakmat.Rendering;
-using skakmat.Helpers;
 using skakmat.Extensions;
+using skakmat.Game;
+using skakmat.Helpers;
+using skakmat.Rendering;
 
 namespace skakmat.Engine;
 
 internal class GameEngine
 {
-    private readonly BoardRenderer renderer;
-    private readonly InputHandler inputHandler;
-    private readonly GameSoundHandler soundHandler;
-    private readonly Random random = new();
-    private readonly int sideLength;
     private readonly GameController gameController;
+    private readonly InputHandler inputHandler;
     private readonly Opponent opponent = Opponent.ComputerIsWhite;
+    private readonly Random random = new();
+    private readonly BoardRenderer renderer;
+    private readonly int sideLength;
+    private readonly GameSoundHandler soundHandler;
     private bool useStandardOrientation;
-
-    enum Opponent
-    {
-        None,
-        ComputerIsWhite,
-        ComputerIsBlack
-    }
 
     public GameEngine()
     {
@@ -77,21 +70,16 @@ internal class GameEngine
             useStandardOrientation = !useStandardOrientation;
             renderer.UpdateOrientation(useStandardOrientation);
         }
-        if (InputHandler.IsLeftArrowPressed)
-        {
-            gameController.StepBack();
-        }
-        if (InputHandler.IsRightArrowPressed)
-        {
-            gameController.StepForward();
-        }
+
+        if (InputHandler.IsLeftArrowPressed) gameController.StepBack();
+        if (InputHandler.IsRightArrowPressed) gameController.StepForward();
 
         if (!InputHandler.IsLeftMouseButtonPressed || !gameController.AtMostRecentPosition()) return;
 
         var mousePos = inputHandler.GetMouseGridPosition();
         if (!InputHandler.IsMouseOnBoard(mousePos)) return;
 
-        int squareIndex = BoardHelper.IndexUnderMouse(mousePos, useStandardOrientation);
+        var squareIndex = BoardHelper.IndexUnderMouse(mousePos, useStandardOrientation);
 
         if (gameController.SelectedPiece.HasValue)
         {
@@ -100,13 +88,11 @@ internal class GameEngine
             var targetBit = 1UL << squareIndex;
             var moveAttempt = new Move(selection.PieceIndex, originBit, targetBit);
 
-            if (gameController.IsValidMove(moveAttempt))
-            {
-                gameController.MakeMove(moveAttempt);
-            }
+            if (gameController.IsValidMove(moveAttempt)) gameController.MakeMove(moveAttempt);
 
             gameController.ClearSelection();
         }
+
         gameController.SelectPiece(squareIndex);
     }
 
@@ -135,5 +121,12 @@ internal class GameEngine
 
         renderer.DrawPieces(position);
         Raylib.EndDrawing();
+    }
+
+    private enum Opponent
+    {
+        None,
+        ComputerIsWhite,
+        ComputerIsBlack
     }
 }

@@ -1,9 +1,9 @@
-
 using skakmat.Chess;
 using skakmat.Extensions;
 using skakmat.Helpers;
 
 namespace skakmat.Game;
+
 internal class MoveGenerator(MoveTables moveTables, Board board)
 {
     internal ulong GetLegalPawnMoves(int index, Position position)
@@ -16,9 +16,7 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         var enemyPieces = position.GetEnemyPieces();
         attackBits &= enemyPieces;
         if (startRow.Contains(1UL << index) && firstMoveBlokingRow.Contains(moveBits & position.AllPieces))
-        {
             return attackBits;
-        }
         return moveBits.Exclude(position.AllPieces) | attackBits;
     }
 
@@ -34,8 +32,8 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
     private bool IsPathSafe(Castling.Type castleType, Position position)
     {
         var path = castleType == Castling.Type.KingSide
-        ? Masks.KingSideCastlePath(position.WhiteToPlay)
-        : Masks.QueenSideCastlePath(position.WhiteToPlay);
+            ? Masks.KingSideCastlePath(position.WhiteToPlay)
+            : Masks.QueenSideCastlePath(position.WhiteToPlay);
 
         var enemyControl = SquaresUnderControl(position, !position.WhiteToPlay);
         return !path.Contains(enemyControl);
@@ -58,33 +56,25 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         return move.TryCreateCastleMove(position.WhiteToPlay);
     }
 
-    bool IsMoveValid(Move move)
+    private bool IsMoveValid(Move move)
     {
         var valid = false;
         var possibleTargetType = board.GetPieceIndexAt(move.TargetBit);
         board.ExecuteMove(move);
-        if (!IsKingUnderAttack())
-        {
-            valid = true;
-        }
+        if (!IsKingUnderAttack()) valid = true;
         board.UndoMove(move, possibleTargetType);
         return valid;
     }
 
     private (bool isLegal, Move) GetLegalMove(Move move, ulong pseudoLegalMoves, Position position)
     {
-        if (pseudoLegalMoves.Contains(move.TargetBit) && IsMoveValid(move))
-        {
-            return (true, move);
-        }
-        else if (ValidateCastling(move, position) is CastleMove castleMove && IsMoveValid(castleMove))
-        {
+        if (pseudoLegalMoves.Contains(move.TargetBit) && IsMoveValid(move)) return (true, move);
+
+        if (ValidateCastling(move, position) is CastleMove castleMove && IsMoveValid(castleMove))
             return (true, castleMove);
-        }
-        else if (CanTakeEnPassant(move, position) is EnPassantMove enPassantMove && IsMoveValid(enPassantMove))
-        {
+
+        if (CanTakeEnPassant(move, position) is EnPassantMove enPassantMove && IsMoveValid(enPassantMove))
             return (true, enPassantMove);
-        }
         return (false, move);
     }
 
@@ -100,6 +90,7 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
             var (ok, legalMove) = GetLegalMove(possibleMove, legalMoves, position);
             if (ok) validMoves.Add(legalMove);
         }
+
         return validMoves;
     }
 
@@ -114,9 +105,9 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
             return possibleMove;
         if (!BoardHelper.AreHorizontalNeighbors(possibleMove.OriginBit, prevMove.TargetBit))
             return possibleMove;
-        var behindBit = possibleMove.IsWhite() ?
-            prevMove.TargetBit >> MoveTables.RankOffset :
-            prevMove.TargetBit << MoveTables.RankOffset;
+        var behindBit = possibleMove.IsWhite()
+            ? prevMove.TargetBit >> MoveTables.RankOffset
+            : prevMove.TargetBit << MoveTables.RankOffset;
         if (behindBit != possibleMove.TargetBit)
             return possibleMove;
         return new EnPassantMove(possibleMove, prevMove);
@@ -131,6 +122,7 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
             if (!Piece.IsCorrectColor(pieceIndex, position.WhiteToPlay)) continue;
             validMoves.AddRange(GenerateMovesForSquare(idx, position));
         }
+
         return validMoves;
     }
 
@@ -138,17 +130,21 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
     {
         var control = 0UL;
         foreach (var (type, idx, _) in position.GetAllPieces())
-        {
             if (Piece.IsCorrectColor(type, isWhite))
-            {
                 control |= moveTables.GetPieceAttacks(type, idx, position);
-            }
-        }
+
         return control;
     }
 
-    private ulong SquaresUnderWhiteControl() => SquaresUnderControl(board.CreatePosition(), true);
-    private ulong SquaresUnderBlackControl() => SquaresUnderControl(board.CreatePosition(), false);
+    private ulong SquaresUnderWhiteControl()
+    {
+        return SquaresUnderControl(board.CreatePosition(), true);
+    }
+
+    private ulong SquaresUnderBlackControl()
+    {
+        return SquaresUnderControl(board.CreatePosition(), false);
+    }
 
     internal ulong GetPseudoLegalMoves(int pieceIndex, int index, Position position)
     {
@@ -162,11 +158,13 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
             Piece.BlackKnight => moveTables.KnightMoves[index].Exclude(position.BlackPieces),
             Piece.WhiteRook => MoveTables.RookAttacks(index, position.AllPieces).Exclude(position.WhitePieces),
             Piece.BlackRook => MoveTables.RookAttacks(index, position.AllPieces).Exclude(position.BlackPieces),
-            Piece.WhiteQueen => GetPseudoLegalMoves(Piece.WhiteRook, index, position) | GetPseudoLegalMoves(Piece.WhiteBishop, index, position),
-            Piece.BlackQueen => GetPseudoLegalMoves(Piece.BlackRook, index, position) | GetPseudoLegalMoves(Piece.BlackBishop, index, position),
+            Piece.WhiteQueen => GetPseudoLegalMoves(Piece.WhiteRook, index, position) |
+                                GetPseudoLegalMoves(Piece.WhiteBishop, index, position),
+            Piece.BlackQueen => GetPseudoLegalMoves(Piece.BlackRook, index, position) |
+                                GetPseudoLegalMoves(Piece.BlackBishop, index, position),
             Piece.WhiteKing => moveTables.KingMoves[index].Exclude(SquaresUnderBlackControl() | position.WhitePieces),
             Piece.BlackKing => moveTables.KingMoves[index].Exclude(SquaresUnderWhiteControl() | position.BlackPieces),
-            _ => 0UL,
+            _ => 0UL
         };
     }
 
@@ -174,16 +172,13 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
     {
         var enemyControl = SquaresUnderControl(position, !position.WhiteToPlay);
 
-        if (position.WhiteToPlay)
-        {
-            return position.Bitboards[Piece.WhiteKing].Contains(enemyControl);
-        }
-        else
-        {
-            return position.Bitboards[Piece.BlackKing].Contains(enemyControl);
-        }
+        if (position.WhiteToPlay) return position.Bitboards[Piece.WhiteKing].Contains(enemyControl);
+
+        return position.Bitboards[Piece.BlackKing].Contains(enemyControl);
     }
 
-    internal bool IsKingUnderAttack() => IsKingUnderAttack(board.CreatePosition());
-
+    internal bool IsKingUnderAttack()
+    {
+        return IsKingUnderAttack(board.CreatePosition());
+    }
 }
