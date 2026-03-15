@@ -18,7 +18,7 @@ internal class Piece
 
     internal static bool IsWhiteIndex(int pieceIndex)
     {
-        return pieceIndex >= WhitePawn && pieceIndex < BlackPawn;
+        return pieceIndex is >= WhitePawn and < BlackPawn;
     }
 
     internal static int GetPieceIndex(PieceType type, Position position)

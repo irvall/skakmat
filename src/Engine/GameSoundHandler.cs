@@ -27,6 +27,8 @@ public class GameSoundHandler
             case GameEventType.Stalemate:
                 soundController.PlayStalemateSound();
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(gameEvent),  gameEvent.Type, null);
         }
     }
 }

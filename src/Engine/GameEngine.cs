@@ -10,26 +10,24 @@ internal class GameEngine
 {
     private readonly GameController gameController;
     private readonly InputHandler inputHandler;
-    private readonly Opponent opponent = Opponent.ComputerIsWhite;
+    private const Opponent OpposingPlayer = Opponent.ComputerIsWhite;
     private readonly Random random = new();
     private readonly BoardRenderer renderer;
-    private readonly int sideLength;
-    private readonly GameSoundHandler soundHandler;
     private bool useStandardOrientation;
 
     public GameEngine()
     {
         var windowHeight = RaylibHelper.GetWindowHeightDynamically();
-        sideLength = windowHeight / Constants.SquareCount;
+        var sideLength = windowHeight / Constants.SquareCount;
 
-        useStandardOrientation = opponent != Opponent.ComputerIsWhite;
+        useStandardOrientation = OpposingPlayer != Opponent.ComputerIsWhite;
         renderer = new BoardRenderer(windowHeight, sideLength, useStandardOrientation);
         inputHandler = new InputHandler(sideLength);
 
         gameController = new GameController();
-        soundHandler = new GameSoundHandler();
+        var soundHandler1 = new GameSoundHandler();
 
-        gameController.GameEventOccurred += soundHandler.HandleGameEvent;
+        gameController.GameEventOccurred += soundHandler1.HandleGameEvent;
     }
 
     internal void Run()
@@ -52,15 +50,17 @@ internal class GameEngine
 
     private void HandleComputerMove()
     {
-        if (opponent == Opponent.None || gameController.Status != GameStatus.Ongoing) return;
-        if (opponent == Opponent.ComputerIsWhite && !gameController.WhiteToPlay)
+        if (OpposingPlayer == Opponent.None || gameController.Status != GameStatus.Ongoing) return;
+        if (OpposingPlayer == Opponent.ComputerIsWhite && !gameController.WhiteToPlay)
             return;
-        if (opponent == Opponent.ComputerIsBlack && gameController.WhiteToPlay)
-            return;
+        var move = FindComputerMove();
+        gameController.MakeMove(move);
+    }
+
+    private Move FindComputerMove()
+    {
         var moves = gameController.GetValidMoves();
-        var randomMove = moves[random.Next(moves.Count)];
-        Thread.Sleep(random.Next(250, 1000));
-        gameController.MakeMove(randomMove);
+        return moves[random.Next(moves.Count)];
     }
 
     private void HandleInput()

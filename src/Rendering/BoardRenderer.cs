@@ -44,8 +44,8 @@ internal class BoardRenderer
 
             var digit = useStandardOrientation ? Constants.SquareCount - i : i + 1;
 
-            var fontSize = 10;
-            var padding = 2;
+            const int fontSize = 10;
+            const int padding = 2;
 
             var posX = j * squareSize + squareSize - fontSize + padding;
             var posY = i * squareSize + padding;
@@ -122,18 +122,16 @@ internal class BoardRenderer
         for (var idx = 63; idx >= 0; idx--)
         {
             var bit = 1UL << idx;
-            if (squares.Contains(bit))
+            if (!squares.Contains(bit)) continue;
+            var col = idx % Constants.SquareCount;
+            var row = idx / Constants.SquareCount;
+            if (!useStandardOrientation)
             {
-                var col = idx % Constants.SquareCount;
-                var row = idx / Constants.SquareCount;
-                if (!useStandardOrientation)
-                {
-                    col = 7 - col;
-                    row = 7 - row;
-                }
-
-                DrawTile(col, row, color, 0.5f);
+                col = 7 - col;
+                row = 7 - row;
             }
+
+            DrawTile(col, row, color, 0.5f);
         }
     }
 
