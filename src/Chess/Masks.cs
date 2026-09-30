@@ -5,36 +5,36 @@ internal class Masks
     private const ulong WhiteKingTryCastleShort = 0xc000000000000000;
 
 
-    internal const ulong BlackKingShortGap = 0x60;
+    private const ulong BlackKingShortGap = 0x60;
+
+    private const ulong WhiteKingShortGap = 0x6000000000000000;
+    private const ulong WhiteKingLongGap = 0xe00000000000000;
+    private const ulong WhiteKingTryCastleLong = 0x700000000000000;
+    private const ulong BlackKingLongGap = 0xe;
+    private const ulong BlackKingTryCastleShort = 0xc0;
+    private static readonly ulong BlackKingTryCastleLong = 0x7;
+    internal static ulong FileA => 0x0101010101010101;
+    internal static ulong FileB => 0x0202020202020202;
+    internal static ulong FileC => 0x0404040404040404;
+    internal static ulong FileD => 0x0808080808080808;
+    internal static ulong FileE => 0x1010101010101010;
+    internal static ulong FileF => 0x2020202020202020;
+    internal static ulong FileG => 0x4040404040404040;
+    internal static ulong FileH => 0x8080808080808080;
+    internal static ulong Rank1 => 0xFF00000000000000;
+    internal static ulong Rank2 => 0x00FF000000000000;
+    internal static ulong Rank3 => 0x0000FF0000000000;
+    internal static ulong Rank4 => 0x000000FF00000000;
+    internal static ulong Rank5 => 0x00000000FF000000;
+    internal static ulong Rank6 => 0x0000000000FF0000;
+    internal static ulong Rank7 => 0x000000000000FF00;
+    internal static ulong Rank8 => 0x00000000000000FF;
+    internal static ulong Center => 0x0000001818000000;
+    internal static ulong Corners => 0x8100000000000081;
+    internal static ulong CornersAndCenter => 0x8100001818000081;
+    internal static ulong CornersAndCenterAndAdjacent => 0xFF000018181800FF;
+
     internal static ulong Edge = Rank1 | Rank8 | FileA | FileH;
-
-    internal static ulong WhiteKingShortGap = 0x6000000000000000;
-    internal static ulong WhiteKingLongGap = 0xe00000000000000;
-    private static readonly ulong WhiteKingTryCastleLong = 0x700000000000000;
-    internal static ulong BlackKingLongGap = 0xe;
-    private static readonly ulong BlackKingTryCastleShort = 0xc0;
-    internal static ulong BlackKingTryCastleLong = 0x7;
-    internal static ulong FileA { get; } = 0x0101010101010101;
-    internal static ulong FileB { get; } = 0x0202020202020202;
-    internal static ulong FileC { get; } = 0x0404040404040404;
-    internal static ulong FileD { get; } = 0x0808080808080808;
-    internal static ulong FileE { get; } = 0x1010101010101010;
-    internal static ulong FileF { get; } = 0x2020202020202020;
-    internal static ulong FileG { get; } = 0x4040404040404040;
-    internal static ulong FileH { get; } = 0x8080808080808080;
-    internal static ulong Rank1 { get; } = 0xFF00000000000000;
-    internal static ulong Rank2 { get; } = 0x00FF000000000000;
-    internal static ulong Rank3 { get; } = 0x0000FF0000000000;
-    internal static ulong Rank4 { get; } = 0x000000FF00000000;
-    internal static ulong Rank5 { get; } = 0x00000000FF000000;
-    internal static ulong Rank6 { get; } = 0x0000000000FF0000;
-    internal static ulong Rank7 { get; } = 0x000000000000FF00;
-    internal static ulong Rank8 { get; } = 0x00000000000000FF;
-    internal static ulong Center { get; } = 0x0000001818000000;
-    internal static ulong Corners { get; } = 0x8100000000000081;
-    internal static ulong CornersAndCenter { get; } = 0x8100001818000081;
-    internal static ulong CornersAndCenterAndAdjacent { get; } = 0xFF000018181800FF;
-
     internal static ulong QueenSideCastlePath(bool isWhite)
     {
         return isWhite ? WhiteKingLongGap : BlackKingLongGap;
