@@ -8,9 +8,9 @@ namespace skakmat.Chess;
 internal class MoveTables
 {
     internal const int RankOffset = 8;
-    private const int fileOffset = 1;
-    private const int diagonalOffset = 7;
-    private const int antiDiagonalOffset = 9;
+    private const int FileOffset = 1;
+    private const int DiagonalOffset = 7;
+    private const int AntiDiagonalOffset = 9;
 
     private readonly Dictionary<string, int> boardSquareToIndex;
     private readonly Dictionary<int, string> indexToBoardSquare;
@@ -40,14 +40,14 @@ internal class MoveTables
         var upperY = square + (64 - (square / 8 + 1) * 8);
         var lowerX = square - lowerY;
         var upperX = lowerX + 8;
-        for (var s = square + fileOffset; s < upperX; s += fileOffset)
+        for (var s = square + FileOffset; s < upperX; s += FileOffset)
         {
             var bit = 1UL << s;
             attacks |= bit;
             if (blockers.Contains(bit)) break;
         }
 
-        for (var s = square - fileOffset; s >= lowerX; s -= fileOffset)
+        for (var s = square - FileOffset; s >= lowerX; s -= FileOffset)
         {
             var bit = 1UL << s;
             attacks |= bit;
@@ -159,17 +159,17 @@ internal class MoveTables
             if (!Masks.Rank1.Contains(bit))
                 KingMoves[idx] |= bit << RankOffset;
             if (!Masks.FileH.Contains(bit))
-                KingMoves[idx] |= bit << fileOffset;
+                KingMoves[idx] |= bit << FileOffset;
             if (!Masks.FileA.Contains(bit))
-                KingMoves[idx] |= bit >> fileOffset;
+                KingMoves[idx] |= bit >> FileOffset;
             if (Masks.Boxes.A1G7.Contains(bit))
-                KingMoves[idx] |= bit >> diagonalOffset;
+                KingMoves[idx] |= bit >> DiagonalOffset;
             if (Masks.Boxes.B2H8.Contains(bit))
-                KingMoves[idx] |= bit << diagonalOffset;
+                KingMoves[idx] |= bit << DiagonalOffset;
             if (Masks.Boxes.A2G8.Contains(bit))
-                KingMoves[idx] |= bit << antiDiagonalOffset;
+                KingMoves[idx] |= bit << AntiDiagonalOffset;
             if (Masks.Boxes.B1H7.Contains(bit))
-                KingMoves[idx] |= bit >> antiDiagonalOffset;
+                KingMoves[idx] |= bit >> AntiDiagonalOffset;
         }
     }
 
@@ -180,21 +180,21 @@ internal class MoveTables
         {
             var bit = 1UL << idx;
             if (Masks.Boxes.A1G6.Contains(bit))
-                KnightMoves[idx] |= bit >> (RankOffset * 2 - fileOffset);
+                KnightMoves[idx] |= bit >> (RankOffset * 2 - FileOffset);
             if (Masks.Boxes.B1H6.Contains(bit))
-                KnightMoves[idx] |= bit >> (RankOffset * 2 + fileOffset);
+                KnightMoves[idx] |= bit >> (RankOffset * 2 + FileOffset);
             if (Masks.Boxes.A1F7.Contains(bit))
-                KnightMoves[idx] |= bit >> (RankOffset - fileOffset * 2);
+                KnightMoves[idx] |= bit >> (RankOffset - FileOffset * 2);
             if (Masks.Boxes.A2F8.Contains(bit))
-                KnightMoves[idx] |= bit << (RankOffset + fileOffset * 2);
+                KnightMoves[idx] |= bit << (RankOffset + FileOffset * 2);
             if (Masks.Boxes.C1H7.Contains(bit))
-                KnightMoves[idx] |= bit >> (RankOffset + fileOffset * 2);
+                KnightMoves[idx] |= bit >> (RankOffset + FileOffset * 2);
             if (Masks.Boxes.C2H8.Contains(bit))
-                KnightMoves[idx] |= bit << (RankOffset - fileOffset * 2);
+                KnightMoves[idx] |= bit << (RankOffset - FileOffset * 2);
             if (Masks.Boxes.B3H8.Contains(bit))
-                KnightMoves[idx] |= bit << (RankOffset * 2 - fileOffset);
+                KnightMoves[idx] |= bit << (RankOffset * 2 - FileOffset);
             if (Masks.Boxes.A3G8.Contains(bit))
-                KnightMoves[idx] |= bit << (RankOffset * 2 + fileOffset);
+                KnightMoves[idx] |= bit << (RankOffset * 2 + FileOffset);
         }
     }
 
@@ -217,10 +217,10 @@ internal class MoveTables
                 BlackPawnMoves[idx] |= bit << RankOffset;
 
                 if (!Masks.FileA.Contains(bit))
-                    BlackPawnAttacks[idx] |= bit << diagonalOffset;
+                    BlackPawnAttacks[idx] |= bit << DiagonalOffset;
 
                 if (!Masks.FileH.Contains(bit))
-                    BlackPawnAttacks[idx] |= bit << antiDiagonalOffset;
+                    BlackPawnAttacks[idx] |= bit << AntiDiagonalOffset;
             }
 
             // White Pawns
@@ -232,10 +232,10 @@ internal class MoveTables
                 WhitePawnMoves[idx] |= bit >> RankOffset;
 
                 if (!Masks.FileA.Contains(bit))
-                    WhitePawnAttacks[idx] |= bit >> antiDiagonalOffset;
+                    WhitePawnAttacks[idx] |= bit >> AntiDiagonalOffset;
 
                 if (!Masks.FileH.Contains(bit))
-                    WhitePawnAttacks[idx] |= bit >> diagonalOffset;
+                    WhitePawnAttacks[idx] |= bit >> DiagonalOffset;
             }
         }
     }

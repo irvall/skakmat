@@ -4,9 +4,11 @@ using skakmat.Helpers;
 
 namespace skakmat.Game;
 
-internal class MoveGenerator(MoveTables moveTables, Board board)
+internal class MoveGenerator(Board board)
 {
-    internal ulong GetLegalPawnMoves(int index, Position position)
+
+    private readonly MoveTables moveTables = new();
+    private ulong GetLegalPawnMoves(int index, Position position)
     {
         var moveBits = position.WhiteToPlay ? moveTables.WhitePawnMoves[index] : moveTables.BlackPawnMoves[index];
         var attackBits = position.WhiteToPlay ? moveTables.WhitePawnAttacks[index] : moveTables.BlackPawnAttacks[index];
@@ -41,16 +43,10 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
 
     private Move ValidateCastling(Move move, Position position)
     {
-        if (Piece.GetPieceIndex(PieceType.King, position) != move.PieceIndex) return move;
-        if (IsKingUnderAttack()) return move;
+        if (Piece.GetPieceIndex(PieceType.King, position) != move.PieceIndex || IsKingUnderAttack()) return move;
 
         var castlingType = Castling.GetCastlingType(position.WhiteToPlay, move.TargetBit, position);
-        if (castlingType == Castling.Type.None)
-            return move;
-        if (!IsPathClear(castlingType, position))
-            return move;
-
-        if (!IsPathSafe(castlingType, position))
+        if (castlingType == Castling.Type.None || !IsPathClear(castlingType, position) || !IsPathSafe(castlingType, position))
             return move;
 
         return move.TryCreateCastleMove(position.WhiteToPlay);
@@ -94,23 +90,18 @@ internal class MoveGenerator(MoveTables moveTables, Board board)
         return validMoves;
     }
 
-    internal static Move CanTakeEnPassant(Move possibleMove, Position position)
+    private static Move CanTakeEnPassant(Move possibleMove, Position position)
     {
         if (possibleMove.PieceIndex != position.GetPieceIndex(PieceType.Pawn))
             return possibleMove;
         var prevMove = position.LastMovePlayed;
-        if (prevMove is null)
-            return possibleMove;
-        if (!prevMove.IsPawnDoublePush())
-            return possibleMove;
-        if (!BoardHelper.AreHorizontalNeighbors(possibleMove.OriginBit, prevMove.TargetBit))
+        if (prevMove is null || !prevMove.IsPawnDoublePush() ||
+            !BoardHelper.AreHorizontalNeighbors(possibleMove.OriginBit, prevMove.TargetBit))
             return possibleMove;
         var behindBit = possibleMove.IsWhite()
             ? prevMove.TargetBit >> MoveTables.RankOffset
             : prevMove.TargetBit << MoveTables.RankOffset;
-        if (behindBit != possibleMove.TargetBit)
-            return possibleMove;
-        return new EnPassantMove(possibleMove, prevMove);
+        return behindBit == possibleMove.TargetBit ? new EnPassantMove(possibleMove, prevMove) : possibleMove;
     }
 
     internal List<Move> GenerateMoves()

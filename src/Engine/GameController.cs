@@ -9,7 +9,6 @@ internal class GameController
     private readonly Board board;
     private readonly List<Position> boardPositions;
     private readonly MoveGenerator moveGenerator;
-    private readonly MoveTables moveTables;
     private bool movesShouldUpdate = true;
     private int positionIndex;
     private List<Move> validMovesCache = [];
@@ -17,8 +16,7 @@ internal class GameController
     public GameController()
     {
         board = new Board();
-        moveTables = new MoveTables();
-        moveGenerator = new MoveGenerator(moveTables, board);
+        moveGenerator = new MoveGenerator(board);
         var initialPosition = board.CreatePosition();
         boardPositions = [initialPosition];
     }
@@ -155,12 +153,14 @@ internal class GameController
 
     internal void StepBack()
     {
+        SelectedPiece = null;
         if (positionIndex == 0) return;
         positionIndex--;
     }
 
     internal void StepForward()
     {
+        SelectedPiece = null;
         if (AtMostRecentPosition())
             return;
         positionIndex++;
