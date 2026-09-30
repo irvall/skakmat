@@ -5,13 +5,14 @@ namespace skakmat.Helpers;
 
 internal abstract class RaylibHelper
 {
+
+    private static readonly TraceLogDelegate traceLog = new(CustomLog);
     private static void CustomLog(int logType, string text, nint args)
     {
     }
 
     internal static void IgnoreLogs()
     {
-        var traceLog = new TraceLogDelegate(CustomLog);
         unsafe
         {
             Raylib.SetTraceLogCallback(

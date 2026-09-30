@@ -139,4 +139,9 @@ internal class BoardRenderer
     {
         useStandardOrientation = usingStandard;
     }
+
+    internal void Dispose()
+    {
+        Raylib.UnloadTexture(spriteTexture);
+    }
 }

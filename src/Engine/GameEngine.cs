@@ -33,8 +33,15 @@ internal class GameEngine
     internal void Run()
     {
         renderer.Initialize();
-        GameLoop();
-        Raylib.CloseWindow();
+        try
+        {
+            GameLoop();
+        }
+        finally
+        {
+            renderer.Dispose();
+            Raylib.CloseWindow();
+        }
     }
 
 
