@@ -1,10 +1,14 @@
-# skakmat ♟️
+# skakmat
 
 A tiny chess engine written in C# with a Raylib-powered graphical interface.
 
+To combat AI-fatigue, this is one of my happy places where I get to write code for the joy of it.
+
 ## Overview
 
-skakmat (Danish for "checkmate") is a lightweight chess engine designed for learning and experimentation. It features a clean C# implementation with an intuitive visual interface built using Raylib.
+skakmat (Danish for "checkmate") is a lightweight chess engine designed for learning and experimentation. It features a (striving for!) clean C# implementation with an intuitive visual interface built using Raylib.
+
+To see what's happening with the .NET SDK, I strive to always be up-to-date on the LTS version of C#.
 
 ## Features
 
