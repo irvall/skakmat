@@ -29,7 +29,7 @@ To see what's happening with the .NET SDK, I strive to always be up-to-date on t
 
 ### Prerequisites
 
-- .NET 6.0 or later
+- .NET 10 SDK (pinned in `global.json`)
 - Raylib-cs NuGet package
 
 ### Building
@@ -43,7 +43,7 @@ dotnet build
 ### Running
 
 ```bash
-dotnet run
+dotnet run --project src
 ```
 
 ## How to Play
