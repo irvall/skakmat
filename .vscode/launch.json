@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/bin/Debug/net9.0/skakmat",
+            "program": "${workspaceFolder}/src/bin/Debug/net10.0/skakmat",
             "args": [],
             "cwd": "${workspaceFolder}/src",
             "console": "internalConsole",
